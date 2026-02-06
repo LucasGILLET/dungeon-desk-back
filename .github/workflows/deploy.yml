@@ -48,3 +48,4 @@ jobs:
           region: ${{ env.REGION }}
           env_vars: |
             DATABASE_URL=${{ secrets.DATABASE_URL }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
