@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit'; // Ajout de l'import
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './swagger';
 import authRoutes from './routes/authRoutes';
@@ -12,7 +13,22 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Important pour Cloud Run (derrière un proxy) : faire confiance au premier proxy pour avoir la vraie IP client
+app.set('trust proxy', 1);
+
+// Configuration du Rate Limiter : max 50 requêtes par 15 minutes par IP
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50, // Limite à 50 requêtes par fenêtre par IP
+  standardHeaders: true, // Retourne les infos de limite dans les headers `RateLimit-*`
+  legacyHeaders: false, // Désactive les headers `X-RateLimit-*`
+  message: 'Trop de requêtes, veuillez réessayer plus tard.'
+});
+
 // Middleware
+// Appliquer le rate limiter globalement
+app.use(limiter);
+
 // Autoriser uniquement le frontend spécifié
 app.use(cors({
   origin: process.env.FRONTEND_URL,
