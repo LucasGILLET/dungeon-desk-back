@@ -48,4 +48,3 @@ jobs:
           region: ${{ env.REGION }}
           env_vars: |
             DATABASE_URL=${{ secrets.DATABASE_URL }}
-            PORT=3000
