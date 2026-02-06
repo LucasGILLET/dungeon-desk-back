@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+
+  # Backend Express
+  api:
+    build: .
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+    # Attendre que la DB soit prête avant de lancer les migrations et le serveur
+    # Note: Dans un vrai environnement de prod, on utiliserait un script wait-for-it
+    command: sh -c "npx prisma migrate deploy && npm start"
+
