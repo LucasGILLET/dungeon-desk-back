@@ -2,17 +2,36 @@ version: '3.8'
 
 services:
 
+  # Base de données locale pour le développement
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: dungeon_desk_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   # Backend Express
   api:
     build: .
     restart: always
     ports:
       - "3000:3000"
-    env_file:
-      - .env
     environment:
       PORT: 3000
-    # Attendre que la DB soit prête avant de lancer les migrations et le serveur
-    # Note: Dans un vrai environnement de prod, on utiliserait un script wait-for-it
+      FRONTEND_URL: http://localhost:5173
+      JWT_SECRET: super_secret_dungeon_key_change_me
+      DATABASE_URL: postgresql://admin:password123@postgres:5432/dungeon_desk_db?schema=public
+      DIRECT_URL: postgresql://admin:password123@postgres:5432/dungeon_desk_db?schema=public
+    depends_on:
+      - postgres
     command: sh -c "npx prisma migrate deploy && npm start"
+
+volumes:
+  postgres_data:
+
 
