@@ -18,6 +18,7 @@ vi.mock('../prismaClient', () => ({
 describe('Auth Controller', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.JWT_SECRET = 'test-secret';
   });
 
   describe('POST /api/auth/register', () => {
