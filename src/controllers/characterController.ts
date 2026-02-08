@@ -100,3 +100,40 @@ export const deleteCharacter = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error deleting character' });
     }
 };
+
+// Update a character
+export const updateCharacter = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { name, race, class: charClass, level, data } = req.body;
+        // @ts-ignore
+        const userId = req.user?.id;
+
+        const character = await prisma.character.findFirst({
+            where: { 
+                id: Number(id),
+                userId 
+            }
+        });
+
+        if (!character) {
+             return res.status(404).json({ message: 'Character not found' });
+        }
+
+        const updatedCharacter = await prisma.character.update({
+            where: { id: Number(id) },
+            data: {
+                name,
+                race,
+                class: charClass,
+                level,
+                data
+            }
+        });
+
+        res.json(updatedCharacter);
+    } catch (error) {
+        console.error('Error updating character:', error);
+        res.status(500).json({ message: 'Error updating character' });
+    }
+};

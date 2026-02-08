@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCharacter, getCharacters, getCharacter, deleteCharacter } from '../controllers/characterController';
+import { createCharacter, getCharacters, getCharacter, deleteCharacter, updateCharacter } from '../controllers/characterController';
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
@@ -82,5 +82,7 @@ router.get('/', getCharacters);
 router.get('/:id', getCharacter);
 
 router.delete('/:id', deleteCharacter);
+
+router.put('/:id', updateCharacter);
 
 export default router;
