@@ -2,14 +2,18 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '../prismaClient';
+import { registerSchema, loginSchema } from '../validators/authValidator';
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { username, email, password } = req.body;
-
-    if (!username || !email || !password) {
-      return res.status(400).json({ message: 'Username, email and password are required' });
+    // Validation des données entrantes avec Zod
+    const validation = registerSchema.safeParse(req.body);
+    
+    if (!validation.success) {
+      return res.status(400).json({ message: 'Validation error', errors: validation.error.format() });
     }
+
+    const { username, email, password } = validation.data;
 
     // Vérifier si l'utilisateur existe déjà
     const userExists = await prisma.user.findFirst({
@@ -47,7 +51,14 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    // Validation des données entrantes avec Zod
+    const validation = loginSchema.safeParse(req.body);
+
+    if (!validation.success) {
+      return res.status(400).json({ message: 'Validation error', errors: validation.error.format() });
+    }
+
+    const { email, password } = validation.data;
 
     // Trouver l'utilisateur par email
     const user = await prisma.user.findUnique({

@@ -21,6 +21,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Étape de test : Empêche le déploiement si les tests échouent
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './package-lock.json' # Spécifie le chemin si le package.json n'est pas à la racine
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: npm test
+
       # Authentification via Google Cloud Service Account Key (JSON)
       # Il faudra ajouter ce secret dans GitHub
       - id: 'auth'
