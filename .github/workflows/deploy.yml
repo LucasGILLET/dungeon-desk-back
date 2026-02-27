@@ -35,6 +35,13 @@ jobs:
       - name: Run Tests
         run: npm test
 
+      # Migration de la base de données (exécutée depuis GitHub Actions)
+      - name: Run Database Migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DATABASE_URL }} # Nécéssaire si vous utilisez Neon/Supabase avec pooling
+
       # Authentification via Google Cloud Service Account Key (JSON)
       # Il faudra ajouter ce secret dans GitHub
       - id: 'auth'
