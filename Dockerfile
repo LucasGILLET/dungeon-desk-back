@@ -19,8 +19,13 @@ RUN npx prisma generate
 # Build TypeScript code
 RUN npm run build
 
+# Make the entrypoint script executable
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Expose port
 EXPOSE 3000
 
-# Start application
+# Start application using the entrypoint
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["npm", "start"]
