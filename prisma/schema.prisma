@@ -11,9 +11,10 @@ datasource db {
 
 model User {
   id        Int      @id @default(autoincrement())
-  username  String   @unique
+  username  String?  @unique
   email     String   @unique
-  password  String
+  password  String?
+  auth0Id   String?  @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   npcs      Npc[]
