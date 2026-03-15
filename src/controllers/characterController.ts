@@ -1,10 +1,21 @@
 import { Request, Response } from 'express';
 import prisma from '../prismaClient';
+import { createCharacterSchema } from '../validators/characterValidator';
 
 // Create a new Character
 export const createCharacter = async (req: Request, res: Response) => {
     try {
-        const { name, race, class: charClass, level, data } = req.body;
+        // Validate request body
+        const result = createCharacterSchema.safeParse(req.body);
+        
+        if (!result.success) {
+            return res.status(400).json({ 
+                message: 'Invalid character data', 
+                errors: result.error.format() 
+            });
+        }
+
+        const { name, level, data } = result.data;
         // @ts-ignore
         const userId = req.user?.id; 
 
@@ -12,13 +23,18 @@ export const createCharacter = async (req: Request, res: Response) => {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
+        // Extract internal columns from the data object
+        // This ensures the DB columns match the JSON data content
+        const raceName = data.race.name;
+        const className = data.class.name;
+
         const character = await prisma.character.create({
             data: {
                 name,
-                race,
-                class: charClass,
+                race: raceName,
+                class: className,
                 level,
-                data,
+                data: data as any, // Prisma expects generic Json
                 userId
             }
         });
