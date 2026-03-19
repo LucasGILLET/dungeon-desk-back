@@ -2,12 +2,17 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
+import morgan from 'morgan';
+import responseTime from 'response-time';
+
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './swagger';
 import authRoutes from './routes/authRoutes';
 import npcRoutes from './routes/npcRoutes';
 import characterRoutes from './routes/characterRoutes';
 import prisma from './prismaClient';
+import { logger } from './utils/logger';
+import { httpRequestDurationSeconds, register } from './utils/monitoring';
 
 dotenv.config();
 
@@ -15,6 +20,42 @@ export const app = express();
 
 // Important pour Cloud Run (derrière un proxy) : faire confiance au premier proxy pour avoir la vraie IP client
 app.set('trust proxy', 1);
+
+// Middleware de mesure du temps de réponse pour Prometheus
+app.use(responseTime((req: any, res: any, time) => {
+  if (req?.route?.path) {
+    httpRequestDurationSeconds.observe(
+      {
+        method: req.method,
+        route: req.route.path,
+        status_code: res.statusCode,
+      },
+      time / 1000 // Conversion ms -> s
+    );
+  }
+}));
+
+// Logger HTTP avec Morgan et Winston
+app.use(
+  morgan(
+    ':method :url :status :res[content-length] - :response-time ms',
+    {
+      stream: {
+        write: (message) => logger.http(message.trim()),
+      },
+    }
+  )
+);
+
+// Exposition des métriques Prometheus
+app.get('/metrics', async (req, res) => {
+  try {
+    res.set('Content-Type', register.contentType);
+    res.send(await register.metrics());
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
 
 // Note: Pour les tests, on pourrait vouloir désactiver ou augmenter cette limite
 const limiter = rateLimit({
