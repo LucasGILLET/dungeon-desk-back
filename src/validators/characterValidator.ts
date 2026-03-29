@@ -10,8 +10,8 @@ const AbilitySchema = z.object({
 });
 
 const ResourceSchema = z.object({
-    index: z.string(),
-    name: z.string(),
+    index: z.string().optional(),
+    name: z.string().optional(),
     url: z.string().optional(),
 }).passthrough();
 
@@ -23,7 +23,7 @@ export const CharacterDataSchema = z.object({
     skills: z.array(z.string()),
     languages: z.array(z.string()),
     tools: z.array(z.string()).optional(),
-  }).passthrough(),
+  }).passthrough().optional(),
   race: ResourceSchema,
   class: ResourceSchema,
   subrace: ResourceSchema.optional().nullable(),

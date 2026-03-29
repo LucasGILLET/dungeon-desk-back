@@ -27,6 +27,9 @@ export const createCharacter = async (req: Request, res: Response) => {
         // This ensures the DB columns match the JSON data content
         const raceName = data.race.name;
         const className = data.class.name;
+        if (!raceName || !className) {
+            return res.status(400).json({ message: 'Race and Class names are required in the data object' });
+        }
 
         const character = await prisma.character.create({
             data: {
