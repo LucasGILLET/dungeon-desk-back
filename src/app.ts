@@ -76,6 +76,9 @@ app.use(express.json());
 
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/openapi.json', (req, res) => {
+  res.type('application/json').json(swaggerSpec);
+});
 
 // Routes
 app.use('/api/auth', authRoutes);

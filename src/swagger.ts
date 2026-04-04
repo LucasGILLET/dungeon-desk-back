@@ -1,4 +1,5 @@
 import swaggerJsdoc from 'swagger-jsdoc';
+import { swaggerSchemas } from './swagger/schemas';
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -10,11 +11,12 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:3000/api',
-        description: 'Development server',
+        url: '/api',
+        description: 'Relative API base URL',
       },
     ],
     components: {
+      schemas: swaggerSchemas,
       securitySchemes: {
         bearerAuth: {
           type: 'http',
