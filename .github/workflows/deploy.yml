@@ -35,6 +35,11 @@ jobs:
       - name: Run Tests
         run: npm test
 
+      # Vérifie la compilation TypeScript avant toute action risquée (migrations, déploiement).
+      # Sans ça, une erreur de type n'était détectée qu'au build Docker, APRES les migrations.
+      - name: Type-check
+        run: npx tsc --noEmit
+
       # Migration de la base de données (exécutée depuis GitHub Actions)
       - name: Run Database Migrations
         run: npx prisma migrate deploy
