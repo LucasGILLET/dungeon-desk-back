@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { auth } from 'express-oauth2-jwt-bearer';
 import prisma from '../prismaClient';
+import { logger } from '../utils/logger';
 
 // Extend Express Request type to include user
 declare global {
@@ -53,7 +54,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
                     email = userInfo.email;
                 }
             } catch (e) {
-                console.error("Failed to fetch userinfo", e);
+                logger.error(`Failed to fetch userinfo: ${e instanceof Error ? e.message : e}`);
             }
         }
 
@@ -83,7 +84,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
       req.user = user;
       next();
     } catch (dbError) {
-      console.error("Database auth error:", dbError);
+      logger.error(`Database auth error: ${dbError instanceof Error ? dbError.message : dbError}`);
       return res.status(500).json({ message: 'Internal Server Error during auth' });
     }
   });

@@ -1,6 +1,7 @@
 import express from 'express';
 import { createCharacter, getCharacters, getCharacter, deleteCharacter, updateCharacter } from '../controllers/characterController';
 import { protect } from '../middleware/authMiddleware';
+import { validateIdParam } from '../middleware/validateIdParam';
 
 const router = express.Router();
 
@@ -80,7 +81,7 @@ router.get('/', getCharacters);
  *       404:
  *         description: Character not found
  */
-router.get('/:id', getCharacter);
+router.get('/:id', validateIdParam, getCharacter);
 
 /**
  * @swagger
@@ -105,7 +106,7 @@ router.get('/:id', getCharacter);
  *       404:
  *         description: Character not found
  */
-router.delete('/:id', deleteCharacter);
+router.delete('/:id', validateIdParam, deleteCharacter);
 
 /**
  * @swagger
@@ -136,6 +137,6 @@ router.delete('/:id', deleteCharacter);
  *       404:
  *         description: Character not found
  */
-router.put('/:id', updateCharacter);
+router.put('/:id', validateIdParam, updateCharacter);
 
 export default router;

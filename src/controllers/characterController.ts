@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../prismaClient';
-import { createCharacterSchema } from '../validators/characterValidator';
+import { createCharacterSchema, updateCharacterSchema } from '../validators/characterValidator';
+import { logger } from '../utils/logger';
 
 // Create a new Character
 export const createCharacter = async (req: Request, res: Response) => {
@@ -45,7 +46,7 @@ export const createCharacter = async (req: Request, res: Response) => {
 
         res.status(201).json(character);
     } catch (error) {
-        console.error('Error creating character:', error);
+        logger.error(`Error creating character: ${error instanceof Error ? error.message : error}`);
         res.status(500).json({ message: 'Error creating character' });
     }
 };
@@ -67,7 +68,7 @@ export const getCharacters = async (req: Request, res: Response) => {
 
         res.json(characters);
     } catch (error) {
-        console.error('Error fetching characters:', error);
+        logger.error(`Error fetching characters: ${error instanceof Error ? error.message : error}`);
         res.status(500).json({ message: 'Error fetching characters' });
     }
 };
@@ -92,6 +93,7 @@ export const getCharacter = async (req: Request, res: Response) => {
 
         res.json(character);
     } catch (error) {
+        logger.error(`Error fetching character: ${error instanceof Error ? error.message : error}`);
         res.status(500).json({ message: 'Error fetching character' });
     }
 };
@@ -116,6 +118,7 @@ export const deleteCharacter = async (req: Request, res: Response) => {
 
         res.json({ message: 'Character deleted successfully' });
     } catch (error) {
+        logger.error(`Error deleting character: ${error instanceof Error ? error.message : error}`);
         res.status(500).json({ message: 'Error deleting character' });
     }
 };
@@ -124,35 +127,46 @@ export const deleteCharacter = async (req: Request, res: Response) => {
 export const updateCharacter = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { name, race, class: charClass, level, data } = req.body;
         // @ts-ignore
         const userId = req.user?.id;
 
-        const character = await prisma.character.findFirst({
-            where: { 
-                id: Number(id),
-                userId 
-            }
-        });
-
-        if (!character) {
-             return res.status(404).json({ message: 'Character not found' });
+        const result = updateCharacterSchema.safeParse(req.body);
+        if (!result.success) {
+            return res.status(400).json({
+                message: 'Invalid character data',
+                errors: result.error.format()
+            });
         }
 
-        const updatedCharacter = await prisma.character.update({
-            where: { id: Number(id) },
+        const { name, level, data } = result.data;
+        const raceName = data.race.name;
+        const className = data.class.name;
+        if (!raceName || !className) {
+            return res.status(400).json({ message: 'Race and Class names are required in the data object' });
+        }
+
+        const updatedCharacter = await prisma.character.updateMany({
+            where: {
+                id: Number(id),
+                userId
+            },
             data: {
                 name,
-                race,
-                class: charClass,
+                race: raceName,
+                class: className,
                 level,
-                data
+                data: data as any
             }
         });
 
-        res.json(updatedCharacter);
+        if (updatedCharacter.count === 0) {
+            return res.status(404).json({ message: 'Character not found' });
+        }
+
+        const refreshedCharacter = await prisma.character.findFirst({ where: { id: Number(id), userId } });
+        res.json(refreshedCharacter);
     } catch (error) {
-        console.error('Error updating character:', error);
+        logger.error(`Error updating character: ${error instanceof Error ? error.message : error}`);
         res.status(500).json({ message: 'Error updating character' });
     }
 };

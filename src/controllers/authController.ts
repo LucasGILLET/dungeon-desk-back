@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -44,7 +45,7 @@ export const register = async (req: Request, res: Response) => {
 
     res.status(201).json({ message: 'User registered successfully', userId: newUser.id });
   } catch (error) {
-    console.error(error);
+    logger.error(`Auth error: ${error instanceof Error ? error.message : error}`);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -91,7 +92,7 @@ export const login = async (req: Request, res: Response) => {
       } 
     });
   } catch (error) {
-    console.error(error);
+    logger.error(`Auth error: ${error instanceof Error ? error.message : error}`);
     res.status(500).json({ message: 'Server error' });
   }
 };

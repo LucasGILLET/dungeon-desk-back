@@ -36,3 +36,7 @@ export const createCharacterSchema = z.object({
   level: z.number().int().min(1).max(20),
   data: CharacterDataSchema,
 });
+
+// Le frontend envoie toujours le personnage complet lors d'une mise à jour
+// (voir toCharacterCreateInput côté front), donc le même schéma s'applique.
+export const updateCharacterSchema = createCharacterSchema;

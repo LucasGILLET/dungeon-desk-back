@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import responseTime from 'response-time';
+import helmet from 'helmet';
 
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './swagger';
@@ -20,6 +21,10 @@ export const app = express();
 
 // Important pour Cloud Run (derrière un proxy) : faire confiance au premier proxy pour avoir la vraie IP client
 app.set('trust proxy', 1);
+
+// En-têtes de sécurité HTTP (X-Frame-Options, X-Content-Type-Options, HSTS, etc.)
+// CSP désactivée : elle casse les scripts/styles inline de Swagger UI (/api-docs)
+app.use(helmet({ contentSecurityPolicy: false }));
 
 // Middleware de mesure du temps de réponse pour Prometheus
 app.use(responseTime((req: any, res: any, time) => {
@@ -104,7 +109,7 @@ app.get('/health', async (req, res) => {
       uptime: process.uptime()
     });
   } catch (error) {
-    console.error('Health Check Failed:', error);
+    logger.error(`Health Check Failed: ${error instanceof Error ? error.message : error}`);
     res.status(503).json({
       status: 'DOWN',
       timestamp: new Date().toISOString(),

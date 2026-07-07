@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { createNpc, getNpcs, getNpcById, deleteNpc } from '../controllers/npcController';
 import { protect } from '../middleware/authMiddleware';
+import { validateIdParam } from '../middleware/validateIdParam';
 
 const router = Router();
 
@@ -68,8 +69,8 @@ router.get('/', getNpcs);
  *       404:
  *         description: NPC not found
  */
-router.get('/:id', getNpcById);
+router.get('/:id', validateIdParam, getNpcById);
 
-router.delete('/:id', deleteNpc);
+router.delete('/:id', validateIdParam, deleteNpc);
 
 export default router;
