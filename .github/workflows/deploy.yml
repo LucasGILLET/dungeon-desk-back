@@ -50,7 +50,7 @@ jobs:
       # Authentification via Google Cloud Service Account Key (JSON)
       # Il faudra ajouter ce secret dans GitHub
       - id: 'auth'
-        uses: 'google-github-actions/auth@v2'
+        uses: 'google-github-actions/auth@v3'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
