@@ -68,16 +68,17 @@ model Equipment {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
-  translations            EquipmentTranslation[]
-  categories              EquipmentCategoryItem[]
-  weapon                  WeaponStats?
-  armor                   ArmorStats?
-  vehicle                 VehicleStats?
-  packContents            PackContent[]            @relation("PackContents")
-  inPacks                 PackContent[]            @relation("PackItem")
-  proficiencies           Proficiency[]
-  choiceOptionItems       ChoiceOptionItem[]
-  classStartingEquipments ClassStartingEquipment[]
+  translations                 EquipmentTranslation[]
+  categories                   EquipmentCategoryItem[]
+  weapon                       WeaponStats?
+  armor                        ArmorStats?
+  vehicle                      VehicleStats?
+  packContents                 PackContent[]                 @relation("PackContents")
+  inPacks                      PackContent[]                 @relation("PackItem")
+  proficiencies                Proficiency[]
+  choiceOptionItems            ChoiceOptionItem[]
+  classStartingEquipments      ClassStartingEquipment[]
+  backgroundStartingEquipments BackgroundStartingEquipment[]
 
   @@unique([editionId, index])
 }

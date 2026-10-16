@@ -1,0 +1,167 @@
+[
+  {
+    "index": "elf-weapon-training",
+    "name": "Entraînement aux armes elfiques",
+    "desc": [
+      "Vous maitrisez les épées longues, les épées courtes, les arcs longs et les arcs courts."
+    ],
+    "races": [],
+    "subraces": ["high-elf", "wood-elf"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/elf-weapon-training"
+  },
+  {
+    "index": "high-elf-cantrip",
+    "name": "Sort mineur",
+    "desc": [
+      "Vous connaissez un sort mineur de votre choix issu de la liste des sorts de magicien. Votre caractéristique d'incantation pour ce sort mineur est l'Intelligence."
+    ],
+    "races": [],
+    "subraces": ["high-elf"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/high-elf-cantrip"
+  },
+  {
+    "index": "extra-language",
+    "name": "Langue supplémentaire",
+    "desc": [
+      "Vous pouvez parler, lire et écrire une langue supplémentaire de votre choix."
+    ],
+    "races": [],
+    "subraces": ["high-elf"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/extra-language"
+  },
+  {
+    "index": "fleet-of-foot",
+    "name": "Foulée légère",
+    "desc": [
+      "Votre vitesse de base passe à 10.5 mètres."
+    ],
+    "races": [],
+    "subraces": ["wood-elf"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/fleet-of-foot"
+  },
+  {
+    "index": "mask-of-the-wild",
+    "name": "Cachette naturelle",
+    "desc": [
+      "Vous pouvez tenter de vous dissimuler même quand la visibilité n'est que légèrement réduite du fait des frondaisons, d'une forte pluie, d'une nappe de brume ou tout autre phénomène naturel."
+    ],
+    "races": [],
+    "subraces": ["wood-elf"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/mask-of-the-wild"
+  },
+  {
+    "index": "superior-darkvision",
+    "name": "Vision dans le noir supérieure",
+    "desc": [
+      "Votre vision dans le noir fonctionne dans une rayon de 36 mètres."
+    ],
+    "races": [],
+    "subraces": ["dark-elf"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/superior-darkvision"
+  },
+  {
+    "index": "sunlight-sensitivity",
+    "name": "Sensibilité au soleil",
+    "desc": [
+      "Vous êtes désavantagé lors des jets d'attaque et des tests de Sagesse (Perception) basés sur la vue lorsque vous, votre cible ou ce que vous tentez de percevoir se trouve sous la lumière directe du soleil."
+    ],
+    "races": [],
+    "subraces": ["dark-elf"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/sunlight-sensitivity"
+  },
+  {
+    "index": "drow-magic",
+    "name": "Magie drow",
+    "desc": [
+      "Vous connaissez le sort mineur 'lumières dansantes'. Quand vous atteignez le niveau 3, vous pouvez aussi lancer 'lueurs féériques'. Vous devez terminer un repos long avant de pouvoir relancer ce sort ainsi. Quand vous atteignez le niveau 5, vous pouvez également lancer 'ténèbres'. Vous devez terminer un long repos avant de pouvoir relancer ce sort ainsi. Vous utilisez le Charisme comme caractéristique incantatoire pour tous ces sorts."
+    ],
+    "races": [],
+    "subraces": ["dark-elf"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/drow-magic"
+  },
+  {
+    "index": "drow-weapon-training",
+    "name": "Formation martiale drow",
+    "desc": [
+      "Vous maitrisez les rapières, les épées courtes et les arbalètes de poing."
+    ],
+    "races": [],
+    "subraces": ["dark-elf"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/drow-weapon-training"
+  },
+  {
+    "index": "naturally-stealthy",
+    "name": "Discrétion naturelle",
+    "desc": [
+      "Vous pouvez tenter de vous cacher même quand vous êtes seulement dissimulé par une créature d'au moins une catégorie de taille de plus que vous."
+    ],
+    "races": [],
+    "subraces": ["lightfoot-halfling"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/naturally-stealthy"
+  },
+  {
+    "index": "stout-resilience",
+    "name": "Résistance des robustes",
+    "desc": [
+      "Vous êtes avantagés lors des jets de sauvegarde contre le poison et vous êtes résistant aux dégâts de poison."
+    ],
+    "races": [],
+    "subraces": ["stout-halfling"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/stout-resilience"
+  },
+  {
+    "index": "dwarven-toughness",
+    "name": "Ténacité naine",
+    "desc": [
+      "Votre nombre maximum de points de vie augmente de 1. Il augmente à nouveau de 1 chaque fois que vous gagnez un niveau."
+    ],
+    "races": [],
+    "subraces": ["hill-dwarf"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/dwarven-toughness"
+  },
+  {
+    "index": "dwarven-armor-training",
+    "name": "Formation au port des armures naines",
+    "desc": [
+      "Vous maitrisez les armures légères et intermédiaires."
+    ],
+    "races": [],
+    "subraces": ["mountain-dwarf"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/dwarven-armor-training"
+  },
+  {
+    "index": "natural-illusionist",
+    "name": "Illusionniste-né",
+    "desc": [
+      "Vous connaissez le sort mineur 'illusion mineure' et utilisez l'Intelligence comme caractéristique d'incantation pour le lancer."
+    ],
+    "races": [],
+    "subraces": ["forest-gnome"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/natural-illusionist"
+  },
+  {
+    "index": "speak-with-small-beasts",
+    "name": "Communication avec les petits animaux",
+    "desc": [
+      "A l'aide de bruits et de gestes simples, vous arrivez à transmettre des concepts simples à des bêtes de taille Petite ou inférieure. Les gnomes des forêts aiment les animaux et ont souvent des écureils, des blaireaux, des lapins, des taupes, des pics-verts et d'autres créatures comme compagnons."
+    ],
+    "races": [],
+    "subraces": ["forest-gnome"],
+    "proficiencies": [],
+    "url": "/api/custom/traits/speak-with-small-beasts"
+  }
+]

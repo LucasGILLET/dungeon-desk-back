@@ -99,6 +99,12 @@ model Locale {
   subclassTranslations            SubclassTranslation[]
   classFeatureTranslations        ClassFeatureTranslation[]
   spellTranslations               SpellTranslation[]
+  raceTranslations                RaceTranslation[]
+  subraceTranslations             SubraceTranslation[]
+  traitTranslations               TraitTranslation[]
+  backgroundTranslations          BackgroundTranslation[]
+  personalityOptionTranslations   PersonalityOptionTranslation[]
+  featTranslations                FeatTranslation[]
 }
 
 model Edition {
@@ -119,6 +125,11 @@ model Edition {
   subclasses          Subclass[]
   classFeatures       ClassFeature[]
   spells              Spell[]
+  races               Race[]
+  subraces            Subrace[]
+  traits              Trait[]
+  backgrounds         Background[]
+  feats               Feat[]
 }
 
 model EditionTranslation {

@@ -23,6 +23,10 @@ model AbilityScore {
   proficiencies         Proficiency[]
   classPrimaryAbilities ClassPrimaryAbility[]
   spells                Spell[]
+  choiceOptionItems     ChoiceOptionItem[]
+  raceAbilityBonuses    RaceAbilityBonus[]
+  subraceAbilityBonuses SubraceAbilityBonus[]
+  featPrerequisites     FeatPrerequisite[]
 }
 
 model AbilityScoreTranslation {
@@ -79,7 +83,8 @@ model Alignment {
   ethic    AlignmentEthic
   morality AlignmentMorality
 
-  translations AlignmentTranslation[]
+  translations                AlignmentTranslation[]
+  personalityOptionAlignments PersonalityOptionAlignment[]
 }
 
 model AlignmentTranslation {
@@ -102,6 +107,7 @@ model DamageType {
   translations     DamageTypeTranslation[]
   weaponStats      WeaponStats[]
   spellDamageTypes SpellDamageType[]
+  traits           Trait[]
 }
 
 model DamageTypeTranslation {
@@ -225,7 +231,9 @@ model Language {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
-  translations LanguageTranslation[]
+  translations      LanguageTranslation[]
+  choiceOptionItems ChoiceOptionItem[]
+  raceLanguages     RaceLanguage[]
 
   @@unique([editionId, index])
 }
@@ -275,10 +283,12 @@ model Proficiency {
   equipmentCategoryId Int?
   equipmentCategory   EquipmentCategory? @relation(fields: [equipmentCategoryId], references: [id])
 
-  translations       ProficiencyTranslation[]
-  multiclassClasses  ClassMulticlassProficiency[] @relation("MulticlassProficiencies")
-  classProficiencies ClassProficiency[]
-  choiceOptionItems  ChoiceOptionItem[]
+  translations            ProficiencyTranslation[]
+  multiclassClasses       ClassMulticlassProficiency[] @relation("MulticlassProficiencies")
+  classProficiencies      ClassProficiency[]
+  choiceOptionItems       ChoiceOptionItem[]
+  traitProficiencies      TraitProficiency[]
+  backgroundProficiencies BackgroundProficiency[]
 
   @@unique([editionId, index])
 }

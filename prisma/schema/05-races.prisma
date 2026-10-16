@@ -1,13 +1,12 @@
 // ============================================================================
-// RACES (2014) / ESPÈCES (2024), SOUS-RACES ET TRAITS (rattachés à une édition)
+// RACES, SOUS-RACES ET TRAITS (rattachés à une édition)
 // ----------------------------------------------------------------------------
 // Un seul modèle `Race` pour les deux éditions : le libellé "Race" / "Espèce"
-// relève de l'interface. Différences gérées par les données :
-//  - 2014 : bonus de caractéristiques (RaceAbilityBonus), sous-races (Subrace).
-//  - 2024 : pas de bonus (lignes absentes), taille parfois au choix (sizes),
-//    lignées (elfe, gnome, tieffelin) = traits enfants choisis via un Choice
-//    SUBFEATURE plutôt que des sous-races.
-// Sources 2014 : 5e-SRD-Races, -Subraces, -Traits + fichiers custom.
+// relève de l'interface. En 2024 il n'y aura simplement pas de bonus de
+// caractéristiques, et les lignées seront des traits enfants choisis via un
+// Choice SUBFEATURE.
+// Sources 2014 : 5e-SRD-Races, -Subraces, -Traits, et les fichiers custom
+// (sous-races et traits supplémentaires, importés comme contenu maison).
 // ============================================================================
 
 model Race {
@@ -15,9 +14,10 @@ model Race {
   editionId Int
   edition   Edition @relation(fields: [editionId], references: [id])
   index     String // "dwarf"
-  // Tailles possibles : [MEDIUM], ou [SMALL, MEDIUM] pour l'humain 2024
-  sizes     Size[]
-  // JSONB Speeds : { walk: 25, fly?: 0, swim?: 0, climb?: 0, burrow?: 0 } (pieds)
+  // JSONB Sizes : tailles possibles, ["MEDIUM"], ou ["SMALL", "MEDIUM"] pour
+  // l'humain 2024 (JSON plutôt qu'un tableau d'enum : éditable dans Directus)
+  sizes     Json
+  // JSONB Speeds : { walk: 25, fly?, swim?, climb?, burrow? } (pieds)
   speeds    Json
 
   source    ContentSource @default(SRD)
@@ -26,24 +26,23 @@ model Race {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
-  translations  RaceTranslation[]
-  abilityBonus  RaceAbilityBonus[]
-  languages     RaceLanguage[]
-  traits        RaceTrait[]
-  subraces      Subrace[]
-  choices       Choice[] // langue au choix, bonus au choix (demi-elfe), lignée 2024
-  featPrereqFor FeatPrerequisite[]
+  translations RaceTranslation[]
+  abilityBonus RaceAbilityBonus[]
+  languages    RaceLanguage[]
+  traits       RaceTrait[]
+  subraces     Subrace[]
+  choices      Choice[] // langue au choix, bonus au choix (demi-elfe)
 
   @@unique([editionId, index])
 }
 
 model RaceTranslation {
-  id Int @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   raceId        Int
   localeCode    String
   name          String // "Nain"
-  description   String? @db.Text
-  ageText       String? @db.Text // textes descriptifs du SRD 2014
+  // Textes descriptifs du SRD 2014
+  ageText       String? @db.Text
   alignmentText String? @db.Text
   sizeText      String? @db.Text
   languageText  String? @db.Text
@@ -55,7 +54,7 @@ model RaceTranslation {
 
 // Bonus fixes (2014) : nain +2 CON
 model RaceAbilityBonus {
-  id Int @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   raceId         Int
   abilityScoreId Int
   bonus          Int
@@ -66,7 +65,7 @@ model RaceAbilityBonus {
 }
 
 model RaceLanguage {
-  id Int @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   raceId     Int
   languageId Int
   race       Race     @relation(fields: [raceId], references: [id], onDelete: Cascade)
@@ -76,7 +75,7 @@ model RaceLanguage {
 }
 
 model RaceTrait {
-  id Int @id @default(autoincrement())
+  id      Int   @id @default(autoincrement())
   raceId  Int
   traitId Int
   race    Race  @relation(fields: [raceId], references: [id], onDelete: Cascade)
@@ -112,7 +111,7 @@ model Subrace {
 }
 
 model SubraceTranslation {
-  id Int @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   subraceId   Int
   localeCode  String
   name        String // "Nain des collines"
@@ -124,7 +123,7 @@ model SubraceTranslation {
 }
 
 model SubraceAbilityBonus {
-  id Int @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   subraceId      Int
   abilityScoreId Int
   bonus          Int
@@ -135,7 +134,7 @@ model SubraceAbilityBonus {
 }
 
 model SubraceTrait {
-  id Int @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   subraceId Int
   traitId   Int
   subrace   Subrace @relation(fields: [subraceId], references: [id], onDelete: Cascade)
@@ -153,21 +152,16 @@ model Trait {
   editionId Int
   edition   Edition @relation(fields: [editionId], references: [id])
   index     String // "darkvision", "draconic-ancestry-red"
-  // Trait enfant : "Ascendance draconique (rouge)" → "Ascendance draconique",
-  // ou lignée 2024 "Drow" → "Lignée elfique"
+  // Trait enfant : "Ascendance draconique (rouge)" → "Ascendance draconique"
   parentId  Int?
   parent    Trait?  @relation("TraitTree", fields: [parentId], references: [id], onDelete: Cascade)
   children  Trait[] @relation("TraitTree")
 
-  // Portée de vision dans le noir conférée, en pieds (60, 120)
-  darkvisionFt Int?
   // Type de dégâts associé (ascendance draconique)
   damageTypeId Int?
   damageType   DamageType? @relation(fields: [damageTypeId], references: [id])
-  // JSONB TraitAction, pour les traits utilisables comme une action
-  // (souffle du drakéide) : { area: AreaOfEffect, save: { abilityIndex,
-  // success: "half" }, damageAtCharacterLevel: { "1": "2d6", "6": "3d6" },
-  // usage: Usage } — mêmes types Zod que les sorts et les monstres
+  // JSONB TraitAction, pour un trait utilisable comme une action (souffle du
+  // drakéide) : { area, save, damageAtCharacterLevel, usage }
   action       Json?
 
   source    ContentSource @default(SRD)
@@ -180,7 +174,6 @@ model Trait {
   races         RaceTrait[]
   subraces      SubraceTrait[]
   proficiencies TraitProficiency[]
-  spells        TraitSpell[]
   choices       Choice[] // maîtrise au choix, langue, tour de magie, sous-trait
   choiceItems   ChoiceOptionItem[] @relation("ChoiceItemTrait")
 
@@ -188,7 +181,7 @@ model Trait {
 }
 
 model TraitTranslation {
-  id Int @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   traitId     Int
   localeCode  String
   name        String // "Vision dans le noir"
@@ -200,26 +193,11 @@ model TraitTranslation {
 }
 
 model TraitProficiency {
-  id Int @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   traitId       Int
   proficiencyId Int
   trait         Trait       @relation(fields: [traitId], references: [id], onDelete: Cascade)
   proficiency   Proficiency @relation(fields: [proficiencyId], references: [id])
 
   @@unique([traitId, proficiencyId])
-}
-
-// Sorts innés : Magie drow (lumières dansantes niv. 1, lueurs féeriques
-// niv. 3, ténèbres niv. 5), Héritage infernal du tieffelin…
-model TraitSpell {
-  id Int @id @default(autoincrement())
-  traitId           Int
-  spellId           Int
-  minCharacterLevel Int   @default(1)
-  // JSONB Usage : { type: "per_long_rest", times: 1 } ; null = à volonté
-  usage             Json?
-  trait             Trait @relation(fields: [traitId], references: [id], onDelete: Cascade)
-  spell             Spell @relation(fields: [spellId], references: [id], onDelete: Cascade)
-
-  @@unique([traitId, spellId])
 }

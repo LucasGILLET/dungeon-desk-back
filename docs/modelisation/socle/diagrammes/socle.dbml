@@ -94,7 +94,10 @@ Enum ChoiceKind {
   PROFICIENCY
   MULTICLASS_PROFICIENCY
   EXPERTISE
+  LANGUAGE
   STARTING_EQUIPMENT
+  ABILITY_SCORE_INCREASE
+  SPELL
   SUBFEATURE
   FAVORED_ENEMY
   FAVORED_TERRAIN
@@ -102,6 +105,7 @@ Enum ChoiceKind {
 
 Enum ChoicePool {
   EQUIPMENT_CATEGORY
+  ANY_LANGUAGE
 }
 
 Enum ClassColumnValueType {
@@ -121,6 +125,13 @@ Enum ClassFeaturePrerequisiteType {
   LEVEL
   FEATURE
   SPELL
+}
+
+Enum PersonalityKind {
+  PERSONALITY_TRAIT
+  IDEAL
+  BOND
+  FLAW
 }
 
 Enum CastingTimeUnit {
@@ -519,6 +530,10 @@ Table Choice {
   classId int
   subclassId int
   classFeatureId int
+  raceId int
+  subraceId int
+  traitId int
+  backgroundId int
   parentOptionId int [unique, note: 'sous-choix d\'une option']
   pool ChoicePool
   poolCategoryId int
@@ -544,12 +559,19 @@ Table ChoiceOptionItem {
   id int [pk, increment]
   optionId int [not null]
   quantity int [not null, default: 1, note: '20 flèches']
+  bonus int [note: '+1 / +2 pour une augmentation de caractéristique']
   proficiencyId int
   equipmentId int
   equipmentCategoryId int [note: '"une arme de guerre au choix" dans un lot']
   classFeatureId int
   creatureTypeId int
   terrainId int
+  languageId int
+  abilityScoreId int
+  spellId int
+  traitId int
+  currencyAmount int
+  currency Currency
 }
 
 Table Class {
@@ -798,6 +820,245 @@ Table ClassFeaturePrerequisite {
   requiredSpellId int
 }
 
+Table Race {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"dwarf"']
+  sizes jsonb [not null]
+  speeds jsonb [not null]
+  source ContentSource [not null, default: 'SRD']
+  ownerId int
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table RaceTranslation {
+  id int [pk, increment]
+  raceId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Nain"']
+  ageText varchar
+  alignmentText varchar
+  sizeText varchar
+  languageText varchar
+  indexes {
+    (raceId, localeCode) [unique]
+  }
+}
+
+Table RaceAbilityBonus {
+  id int [pk, increment]
+  raceId int [not null]
+  abilityScoreId int [not null]
+  bonus int [not null]
+  indexes {
+    (raceId, abilityScoreId) [unique]
+  }
+}
+
+Table RaceLanguage {
+  id int [pk, increment]
+  raceId int [not null]
+  languageId int [not null]
+  indexes {
+    (raceId, languageId) [unique]
+  }
+}
+
+Table RaceTrait {
+  id int [pk, increment]
+  raceId int [not null]
+  traitId int [not null]
+  indexes {
+    (raceId, traitId) [unique]
+  }
+}
+
+Table Subrace {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"hill-dwarf"']
+  raceId int [not null]
+  source ContentSource [not null, default: 'SRD']
+  ownerId int
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table SubraceTranslation {
+  id int [pk, increment]
+  subraceId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Nain des collines"']
+  description varchar
+  indexes {
+    (subraceId, localeCode) [unique]
+  }
+}
+
+Table SubraceAbilityBonus {
+  id int [pk, increment]
+  subraceId int [not null]
+  abilityScoreId int [not null]
+  bonus int [not null]
+  indexes {
+    (subraceId, abilityScoreId) [unique]
+  }
+}
+
+Table SubraceTrait {
+  id int [pk, increment]
+  subraceId int [not null]
+  traitId int [not null]
+  indexes {
+    (subraceId, traitId) [unique]
+  }
+}
+
+Table Trait {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"darkvision", "draconic-ancestry-red"']
+  parentId int
+  damageTypeId int
+  action jsonb
+  source ContentSource [not null, default: 'SRD']
+  ownerId int
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table TraitTranslation {
+  id int [pk, increment]
+  traitId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Vision dans le noir"']
+  description varchar [not null]
+  indexes {
+    (traitId, localeCode) [unique]
+  }
+}
+
+Table TraitProficiency {
+  id int [pk, increment]
+  traitId int [not null]
+  proficiencyId int [not null]
+  indexes {
+    (traitId, proficiencyId) [unique]
+  }
+}
+
+Table Background {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"acolyte"']
+  source ContentSource [not null, default: 'SRD']
+  ownerId int
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table BackgroundTranslation {
+  id int [pk, increment]
+  backgroundId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Acolyte"']
+  featureName varchar
+  featureDescription varchar
+  indexes {
+    (backgroundId, localeCode) [unique]
+  }
+}
+
+Table BackgroundProficiency {
+  id int [pk, increment]
+  backgroundId int [not null]
+  proficiencyId int [not null]
+  indexes {
+    (backgroundId, proficiencyId) [unique]
+  }
+}
+
+Table BackgroundStartingEquipment {
+  id int [pk, increment]
+  backgroundId int [not null]
+  equipmentId int [not null]
+  quantity int [not null, default: 1]
+  indexes {
+    (backgroundId, equipmentId) [unique]
+  }
+}
+
+Table BackgroundPersonalityOption {
+  id int [pk, increment]
+  backgroundId int [not null]
+  kind PersonalityKind [not null]
+  position int [not null, note: 'valeur du dé (d8 pour les traits, d6 pour le reste)']
+}
+
+Table PersonalityOptionTranslation {
+  id int [pk, increment]
+  optionId int [not null]
+  localeCode varchar [not null]
+  text varchar [not null]
+  indexes {
+    (optionId, localeCode) [unique]
+  }
+}
+
+Table PersonalityOptionAlignment {
+  id int [pk, increment]
+  optionId int [not null]
+  alignmentId int [not null]
+  indexes {
+    (optionId, alignmentId) [unique]
+  }
+}
+
+Table Feat {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"grappler"']
+  source ContentSource [not null, default: 'SRD']
+  ownerId int
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table FeatTranslation {
+  id int [pk, increment]
+  featId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Lutteur"']
+  description varchar [not null]
+  indexes {
+    (featId, localeCode) [unique]
+  }
+}
+
+Table FeatPrerequisite {
+  id int [pk, increment]
+  featId int [not null]
+  abilityScoreId int [not null]
+  minimumScore int [not null]
+  alternativeGroup int [not null, default: 1]
+}
+
 Table Spell {
   id int [pk, increment]
   editionId int [not null]
@@ -890,6 +1151,10 @@ Ref: VehicleStats.equipmentId - Equipment.id
 Ref: Choice.classId > Class.id
 Ref: Choice.subclassId > Subclass.id
 Ref: Choice.classFeatureId > ClassFeature.id
+Ref: Choice.raceId > Race.id
+Ref: Choice.subraceId > Subrace.id
+Ref: Choice.traitId > Trait.id
+Ref: Choice.backgroundId > Background.id
 Ref: Choice.parentOptionId - ChoiceOption.id
 Ref: Choice.poolCategoryId > EquipmentCategory.id
 Ref: ChoiceTranslation.choiceId > Choice.id
@@ -901,6 +1166,10 @@ Ref: ChoiceOptionItem.equipmentCategoryId > EquipmentCategory.id
 Ref: ChoiceOptionItem.classFeatureId > ClassFeature.id
 Ref: ChoiceOptionItem.creatureTypeId > CreatureType.id
 Ref: ChoiceOptionItem.terrainId > Terrain.id
+Ref: ChoiceOptionItem.languageId > Language.id
+Ref: ChoiceOptionItem.abilityScoreId > AbilityScore.id
+Ref: ChoiceOptionItem.spellId > Spell.id
+Ref: ChoiceOptionItem.traitId > Trait.id
 Ref: ClassTranslation.classId > Class.id
 Ref: ClassPrimaryAbility.classId > Class.id
 Ref: ClassPrimaryAbility.abilityScoreId > AbilityScore.id
@@ -939,6 +1208,36 @@ Ref: ClassFeatureTranslation.classFeatureId > ClassFeature.id
 Ref: ClassFeaturePrerequisite.classFeatureId > ClassFeature.id
 Ref: ClassFeaturePrerequisite.requiredFeatureId > ClassFeature.id
 Ref: ClassFeaturePrerequisite.requiredSpellId > Spell.id
+Ref: RaceTranslation.raceId > Race.id
+Ref: RaceAbilityBonus.raceId > Race.id
+Ref: RaceAbilityBonus.abilityScoreId > AbilityScore.id
+Ref: RaceLanguage.raceId > Race.id
+Ref: RaceLanguage.languageId > Language.id
+Ref: RaceTrait.raceId > Race.id
+Ref: RaceTrait.traitId > Trait.id
+Ref: Subrace.raceId > Race.id
+Ref: SubraceTranslation.subraceId > Subrace.id
+Ref: SubraceAbilityBonus.subraceId > Subrace.id
+Ref: SubraceAbilityBonus.abilityScoreId > AbilityScore.id
+Ref: SubraceTrait.subraceId > Subrace.id
+Ref: SubraceTrait.traitId > Trait.id
+Ref: Trait.parentId > Trait.id
+Ref: Trait.damageTypeId > DamageType.id
+Ref: TraitTranslation.traitId > Trait.id
+Ref: TraitProficiency.traitId > Trait.id
+Ref: TraitProficiency.proficiencyId > Proficiency.id
+Ref: BackgroundTranslation.backgroundId > Background.id
+Ref: BackgroundProficiency.backgroundId > Background.id
+Ref: BackgroundProficiency.proficiencyId > Proficiency.id
+Ref: BackgroundStartingEquipment.backgroundId > Background.id
+Ref: BackgroundStartingEquipment.equipmentId > Equipment.id
+Ref: BackgroundPersonalityOption.backgroundId > Background.id
+Ref: PersonalityOptionTranslation.optionId > BackgroundPersonalityOption.id
+Ref: PersonalityOptionAlignment.optionId > BackgroundPersonalityOption.id
+Ref: PersonalityOptionAlignment.alignmentId > Alignment.id
+Ref: FeatTranslation.featId > Feat.id
+Ref: FeatPrerequisite.featId > Feat.id
+Ref: FeatPrerequisite.abilityScoreId > AbilityScore.id
 Ref: Spell.schoolId > MagicSchool.id
 Ref: Spell.saveAbilityId > AbilityScore.id
 Ref: SpellTranslation.spellId > Spell.id
@@ -1022,7 +1321,35 @@ TableGroup "Classes, sous-classes et capacités de classe" [color: #24BAB1] {
   ClassFeaturePrerequisite
 }
 
-TableGroup "Sorts" [color: #8E44AD] {
+TableGroup "Races, sous-races et traits" [color: #8E44AD] {
+  Race
+  RaceTranslation
+  RaceAbilityBonus
+  RaceLanguage
+  RaceTrait
+  Subrace
+  SubraceTranslation
+  SubraceAbilityBonus
+  SubraceTrait
+  Trait
+  TraitTranslation
+  TraitProficiency
+}
+
+TableGroup "Historiques et dons" [color: #27AE60] {
+  Background
+  BackgroundTranslation
+  BackgroundProficiency
+  BackgroundStartingEquipment
+  BackgroundPersonalityOption
+  PersonalityOptionTranslation
+  PersonalityOptionAlignment
+  Feat
+  FeatTranslation
+  FeatPrerequisite
+}
+
+TableGroup "Sorts" [color: #E67E22] {
   Spell
   SpellTranslation
   SpellDamageType

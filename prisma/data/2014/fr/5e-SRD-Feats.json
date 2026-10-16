@@ -1,0 +1,22 @@
+[
+  {
+    "index": "grappler",
+    "name": "Lutteur",
+    "prerequisites": [
+      {
+        "ability_score": {
+          "index": "str",
+          "name": "FOR",
+          "url": "/api/2014/ability-scores/str"
+        },
+        "minimum_score": 13
+      }
+    ],
+    "desc": [
+      "Vous avez développé les compétences nécessaires pour vous défendre tout seul dans les combats de rues. Vous obtenez les avantages suivants :",
+      "- Vous avez un avantage aux jets d'attaque contre une créature avec laquelle vous êtes engagé dans une lutte.",
+      "Vous pouvez utiliser votre action pour tenter de bloquer une créature avec qui vous avez engagé une lutte. Dans ce cas, faites un nouveau jet de lutte. Si vous réussissez, vous et la créature êtes tous deux entravés jusqu'à ce que la lutte se termine."
+    ],
+    "url": "/api/2014/feats/grappler"
+  }
+]

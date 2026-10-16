@@ -3,7 +3,7 @@
 // Options (après `--`) :
 //   --edition 2014           édition à importer (défaut : 2014)
 //   --only <domaines>        liste séparée par des virgules parmi :
-//                            base, referentiels, equipement, maitrises, sorts, classes
+//                            base, referentiels, equipement, maitrises, sorts, classes, races, historiques
 //   --classes <index>        classes à importer (défaut : toutes), ex. wizard,fighter
 //
 // Chaque domaine ne dépend que des précédents ; relancer le seed met à jour les
@@ -15,8 +15,10 @@ import { importReferentiels } from './importers/referentiels';
 import { importEquipment, importProficiencies } from './importers/equipment';
 import { importSpells } from './importers/spells';
 import { ClassImporter } from './importers/classes';
+import { importRaces } from './importers/races';
+import { importBackgrounds } from './importers/backgrounds';
 
-const DOMAINS = ['base', 'referentiels', 'equipement', 'maitrises', 'sorts', 'classes'] as const;
+const DOMAINS = ['base', 'referentiels', 'equipement', 'maitrises', 'sorts', 'classes', 'races', 'historiques'] as const;
 
 function option(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
@@ -42,13 +44,15 @@ async function main(): Promise<void> {
     if (run('equipement')) await importEquipment(prisma, refs, edition);
     if (run('maitrises')) await importProficiencies(prisma, refs, edition);
     if (run('sorts')) await importSpells(prisma, refs, edition);
+    let untranslated = 0;
     if (run('classes')) {
       const importer = new ClassImporter(prisma, refs, edition);
       await importer.importAll(classes);
-      if (importer.untranslatedChoices) {
-        log(`${importer.untranslatedChoices} description(s) de choix non traduite(s) dans les fichiers sources : repli sur l'anglais`);
-      }
+      untranslated += importer.untranslatedChoices;
     }
+    if (run('races')) untranslated += (await importRaces(prisma, refs, edition)).untranslatedChoices;
+    if (run('historiques')) untranslated += (await importBackgrounds(prisma, refs, edition)).untranslatedChoices;
+    if (untranslated) log(`${untranslated} description(s) de choix non traduite(s) dans les fichiers sources : repli sur l'anglais`);
     log(`terminé en ${((Date.now() - started) / 1000).toFixed(1)} s`);
   } finally {
     await prisma.$disconnect();

@@ -105,6 +105,7 @@ model Spell {
   classes                   ClassSpell[]
   subclasses                SubclassSpell[]
   classFeaturePrerequisites ClassFeaturePrerequisite[]
+  choiceOptionItems         ChoiceOptionItem[]
 
   @@unique([editionId, index])
   @@index([editionId, level])

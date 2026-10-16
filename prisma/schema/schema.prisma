@@ -25,6 +25,11 @@ model User {
   homebrewSubclasses    Subclass[]
   homebrewClassFeatures ClassFeature[]
   homebrewSpells        Spell[]
+  homebrewRaces         Race[]
+  homebrewSubraces      Subrace[]
+  homebrewTraits        Trait[]
+  homebrewBackgrounds   Background[]
+  homebrewFeats         Feat[]
 }
 
 model Npc {

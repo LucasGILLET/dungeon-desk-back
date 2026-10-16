@@ -23,6 +23,9 @@ export const isTranslation = (m: Model) => m.name.endsWith('Translation') && byN
 
 const LABEL_FIELDS = ['name', 'label', 'title', 'text', 'description'];
 
+// Colonnes JSONB qui contiennent une liste de valeurs d'enum : cases à cocher
+const JSON_ENUM_LISTS: Record<string, string> = { 'Race.sizes': 'Size' };
+
 function label(model: string, field: string): string | undefined {
   return FIELDS[`${model}.${field}`] ?? COMMON_FIELDS[field];
 }
@@ -113,6 +116,11 @@ function fieldMeta(m: Model, f: Field): Json | null {
     const labels = ENUMS[f.type] ?? {};
     const choices = (enumValues.get(f.type) ?? []).map((value) => ({ text: labels[value] ?? value, value }));
     Object.assign(meta, { interface: 'select-dropdown', options: { choices }, display: 'labels', display_options: { choices }, width: 'half' });
+  } else if (JSON_ENUM_LISTS[`${m.name}.${f.name}`]) {
+    const type = JSON_ENUM_LISTS[`${m.name}.${f.name}`];
+    const labels = ENUMS[type] ?? {};
+    const choices = (enumValues.get(type) ?? []).map((value) => ({ text: labels[value] ?? value, value }));
+    Object.assign(meta, { interface: 'select-multiple-checkbox', options: { choices }, display: 'labels', display_options: { choices }, width: 'half' });
   } else if (f.type === 'Json') {
     Object.assign(meta, { interface: 'input-code', options: { language: 'JSON', lineNumber: false } });
   } else if (f.nativeType?.[0] === 'Text') {
@@ -244,6 +252,36 @@ async function configureSpellForms(): Promise<void> {
   await api('PATCH', '/fields/Spell/materialConsumed', { meta: { conditions: [{ name: 'Masqué', rule: { _and: [{ material: { _eq: false } }] }, hidden: true }] } });
 }
 
+async function configureRaceForms(): Promise<void> {
+  const tpl = (m: string) => displayTemplate(byName.get(m)!)!;
+  await o2m('Race', 'subraces', 'Subrace', 'raceId', tpl('Subrace'));
+  await o2m('Race', 'abilityBonus', 'RaceAbilityBonus', 'raceId', '{{abilityScoreId.translations.abbreviation}} +{{bonus}}');
+  await o2m('Race', 'choices', 'Choice', 'raceId', '{{kind}} · choisir {{choose}}');
+  await m2m('Race', 'traits', 'RaceTrait', 'raceId', 'traitId', '{{traitId.translations.name}}');
+  await m2m('Race', 'languages', 'RaceLanguage', 'raceId', 'languageId', '{{languageId.translations.name}}');
+  await o2m('Subrace', 'abilityBonus', 'SubraceAbilityBonus', 'subraceId', '{{abilityScoreId.translations.abbreviation}} +{{bonus}}');
+  await m2m('Subrace', 'traits', 'SubraceTrait', 'subraceId', 'traitId', '{{traitId.translations.name}}');
+  await m2m('Trait', 'proficiencies', 'TraitProficiency', 'traitId', 'proficiencyId', '{{proficiencyId.translations.name}}');
+  await groups('Race', [
+    ['grp_general', 'Général', ['index', 'editionId', 'sizes', 'speeds', 'source']],
+    ['grp_bonus', 'Bonus et langues', ['abilityBonus', 'languages', 'choices']],
+    ['grp_traits', 'Traits et sous-races', ['traits', 'subraces']],
+  ]);
+}
+
+async function configureBackgroundForms(): Promise<void> {
+  await m2m('Background', 'proficiencies', 'BackgroundProficiency', 'backgroundId', 'proficiencyId', '{{proficiencyId.translations.name}}');
+  await m2m('Background', 'startingEquipment', 'BackgroundStartingEquipment', 'backgroundId', 'equipmentId', '{{quantity}} × {{equipmentId.translations.name}}');
+  await o2m('Background', 'personalityOptions', 'BackgroundPersonalityOption', 'backgroundId', '{{kind}} {{position}} · {{translations.text}}');
+  await o2m('Background', 'choices', 'Choice', 'backgroundId', '{{kind}} · choisir {{choose}}');
+  await o2m('Feat', 'prerequisites', 'FeatPrerequisite', 'featId', '{{abilityScoreId.translations.abbreviation}} {{minimumScore}}');
+  await groups('Background', [
+    ['grp_general', 'Général', ['index', 'editionId', 'source']],
+    ['grp_dotations', 'Maîtrises et équipement', ['proficiencies', 'startingEquipment', 'choices']],
+    ['grp_personnalite', 'Personnalité', ['personalityOptions']],
+  ]);
+}
+
 async function main(): Promise<void> {
   const started = Date.now();
   await configureSettings();
@@ -252,6 +290,8 @@ async function main(): Promise<void> {
   const translations = await configureTranslations();
   await configureClassForms();
   await configureSpellForms();
+  await configureRaceForms();
+  await configureBackgroundForms();
   const roles = await configureRoles(srdModels.map((m) => m.name), srdModels.filter(isTranslation).map((m) => m.name));
   console.log(`[directus] ${models.length} collections, ${fields} champs, ${translations} onglets de traduction, ${roles} ; ${((Date.now() - started) / 1000).toFixed(1)} s`);
 }

@@ -1,0 +1,299 @@
+[
+  {
+    "index": "high-elf",
+    "name": "Haut-elfe",
+    "race": {
+      "index": "elf",
+      "name": "Elf",
+      "url": "/api/2014/races/elf"
+    },
+    "desc": "Les hauts-elfes sont connus pour leur affinité naturelle avec la magie et leur grâce élégante. Ils excellent dans l'étude des arts arcaniques.",
+    "ability_bonuses": [
+      {
+        "ability_score": {
+          "index": "int",
+          "name": "INT",
+          "url": "/api/2014/ability-scores/int"
+        },
+        "bonus": 1
+      }
+    ],
+    "racial_traits": [
+      {
+        "index": "elf-weapon-training",
+        "name": "Entraînement aux armes elfiques",
+        "url": "/api/2014/traits/elf-weapon-training"
+      },
+      {
+        "index": "high-elf-cantrip",
+        "name": "Sort mineur",
+        "url": "/api/2014/traits/high-elf-cantrip"
+      },
+      {
+        "index": "extra-language",
+        "name": "Langue supplémentaire",
+        "url": "/api/2014/traits/extra-language"
+      }
+    ],
+    "url": "/api/custom/subraces/high-elf"
+  },
+  {
+    "index": "wood-elf",
+    "name": "Elfe des bois",
+    "race": {
+      "index": "elf",
+      "name": "Elf",
+      "url": "/api/2014/races/elf"
+    },
+    "desc": "Les elfes des bois sont des nomades des forêts, experts en survie et en tir à l'arc. Leur connexion avec la nature leur donne une vitesse supérieure.",
+    "ability_bonuses": [
+      {
+        "ability_score": {
+          "index": "wis",
+          "name": "WIS",
+          "url": "/api/2014/ability-scores/wis"
+        },
+        "bonus": 1
+      }
+    ],
+    "racial_traits": [
+      {
+        "index": "elf-weapon-training",
+        "name": "Entraînement aux armes elfiques",
+        "url": "/api/2014/traits/elf-weapon-training"
+      },
+      {
+        "index": "fleet-of-foot",
+        "name": "Foulée légère",
+        "url": "/api/2014/traits/fleet-of-foot"
+      },
+      {
+        "index": "mask-of-the-wild",
+        "name": "Cachette naturelle",
+        "url": "/api/2014/traits/mask-of-the-wild"
+      }
+    ],
+    "url": "/api/custom/subraces/wood-elf"
+  },
+  {
+    "index": "dark-elf",
+    "name": "Elfe noir",
+    "race": {
+      "index": "elf",
+      "name": "Elf",
+      "url": "/api/2014/races/elf"
+    },
+    "desc": "Les elfes noirs, ou drows, viennent des profondeurs souterraines. Leur vision supérieure dans l'obscurité et leur entraînement martial en font des guerriers redoutables.",
+    "ability_bonuses": [
+      {
+        "ability_score": {
+          "index": "cha",
+          "name": "CHA",
+          "url": "/api/2014/ability-scores/cha"
+        },
+        "bonus": 1
+      }
+    ],
+    "racial_traits": [
+      {
+        "index": "superior-darkvision",
+        "name": "Vision dans le noir supérieure",
+        "url": "/api/2014/traits/superior-darkvision"
+      },
+      {
+        "index": "sunlight-sensitivity",
+        "name": "Sensibilité au soleil",
+        "url": "/api/2014/traits/sunlight-sensitivity"
+      },
+      {
+        "index": "drow-magic",
+        "name": "Magie drow",
+        "url": "/api/2014/traits/drow-magic"
+      },
+      {
+        "index": "drow-weapon-training",
+        "name": "Formation martiale drow",
+        "url": "/api/2014/traits/drow-weapon-training"
+      }
+    ],
+    "url": "/api/custom/subraces/dark-elf"
+  },
+  {
+    "index": "lightfoot-halfling",
+    "name": "Halfelin pied-léger",
+    "race": {
+      "index": "halfling",
+      "name": "Halfling",
+      "url": "/api/2014/races/halfling"
+    },
+    "desc": "Les halfelins pied-léger sont les plus nombreux et les plus aventureux de leur race. Leur chance naturelle et leur charisme en font d'excellents compagnons.",
+    "ability_bonuses": [
+      {
+        "ability_score": {
+          "index": "cha",
+          "name": "CHA",
+          "url": "/api/2014/ability-scores/cha"
+        },
+        "bonus": 1
+      }
+    ],
+    "racial_traits": [
+      {
+        "index": "naturally-stealthy",
+        "name": "Discrétion naturelle",
+        "url": "/api/2014/traits/naturally-stealthy"
+      }
+    ],
+    "url": "/api/custom/subraces/lightfoot-halfling"
+  },
+  {
+    "index": "stout-halfling",
+    "name": "Halfelin robuste",
+    "race": {
+      "index": "halfling",
+      "name": "Halfling",
+      "url": "/api/2014/races/halfling"
+    },
+    "desc": "Les halfelins robustes sont plus résistants aux poisons et aux maladies que leurs cousins. Leur constitution supérieure en fait des survivants nés.",
+    "ability_bonuses": [
+      {
+        "ability_score": {
+          "index": "con",
+          "name": "CON",
+          "url": "/api/2014/ability-scores/con"
+        },
+        "bonus": 1
+      }
+    ],
+    "racial_traits": [
+      {
+        "index": "stout-resilience",
+        "name": "Résistance des robustes",
+        "url": "/api/2014/traits/stout-resilience"
+      }
+    ],
+    "url": "/api/custom/subraces/stout-halfling"
+  },
+  {
+    "index": "hill-dwarf",
+    "name": "Nain des collines",
+    "race": {
+      "index": "dwarf",
+      "name": "Dwarf",
+      "url": "/api/2014/races/dwarf"
+    },
+    "desc": "Les nains des collines vivent dans les hauteurs et sont connus pour leur sagesse et leur connexion avec les anciens. Leur endurance naturelle leur donne des points de vie supplémentaires.",
+    "ability_bonuses": [
+      {
+        "ability_score": {
+          "index": "wis",
+          "name": "WIS",
+          "url": "/api/2014/ability-scores/wis"
+        },
+        "bonus": 1
+      }
+    ],
+    "racial_traits": [
+      {
+        "index": "dwarven-toughness",
+        "name": "Ténacité naine",
+        "url": "/api/2014/traits/dwarven-toughness"
+      }
+    ],
+    "url": "/api/custom/subraces/hill-dwarf"
+  },
+  {
+    "index": "mountain-dwarf",
+    "name": "Nain des montagnes",
+    "race": {
+      "index": "dwarf",
+      "name": "Dwarf",
+      "url": "/api/2014/races/dwarf"
+    },
+    "desc": "Les nains des montagnes sont des artisans et des guerriers redoutables. Leur armure et leurs armes sont de qualité supérieure, et ils excellent dans le combat.",
+    "ability_bonuses": [
+      {
+        "ability_score": {
+          "index": "str",
+          "name": "STR",
+          "url": "/api/2014/ability-scores/str"
+        },
+        "bonus": 1
+      }
+    ],
+    "racial_traits": [
+      {
+        "index": "dwarven-armor-training",
+        "name": "Formation au port des armures naines",
+        "url": "/api/2014/traits/dwarven-armor-training"
+      }
+    ],
+    "url": "/api/custom/subraces/mountain-dwarf"
+  },
+  {
+    "index": "forest-gnome",
+    "name": "Gnome des forêts",
+    "race": {
+      "index": "gnome",
+      "name": "Gnome",
+      "url": "/api/2014/races/gnome"
+    },
+    "desc": "Les gnomes des forêts sont des illusionnistes naturels et des amis des animaux. Leur connexion avec la nature leur permet de communiquer avec les petites créatures.",
+    "ability_bonuses": [
+      {
+        "ability_score": {
+          "index": "dex",
+          "name": "DEX",
+          "url": "/api/2014/ability-scores/dex"
+        },
+        "bonus": 1
+      }
+    ],
+    "racial_traits": [
+      {
+        "index": "natural-illusionist",
+        "name": "Illusionniste-né",
+        "url": "/api/2014/traits/natural-illusionist"
+      },
+      {
+        "index": "speak-with-small-beasts",
+        "name": "Communication avec les petits animaux",
+        "url": "/api/2014/traits/speak-with-small-beasts"
+      }
+    ],
+    "url": "/api/custom/subraces/forest-gnome"
+  },
+  {
+    "index": "rock-gnome",
+    "name": "Gnome des roches",
+    "race": {
+      "index": "gnome",
+      "name": "Gnome",
+      "url": "/api/2014/races/gnome"
+    },
+    "desc": "Les gnomes des roches sont des inventeurs et des artificiers talentueux. Leur intelligence supérieure et leurs compétences techniques en font d'excellents artisans.",
+    "ability_bonuses": [
+      {
+        "ability_score": {
+          "index": "con",
+          "name": "CON",
+          "url": "/api/2014/ability-scores/con"
+        },
+        "bonus": 1
+      }
+    ],
+    "racial_traits": [
+      {
+        "index": "artificers-lore",
+        "name": "Connaissance en ingénierie",
+        "url": "/api/2014/traits/artificers-lore"
+      },
+      {
+        "index": "tinker",
+        "name": "Bricoleur",
+        "url": "/api/2014/traits/tinker"
+      }
+    ],
+    "url": "/api/custom/subraces/rock-gnome"
+  }
+]

@@ -3,8 +3,8 @@
 // ----------------------------------------------------------------------------
 // Remplace les "option sets" récursifs du SRD : proficiency_choices,
 // starting_equipment_options, subfeature_options, expertise_options…
-// Pour l'instant utilisée par les classes ; les races, historiques et dons
-// (docs/modelisation/brouillons) y ajouteront leurs propriétaires et cibles.
+// Utilisée par les classes, les races, les sous-races, les traits et les
+// historiques.
 //
 //   Choice              "Choisissez 2 parmi…" (choose = 2)
 //   └ ChoiceOption       une option sélectionnable
@@ -12,7 +12,8 @@
 //     └ Choice            et/ou un sous-choix
 //
 // Le choix peut aussi porter sur une « réserve » au lieu d'options listées :
-// n'importe quel objet d'une catégorie (pool EQUIPMENT_CATEGORY).
+// n'importe quel objet d'une catégorie (EQUIPMENT_CATEGORY), n'importe quelle
+// langue (ANY_LANGUAGE).
 //
 // Exemples :
 //  - Guerrier : "(a) cotte de mailles ou (b) armure de cuir, arc long et
@@ -21,6 +22,11 @@
 //    arcanique" → l'option (b) a un sous-choix dans la catégorie.
 //  - Roublard (Expertise) : "(a) deux compétences ou (b) une compétence et
 //    les outils de voleur" → l'option (b) a un item et un sous-choix.
+//  - Demi-elfe : "+1 à deux caractéristiques au choix" → kind
+//    ABILITY_SCORE_INCREASE, 5 options avec abilityScoreId et bonus = 1.
+//  - Haut-elfe : "un tour de magie parmi…" → kind SPELL, options spellId.
+//  - Acolyte : "deux langues au choix" → pool ANY_LANGUAGE, sans option.
+//  - Charlatan : "15 po" → item monétaire (currencyAmount = 15, currency = GP).
 // ============================================================================
 
 // À quoi sert le choix (détermine comment l'appliquer au personnage)
@@ -28,8 +34,11 @@ enum ChoiceKind {
   PROFICIENCY
   MULTICLASS_PROFICIENCY // maîtrise au choix en multiclassage (barde, rôdeur, roublard)
   EXPERTISE
+  LANGUAGE
   STARTING_EQUIPMENT
-  SUBFEATURE // capacité enfant : terrain du Cercle de la Terre, manifestations occultes
+  ABILITY_SCORE_INCREASE
+  SPELL
+  SUBFEATURE // capacité ou trait enfant : terrain du Cercle de la Terre, ascendance draconique
   FAVORED_ENEMY
   FAVORED_TERRAIN
 }
@@ -37,6 +46,7 @@ enum ChoiceKind {
 // Choix « libre » dans une réserve, sans liste d'options
 enum ChoicePool {
   EQUIPMENT_CATEGORY // poolCategoryId
+  ANY_LANGUAGE
 }
 
 model Choice {
@@ -53,6 +63,14 @@ model Choice {
   subclass       Subclass?     @relation(fields: [subclassId], references: [id], onDelete: Cascade)
   classFeatureId Int?
   classFeature   ClassFeature? @relation(fields: [classFeatureId], references: [id], onDelete: Cascade)
+  raceId         Int?
+  race           Race?         @relation(fields: [raceId], references: [id], onDelete: Cascade)
+  subraceId      Int?
+  subrace        Subrace?      @relation(fields: [subraceId], references: [id], onDelete: Cascade)
+  traitId        Int?
+  trait          Trait?        @relation(fields: [traitId], references: [id], onDelete: Cascade)
+  backgroundId   Int?
+  background     Background?   @relation(fields: [backgroundId], references: [id], onDelete: Cascade)
   parentOptionId Int?          @unique // sous-choix d'une option
   parentOption   ChoiceOption? @relation("NestedChoice", fields: [parentOptionId], references: [id], onDelete: Cascade)
 
@@ -92,6 +110,7 @@ model ChoiceOptionItem {
   optionId Int
   option   ChoiceOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
   quantity Int          @default(1) // 20 flèches
+  bonus    Int? // +1 / +2 pour une augmentation de caractéristique
 
   proficiencyId       Int?
   proficiency         Proficiency?       @relation(fields: [proficiencyId], references: [id])
@@ -105,4 +124,15 @@ model ChoiceOptionItem {
   creatureType        CreatureType?      @relation(fields: [creatureTypeId], references: [id])
   terrainId           Int?
   terrain             Terrain?           @relation(fields: [terrainId], references: [id])
+  languageId          Int?
+  language            Language?          @relation(fields: [languageId], references: [id])
+  abilityScoreId      Int?
+  abilityScore        AbilityScore?      @relation(fields: [abilityScoreId], references: [id])
+  spellId             Int?
+  spell               Spell?             @relation(fields: [spellId], references: [id])
+  traitId             Int?
+  trait               Trait?             @relation("ChoiceItemTrait", fields: [traitId], references: [id])
+  // Item monétaire ("15 po") : currencyAmount + currency
+  currencyAmount      Int?
+  currency            Currency?
 }

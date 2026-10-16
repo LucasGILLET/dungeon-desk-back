@@ -1,9 +1,9 @@
 // Conversion des "option sets" récursifs du SRD vers Choice / ChoiceOption /
-// ChoiceOptionItem. Utilisé par les classes.
+// ChoiceOptionItem. Utilisé par les classes, les races, les traits et les historiques.
 import { ChoiceKind } from '@prisma/client';
 import { Json, LocaleCode, parseUrl, Refs, Tx, URL_TARGETS } from '../context';
 
-// Propriétaire du choix : { classId }, { subclassId }, { classFeatureId }
+// Propriétaire du choix : { classId }, { classFeatureId }, { raceId }, { traitId }, { backgroundId }…
 export type ChoiceOwner = Record<string, number>;
 
 // Les options "string" du rôdeur sont des pluriels anglais
@@ -11,6 +11,19 @@ const CREATURE_TYPE_STRINGS: Record<string, string> = {
   aberrations: 'aberration', beasts: 'beast', celestials: 'celestial', constructs: 'construct', dragons: 'dragon',
   elementals: 'elemental', fey: 'fey', fiends: 'fiend', giants: 'giant', monstrosities: 'monstrosity', oozes: 'ooze',
   plants: 'plant', undead: 'undead', humanoids: 'humanoid',
+};
+
+// Pièces de monnaie référencées par les historiques ("/api/2014/currency/gold-piece")
+const CURRENCIES: Record<string, string> = {
+  'copper-piece': 'CP', 'silver-piece': 'SP', 'electrum-piece': 'EP', 'gold-piece': 'GP', 'platinum-piece': 'PP',
+};
+
+// Description par défaut quand le SRD n'en fournit pas (bonus raciaux, sorts…)
+const DEFAULT_DESCRIPTIONS: Partial<Record<ChoiceKind, { en: (n: number) => string; fr: (n: number) => string }>> = {
+  ABILITY_SCORE_INCREASE: { en: (n) => `Increase ${n} ability scores of your choice`, fr: (n) => `Augmentez ${n} caractéristiques de votre choix` },
+  LANGUAGE: { en: (n) => `Choose ${n} language${n > 1 ? 's' : ''}`, fr: (n) => `Choisissez ${n} langue${n > 1 ? 's' : ''}` },
+  SPELL: { en: (n) => `Choose ${n} spell${n > 1 ? 's' : ''}`, fr: (n) => `Choisissez ${n} sort${n > 1 ? 's' : ''}` },
+  SUBFEATURE: { en: (n) => `Choose ${n} option${n > 1 ? 's' : ''}`, fr: (n) => `Choisissez ${n} option${n > 1 ? 's' : ''}` },
 };
 
 interface ItemData {
@@ -27,6 +40,10 @@ export class ChoiceImporter {
 
   private async reference(url: string): Promise<ItemData> {
     const [kind, index] = parseUrl(url);
+    if (kind === 'currency') {
+      if (!CURRENCIES[index]) throw new Error(`Monnaie inconnue : ${url}`);
+      return { currency: CURRENCIES[index], currencyAmount: 1 };
+    }
     const target = URL_TARGETS[kind];
     if (!target) throw new Error(`Type de référence non géré dans un choix : ${url}`);
     return { [target.itemField]: await this.refs.id(target.model, index) };
@@ -36,8 +53,13 @@ export class ChoiceImporter {
     switch (option.option_type) {
       case 'reference':
         return [await this.reference(option.item.url)];
-      case 'counted_reference':
-        return [{ ...(await this.reference(option.of.url)), quantity: Number(option.count) }];
+      case 'counted_reference': {
+        const ref = await this.reference(option.of.url);
+        // "15 po" : la quantité d'une monnaie est son montant
+        return ref.currency ? [{ ...ref, currencyAmount: Number(option.count) }] : [{ ...ref, quantity: Number(option.count) }];
+      }
+      case 'ability_bonus':
+        return [{ abilityScoreId: await this.refs.id('abilityScore', option.ability_score.index), bonus: option.bonus }];
       case 'multiple':
         return (await Promise.all(option.items.map((sub: Json) => this.items(sub, kind)))).flat();
       case 'choice': {
@@ -75,16 +97,21 @@ export class ChoiceImporter {
     if (from.option_set_type === 'equipment_category') {
       pool.pool = 'EQUIPMENT_CATEGORY';
       pool.poolCategoryId = await this.refs.id('equipmentCategory', from.equipment_category.index);
+    } else if (from.option_set_type === 'resource_list') {
+      if (!from.resource_list_url.endsWith('/languages')) throw new Error(`Liste de ressources non gérée : ${from.resource_list_url}`);
+      pool.pool = 'ANY_LANGUAGE';
     } else if (from.option_set_type !== 'options_array') {
       throw new Error(`Type d'option set non géré : ${from.option_set_type}`);
     }
 
     const choice = await tx.choice.create({ data: { kind, choose: set.choose, ...owner, ...pool } });
 
-    const enDesc: string = set.desc ?? set.type;
+    const fallback = DEFAULT_DESCRIPTIONS[kind];
+    const enDesc: string = set.desc ?? fallback?.en(set.choose) ?? set.type;
     const translations = [{ choiceId: choice.id, localeCode: 'en', description: enDesc }];
+    if (!set.desc && fallback) translations.push({ choiceId: choice.id, localeCode: 'fr', description: fallback.fr(set.choose) });
     for (const [localeCode, other] of Object.entries(localized)) {
-      if (!other?.desc) continue;
+      if (!other?.desc || translations.some((t) => t.localeCode === localeCode)) continue;
       if (other.desc === enDesc) this.untranslated++;
       else translations.push({ choiceId: choice.id, localeCode, description: other.desc });
     }

@@ -155,8 +155,35 @@ export const URL_TARGETS: Record<string, { model: string; itemField: string }> =
   equipment: { model: 'equipment', itemField: 'equipmentId' },
   'equipment-categories': { model: 'equipmentCategory', itemField: 'equipmentCategoryId' },
   features: { model: 'classFeature', itemField: 'classFeatureId' },
+  languages: { model: 'language', itemField: 'languageId' },
+  spells: { model: 'spell', itemField: 'spellId' },
+  traits: { model: 'trait', itemField: 'traitId' },
+  'ability-scores': { model: 'abilityScore', itemField: 'abilityScoreId' },
 };
 
 export function log(message: string): void {
   console.log(`[seed] ${message}`);
+}
+
+// --- Fichiers custom ------------------------------------------------------------
+
+export interface MergedFile extends SrdFile {
+  // Entrée présente uniquement dans le fichier custom : importée comme contenu maison
+  isHomebrew(index: string): boolean;
+}
+
+// Fusionne un fichier SRD et son équivalent custom (même priorité que l'ancien
+// dataLoader du front) : dans la langue du fichier custom, l'entrée custom
+// remplace celle du SRD ; les entrées absentes du SRD sont ajoutées à la liste.
+export function loadMerged(edition: string, name: string, customFile: string, customLocale: LocaleCode): MergedFile {
+  const srd = loadSrd(edition, name);
+  const custom: Json[] = readJson(path.join(edition, 'custom', customFile));
+  const customByIndex = new Map(custom.map((row) => [row.index as string, row]));
+  const srdIndexes = new Set(srd.list.map((row) => row.index as string));
+  return {
+    list: [...srd.list, ...custom.filter((row) => !srdIndexes.has(row.index))],
+    get: (locale, index) =>
+      locale === customLocale && customByIndex.has(index) ? customByIndex.get(index) : srdIndexes.has(index) ? srd.get(locale, index) : undefined,
+    isHomebrew: (index) => !srdIndexes.has(index),
+  };
 }

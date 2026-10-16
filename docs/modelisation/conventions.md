@@ -24,9 +24,9 @@ Prisma ne sait pas exprimer les contraintes `CHECK`. Elles sont ajoutées à la 
 
 | Table | Contrainte |
 |---|---|
-| `Choice` | exactement un propriétaire : `num_nonnulls("classId", "subclassId", "classFeatureId", "parentOptionId") = 1` |
+| `Choice` | exactement un propriétaire : `num_nonnulls("classId", "subclassId", "classFeatureId", "raceId", "subraceId", "traitId", "backgroundId", "parentOptionId") = 1` |
 | `Choice` | une réserve a sa cible : `pool = 'EQUIPMENT_CATEGORY'` ⇒ `poolCategoryId` renseigné |
-| `ChoiceOptionItem` | exactement une cible : proficiency, equipment, equipmentCategory, classFeature, creatureType ou terrain |
+| `ChoiceOptionItem` | exactement une cible : proficiency, equipment, equipmentCategory, classFeature, creatureType, terrain, language, abilityScore, spell, trait, ou une somme (`currencyAmount` et `currency` ensemble) ; `bonus` seulement avec une caractéristique |
 | `Proficiency` | exactement une cible : `num_nonnulls("skillId", "abilityScoreId", "equipmentId", "equipmentCategoryId") = 1` |
 | `ClassLevelValue` | au plus une valeur ; `diceCount` et `diceValue` vont ensemble |
 | `ClassFeaturePrerequisite` | la cible correspond au `type` |
