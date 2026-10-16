@@ -1,0 +1,197 @@
+// ============================================================================
+// HISTORIQUES ET DONS (rattachés à une édition)
+// ----------------------------------------------------------------------------
+// 2014 : l'historique donne des maîtrises, des langues, de l'équipement, une
+//        aptitude narrative et des tables de personnalité. Les dons sont
+//        optionnels.
+// 2024 : l'historique donne en plus 3 caractéristiques possibles (+2/+1 ou
+//        +1/+1/+1) et un don d'origine ; les dons sont classés par catégorie.
+// Les 12 historiques de custom/custom-backgrounds.json deviennent du contenu
+// HOMEBREW global (ownerId null) de l'édition 2014.
+// ============================================================================
+
+model Background {
+  id           Int     @id @default(autoincrement())
+  editionId    Int
+  edition      Edition @relation(fields: [editionId], references: [id])
+  index        String // "acolyte"
+  startingGold Int? // pièces d'or de la bourse de départ (2014 : 15 po)
+  // Don d'origine (2024)
+  originFeatId Int?
+  originFeat   Feat?   @relation("BackgroundOriginFeat", fields: [originFeatId], references: [id])
+
+  source    ContentSource @default(SRD)
+  ownerId   Int?
+  owner     User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  translations       BackgroundTranslation[]
+  proficiencies      BackgroundProficiency[]
+  abilityScores      BackgroundAbilityScore[]
+  startingEquipment  BackgroundStartingEquipment[]
+  personalityOptions BackgroundPersonalityOption[]
+  choices            Choice[] // langues au choix, outil au choix, équipement (A)/(B)
+
+  @@unique([editionId, index])
+}
+
+model BackgroundTranslation {
+  backgroundId       Int
+  localeCode         String
+  name               String // "Acolyte"
+  description        String?    @db.Text
+  // Aptitude d'historique (2014) : "Abri du fidèle"
+  featureName        String?
+  featureDescription String?    @db.Text
+  background         Background @relation(fields: [backgroundId], references: [id], onDelete: Cascade)
+  locale             Locale     @relation(fields: [localeCode], references: [code])
+
+  @@id([backgroundId, localeCode])
+}
+
+model BackgroundProficiency {
+  backgroundId  Int
+  proficiencyId Int
+  background    Background  @relation(fields: [backgroundId], references: [id], onDelete: Cascade)
+  proficiency   Proficiency @relation(fields: [proficiencyId], references: [id])
+
+  @@id([backgroundId, proficiencyId])
+}
+
+// Caractéristiques augmentables (2024) : la règle +2/+1 ou +1/+1/+1 est une
+// règle d'édition, appliquée par le code
+model BackgroundAbilityScore {
+  backgroundId   Int
+  abilityScoreId Int
+  background     Background   @relation(fields: [backgroundId], references: [id], onDelete: Cascade)
+  abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id])
+
+  @@id([backgroundId, abilityScoreId])
+}
+
+model BackgroundStartingEquipment {
+  backgroundId Int
+  equipmentId  Int
+  quantity     Int        @default(1)
+  background   Background @relation(fields: [backgroundId], references: [id], onDelete: Cascade)
+  equipment    Equipment  @relation(fields: [equipmentId], references: [id])
+
+  @@id([backgroundId, equipmentId])
+}
+
+// Tables de personnalité (2014). Le nombre à choisir (2 traits, 1 idéal,
+// 1 lien, 1 défaut) est une règle fixe de l'édition.
+enum PersonalityKind {
+  PERSONALITY_TRAIT
+  IDEAL
+  BOND
+  FLAW
+}
+
+model BackgroundPersonalityOption {
+  id           Int             @id @default(autoincrement())
+  backgroundId Int
+  background   Background      @relation(fields: [backgroundId], references: [id], onDelete: Cascade)
+  kind         PersonalityKind
+  position     Int // valeur du dé (d8 pour les traits, d6 pour le reste)
+
+  translations PersonalityOptionTranslation[]
+  alignments   PersonalityOptionAlignment[] // idéaux : alignements associés
+}
+
+model PersonalityOptionTranslation {
+  optionId   Int
+  localeCode String
+  text       String                      @db.Text
+  option     BackgroundPersonalityOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  locale     Locale                      @relation(fields: [localeCode], references: [code])
+
+  @@id([optionId, localeCode])
+}
+
+model PersonalityOptionAlignment {
+  optionId    Int
+  alignmentId Int
+  option      BackgroundPersonalityOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  alignment   Alignment                   @relation(fields: [alignmentId], references: [id])
+
+  @@id([optionId, alignmentId])
+}
+
+// ----------------------------------------------------------------------------
+// Dons
+// ----------------------------------------------------------------------------
+
+enum FeatCategory {
+  ORIGIN // 2024
+  GENERAL // 2024
+  FIGHTING_STYLE // 2024 (capacité de classe en 2014)
+  EPIC_BOON // 2024
+}
+
+model Feat {
+  id         Int           @id @default(autoincrement())
+  editionId  Int
+  edition    Edition       @relation(fields: [editionId], references: [id])
+  index      String // "grappler"
+  category   FeatCategory? // null en 2014
+  repeatable Boolean       @default(false)
+
+  source    ContentSource @default(SRD)
+  ownerId   Int?
+  owner     User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  translations  FeatTranslation[]
+  prerequisites FeatPrerequisite[] @relation("FeatPrerequisites")
+  requiredBy    FeatPrerequisite[] @relation("RequiredFeat")
+  originOf      Background[]       @relation("BackgroundOriginFeat")
+  // Augmentation de caractéristique (+1 FOR ou DEX), sorts au choix (Initié
+  // à la magie), compétences au choix (Doué)…
+  choices       Choice[]
+  choiceItems   ChoiceOptionItem[] @relation("ChoiceItemFeat")
+
+  @@unique([editionId, index])
+}
+
+model FeatTranslation {
+  featId      Int
+  localeCode  String
+  name        String // "Lutteur"
+  description String @db.Text
+  feat        Feat   @relation(fields: [featId], references: [id], onDelete: Cascade)
+  locale      Locale @relation(fields: [localeCode], references: [code])
+
+  @@id([featId, localeCode])
+}
+
+enum FeatPrerequisiteType {
+  ABILITY_SCORE // FOR 13
+  LEVEL // niveau 4 (dons généraux 2024), 19 (faveurs épiques)
+  PROFICIENCY // maîtrise des armures intermédiaires
+  SPELLCASTING // capacité à lancer au moins un sort
+  RACE
+  FEAT
+}
+
+// Même logique que MulticlassRequirement : même groupe = OU, groupes = ET.
+// Une seule cible remplie selon `type` (CHECK).
+model FeatPrerequisite {
+  id               Int                  @id @default(autoincrement())
+  featId           Int
+  feat             Feat                 @relation("FeatPrerequisites", fields: [featId], references: [id], onDelete: Cascade)
+  type             FeatPrerequisiteType
+  alternativeGroup Int                  @default(1)
+  abilityScoreId   Int?
+  abilityScore     AbilityScore?        @relation(fields: [abilityScoreId], references: [id])
+  minimumScore     Int?
+  minimumLevel     Int?
+  proficiencyId    Int?
+  proficiency      Proficiency?         @relation(fields: [proficiencyId], references: [id])
+  raceId           Int?
+  race             Race?                @relation(fields: [raceId], references: [id])
+  requiredFeatId   Int?
+  requiredFeat     Feat?                @relation("RequiredFeat", fields: [requiredFeatId], references: [id])
+}

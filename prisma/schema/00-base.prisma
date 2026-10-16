@@ -1,0 +1,132 @@
+// ============================================================================
+// Socle des données de jeu (SRD) : base commune
+// ----------------------------------------------------------------------------
+// Le schéma est réparti en un fichier par domaine (00 à 07 ; les domaines à venir sont dans
+// docs/modelisation/brouillons) ; schema.prisma
+// contient le générateur, la source de données et les modèles applicatifs.
+// Conventions complémentaires (nommage, CHECK, seed, API) :
+// docs/modelisation/conventions.md
+//
+// Conventions appliquées dans tous les fichiers :
+//
+//  1. Clés : `id` autoincrémenté = clé technique ; `index` (slug anglais,
+//     ex. "wizard") = clé métier stable, neutre en langue.
+//
+//  2. Éditions : tout contenu de jeu porte `editionId`, avec l'unicité
+//     @@unique([editionId, index]). Le magicien 2014 et le magicien 2024 sont
+//     deux lignes distinctes. Seuls quelques référentiels universels (les six
+//     caractéristiques, les compétences, les alignements, les types de dégâts,
+//     les écoles de magie, les types de créatures, les terrains) sont partagés
+//     entre éditions et n'ont pas de `editionId`.
+//
+//  3. Traductions : l'entité ne contient que des données neutres en langue
+//     (nombres, références, enums). Tout texte lisible est dans une table
+//     `<Entité>Translation` (clé [entitéId, localeCode]). Côté API : langue
+//     demandée, puis repli sur la langue par défaut.
+//
+//  4. JSONB : uniquement pour des valeurs neutres en langue appartenant à un
+//     seul parent (vitesses, sens, montée en puissance des dégâts…). Chaque
+//     colonne JSONB est validée par un schéma Zod partagé front/back (le type
+//     attendu est indiqué en commentaire). Jamais de texte en JSONB.
+//
+//  5. Contenu maison : tout contenu modifiable porte `source` (SRD / HOMEBREW)
+//     et `ownerId` → User (null = contenu global ; mis à null si l'utilisateur
+//     est supprimé). L'application suffixe l'`index` du contenu maison pour éviter les
+//     collisions entre utilisateurs.
+//
+//  6. Unités : distances en pieds, poids en livres, prix en pièces. La
+//     conversion (1,5 m pour 5 pieds, kg) est faite à l'affichage selon la
+//     langue : les données françaises actuelles stockent "18 mètres" en texte.
+//
+//  7. Les enums servent aux listes techniques fixées par les règles (tailles,
+//     unités…), traduites par le front (i18n). Les listes de contenu,
+//     éditables dans le back-office, sont des tables.
+//
+//  8. Une contrainte « exactement une colonne cible remplie » (références
+//     polymorphes) est signalée par CHECK : à écrire en SQL brut dans la
+//     migration, ex. CHECK (num_nonnulls(a, b, c) = 1).
+//
+// 9. Les textes longs sont en Markdown (`@db.Text`).
+// ============================================================================
+
+enum ContentSource {
+  SRD
+  HOMEBREW
+}
+
+enum Size {
+  TINY
+  SMALL
+  MEDIUM
+  LARGE
+  HUGE
+  GARGANTUAN
+}
+
+enum Currency {
+  CP // pièce de cuivre
+  SP // pièce d'argent
+  EP // pièce d'électrum
+  GP // pièce d'or
+  PP // pièce de platine
+}
+
+model Locale {
+  code                            String                           @id // "fr", "en"
+  name                            String // nom dans sa propre langue : "Français", "English"
+  isDefault                       Boolean                          @default(false) // langue de repli (une seule)
+  position                        Int
+  editionTranslations             EditionTranslation[]
+  abilityScoreTranslations        AbilityScoreTranslation[]
+  skillTranslations               SkillTranslation[]
+  alignmentTranslations           AlignmentTranslation[]
+  damageTypeTranslations          DamageTypeTranslation[]
+  magicSchoolTranslations         MagicSchoolTranslation[]
+  creatureTypeTranslations        CreatureTypeTranslation[]
+  terrainTranslations             TerrainTranslation[]
+  conditionTranslations           ConditionTranslation[]
+  languageTranslations            LanguageTranslation[]
+  proficiencyTranslations         ProficiencyTranslation[]
+  equipmentCategoryTranslations   EquipmentCategoryTranslation[]
+  equipmentTranslations           EquipmentTranslation[]
+  weaponPropertyTranslations      WeaponPropertyTranslation[]
+  choiceTranslations              ChoiceTranslation[]
+  classTranslations               ClassTranslation[]
+  classTableColumnTranslations    ClassTableColumnTranslation[]
+  spellcastingSectionTranslations SpellcastingSectionTranslation[]
+  subclassTranslations            SubclassTranslation[]
+  classFeatureTranslations        ClassFeatureTranslation[]
+  spellTranslations               SpellTranslation[]
+}
+
+model Edition {
+  id          Int     @id @default(autoincrement())
+  code        String  @unique // "2014", "2024"
+  releaseYear Int
+  isDefault   Boolean @default(false)
+  position    Int
+
+  translations        EditionTranslation[]
+  conditions          Condition[]
+  languages           Language[]
+  proficiencies       Proficiency[]
+  equipmentCategories EquipmentCategory[]
+  equipment           Equipment[]
+  weaponProperties    WeaponProperty[]
+  classes             Class[]
+  subclasses          Subclass[]
+  classFeatures       ClassFeature[]
+  spells              Spell[]
+}
+
+model EditionTranslation {
+  editionId   Int
+  localeCode  String
+  name        String // "D&D 5e (2014)", "D&D 5e révisé (2024)"
+  // Mention d'attribution obligatoire (SRD 5.1 et 5.2 sous CC-BY-4.0)
+  attribution String  @db.Text
+  edition     Edition @relation(fields: [editionId], references: [id], onDelete: Cascade)
+  locale      Locale  @relation(fields: [localeCode], references: [code])
+
+  @@id([editionId, localeCode])
+}

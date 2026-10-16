@@ -1,0 +1,207 @@
+// ============================================================================
+// ÉQUIPEMENT (rattaché à une édition)
+// ----------------------------------------------------------------------------
+// Un objet de base + une table de statistiques 1-1 selon sa nature (arme,
+// armure, monture/véhicule), plutôt que des dizaines de colonnes vides.
+// Les objets magiques et les bottes d'armes (2024) viendront plus tard.
+// ============================================================================
+
+// Catégories hiérarchiques et non exclusives : un gourdin appartient à
+// "Armes", "Armes courantes" et "Armes courantes de corps à corps".
+model EquipmentCategory {
+  id        Int                 @id @default(autoincrement())
+  editionId Int
+  edition   Edition             @relation(fields: [editionId], references: [id])
+  index     String // "simple-melee-weapons", "holy-symbols"
+  parentId  Int?
+  parent    EquipmentCategory?  @relation("EquipmentCategoryTree", fields: [parentId], references: [id])
+  children  EquipmentCategory[] @relation("EquipmentCategoryTree")
+
+  translations  EquipmentCategoryTranslation[]
+  items         EquipmentCategoryItem[]
+  choiceItems   ChoiceOptionItem[]             @relation("ChoiceItemCategory")
+  proficiencies Proficiency[]
+  choices       Choice[]
+
+  @@unique([editionId, index])
+}
+
+model EquipmentCategoryTranslation {
+  equipmentCategoryId Int
+  localeCode          String
+  name                String // "Armes courantes de corps à corps"
+  equipmentCategory   EquipmentCategory @relation(fields: [equipmentCategoryId], references: [id], onDelete: Cascade)
+  locale              Locale            @relation(fields: [localeCode], references: [code])
+
+  @@id([equipmentCategoryId, localeCode])
+}
+
+enum EquipmentKind {
+  WEAPON
+  ARMOR // armures et boucliers
+  ADVENTURING_GEAR
+  AMMUNITION
+  TOOL
+  MOUNT
+  VEHICLE
+  PACK // paquetage (contenu dans PackContent)
+  FOCUS // focaliseur arcanique, symbole sacré…
+}
+
+model Equipment {
+  id           Int           @id @default(autoincrement())
+  editionId    Int
+  edition      Edition       @relation(fields: [editionId], references: [id])
+  index        String // "longsword"
+  kind         EquipmentKind
+  costAmount   Int?
+  costCurrency Currency?
+  weightLb     Decimal?      @db.Decimal(8, 2)
+  // Vendu par lot : 20 flèches pour 1 po
+  bundleSize   Int           @default(1)
+  imageUrl     String?
+
+  source    ContentSource @default(SRD)
+  ownerId   Int?
+  owner     User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  translations            EquipmentTranslation[]
+  categories              EquipmentCategoryItem[]
+  weapon                  WeaponStats?
+  armor                   ArmorStats?
+  vehicle                 VehicleStats?
+  packContents            PackContent[]            @relation("PackContents")
+  inPacks                 PackContent[]            @relation("PackItem")
+  proficiencies           Proficiency[]
+  choiceOptionItems       ChoiceOptionItem[]
+  classStartingEquipments ClassStartingEquipment[]
+
+  @@unique([editionId, index])
+}
+
+model EquipmentTranslation {
+  equipmentId Int
+  localeCode  String
+  name        String // "Épée longue"
+  description String?   @db.Text
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  locale      Locale    @relation(fields: [localeCode], references: [code])
+
+  @@id([equipmentId, localeCode])
+}
+
+model EquipmentCategoryItem {
+  equipmentId Int
+  categoryId  Int
+  equipment   Equipment         @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  category    EquipmentCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([equipmentId, categoryId])
+}
+
+model PackContent {
+  packId   Int
+  itemId   Int
+  quantity Int       @default(1)
+  pack     Equipment @relation("PackContents", fields: [packId], references: [id], onDelete: Cascade)
+  item     Equipment @relation("PackItem", fields: [itemId], references: [id])
+
+  @@id([packId, itemId])
+}
+
+// --- Armes -------------------------------------------------------------------
+
+enum WeaponCategory {
+  SIMPLE
+  MARTIAL
+}
+
+enum WeaponRange {
+  MELEE
+  RANGED
+}
+
+model WeaponStats {
+  equipmentId   Int            @id
+  equipment     Equipment      @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  category      WeaponCategory
+  range         WeaponRange
+  // Notation de dés validée par regex Zod : "1d8", "2d6", "1"
+  damageDice    String?
+  damageTypeId  Int?
+  damageType    DamageType?    @relation(fields: [damageTypeId], references: [id])
+  versatileDice String? // dégâts à deux mains (propriété Polyvalente)
+  normalRangeFt Int? // portée normale (armes à distance et de lancer)
+  longRangeFt   Int?
+
+  properties WeaponStatsProperty[]
+}
+
+model WeaponProperty {
+  id        Int     @id @default(autoincrement())
+  editionId Int
+  edition   Edition @relation(fields: [editionId], references: [id])
+  index     String // "finesse", "versatile"
+
+  translations          WeaponPropertyTranslation[]
+  weaponStatsProperties WeaponStatsProperty[]
+
+  @@unique([editionId, index])
+}
+
+model WeaponPropertyTranslation {
+  weaponPropertyId Int
+  localeCode       String
+  name             String // "Finesse"
+  description      String         @db.Text
+  weaponProperty   WeaponProperty @relation(fields: [weaponPropertyId], references: [id], onDelete: Cascade)
+  locale           Locale         @relation(fields: [localeCode], references: [code])
+
+  @@id([weaponPropertyId, localeCode])
+}
+
+model WeaponStatsProperty {
+  weaponId   Int
+  propertyId Int
+  weapon     WeaponStats    @relation(fields: [weaponId], references: [equipmentId], onDelete: Cascade)
+  property   WeaponProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@id([weaponId, propertyId])
+}
+
+// --- Armures ----------------------------------------------------------------
+
+enum ArmorCategory {
+  LIGHT
+  MEDIUM
+  HEAVY
+  SHIELD
+}
+
+model ArmorStats {
+  equipmentId         Int           @id
+  equipment           Equipment     @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  category            ArmorCategory
+  baseArmorClass      Int // 11, ou +2 pour un bouclier
+  addsDexModifier     Boolean
+  maxDexModifier      Int? // 2 pour les armures intermédiaires
+  strengthMinimum     Int?
+  stealthDisadvantage Boolean       @default(false)
+}
+
+// --- Montures et véhicules --------------------------------------------------
+
+enum VehicleSpeedUnit {
+  FEET_PER_ROUND // montures
+  MILES_PER_HOUR // navires
+}
+
+model VehicleStats {
+  equipmentId Int               @id
+  equipment   Equipment         @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  speed       Decimal?          @db.Decimal(6, 1)
+  speedUnit   VehicleSpeedUnit?
+  capacityLb  Int?
+}

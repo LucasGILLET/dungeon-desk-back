@@ -1,0 +1,343 @@
+// ============================================================================
+// MONSTRES (rattachés à une édition)
+// ----------------------------------------------------------------------------
+// Source 2014 : 5e-SRD-Monsters (334 créatures). Tout ce qui est référencé
+// ou filtrable (types de dégâts, états, langues, sorts, actions) est en
+// tables ; seules les valeurs neutres sans texte (vitesses, sens, usage)
+// sont en JSONB typé.
+// Dérivés non stockés : bonus de maîtrise (= f(FP)), modificateurs.
+// ============================================================================
+
+model Monster {
+  id        Int     @id @default(autoincrement())
+  editionId Int
+  edition   Edition @relation(fields: [editionId], references: [id])
+  index     String // "aboleth"
+
+  size           Size
+  creatureTypeId Int
+  creatureType   CreatureType @relation(fields: [creatureTypeId], references: [id])
+  // Nuée : "nuée de bêtes Très Petites" → type bête, swarmOfSize = TINY
+  swarmOfSize    Size?
+
+  // Alignements possibles listés dans MonsterAlignment :
+  // "chaotique mauvais" = 1 ligne ; "tout alignement non bon" = 6 lignes ;
+  // "tout alignement" = 9 lignes. "Sans alignement" = isUnaligned.
+  isUnaligned Boolean @default(false)
+
+  hitPoints     Int
+  hitDiceCount  Int // 18 (18d10)
+  hitDieSize    Int // 10
+  hitPointBonus Int @default(0) // +36
+
+  // JSONB Speeds : { walk: 10, swim: 40, fly?: …, hover?: true } (pieds)
+  speeds Json
+
+  strength     Int
+  dexterity    Int
+  constitution Int
+  intelligence Int
+  wisdom       Int
+  charisma     Int
+
+  // JSONB Senses : { darkvision?: 120, blindsight?: 60, tremorsense?: …,
+  // truesight?: … } (pieds)
+  senses            Json
+  passivePerception Int
+  telepathyFt       Int?
+  initiativeBonus   Int? // affiché séparément en 2024
+
+  challengeRating Decimal @db.Decimal(5, 3) // 0.125, 0.25, 0.5, 1…30
+  xp              Int
+
+  // Actions légendaires par round (souvent 3) ; null = pas d'actions légendaires
+  legendaryActionsPerRound Int?
+  imageUrl                 String?
+
+  source    ContentSource @default(SRD)
+  ownerId   Int?
+  owner     User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  translations        MonsterTranslation[]
+  subtypes            MonsterSubtype[]
+  alignments          MonsterAlignment[]
+  armorClasses        MonsterArmorClass[]
+  savingThrows        MonsterSavingThrow[]
+  skills              MonsterSkill[]
+  damageModifiers     MonsterDamageModifier[]
+  conditionImmunities MonsterConditionImmunity[]
+  languages           MonsterLanguage[]
+  actions             MonsterAction[]
+  spellcasting        MonsterSpellcasting[]
+  forms               MonsterForm[]              @relation("MonsterForms")
+  formOf              MonsterForm[]              @relation("MonsterFormTarget")
+
+  @@unique([editionId, index])
+  @@index([editionId, challengeRating])
+}
+
+model MonsterTranslation {
+  monsterId     Int
+  localeCode    String
+  name          String // "Aboleth"
+  description   String? @db.Text
+  // Cas non structurables : "les langues qu'il connaissait de son vivant"
+  languagesNote String?
+  monster       Monster @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  locale        Locale  @relation(fields: [localeCode], references: [code])
+
+  @@id([monsterId, localeCode])
+}
+
+model MonsterSubtype {
+  monsterId         Int
+  creatureSubtypeId Int
+  monster           Monster         @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  creatureSubtype   CreatureSubtype @relation(fields: [creatureSubtypeId], references: [id])
+
+  @@id([monsterId, creatureSubtypeId])
+}
+
+model MonsterAlignment {
+  monsterId   Int
+  alignmentId Int
+  monster     Monster   @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  alignment   Alignment @relation(fields: [alignmentId], references: [id])
+
+  @@id([monsterId, alignmentId])
+}
+
+// ----------------------------------------------------------------------------
+// Défenses
+// ----------------------------------------------------------------------------
+
+enum ArmorClassSource {
+  NATURAL
+  ARMOR // armures listées dans MonsterArmorClassEquipment
+  DEXTERITY
+  SPELL // armure de mage
+  CONDITION // CA différente quand la créature est à terre
+}
+
+// Plusieurs lignes possibles : "12 (15 avec armure de mage)"
+model MonsterArmorClass {
+  id          Int              @id @default(autoincrement())
+  monsterId   Int
+  monster     Monster          @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  position    Int
+  value       Int
+  sourceType  ArmorClassSource
+  spellId     Int?
+  spell       Spell?           @relation(fields: [spellId], references: [id])
+  conditionId Int?
+  condition   Condition?       @relation(fields: [conditionId], references: [id])
+
+  equipment MonsterArmorClassEquipment[]
+}
+
+model MonsterArmorClassEquipment {
+  armorClassId Int
+  equipmentId  Int
+  armorClass   MonsterArmorClass @relation(fields: [armorClassId], references: [id], onDelete: Cascade)
+  equipment    Equipment         @relation(fields: [equipmentId], references: [id])
+
+  @@id([armorClassId, equipmentId])
+}
+
+model MonsterSavingThrow {
+  monsterId      Int
+  abilityScoreId Int
+  bonus          Int
+  monster        Monster      @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id])
+
+  @@id([monsterId, abilityScoreId])
+}
+
+model MonsterSkill {
+  monsterId Int
+  skillId   Int
+  bonus     Int
+  monster   Monster @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  skill     Skill   @relation(fields: [skillId], references: [id])
+
+  @@id([monsterId, skillId])
+}
+
+enum DamageModifierKind {
+  VULNERABILITY
+  RESISTANCE
+  IMMUNITY
+}
+
+// "contondant, perforant et tranchant des attaques non magiques" =
+// 3 lignes avec nonMagicalOnly = true. damageTypeId est null pour les cas
+// non typés ("dégâts des sorts"), décrits par la traduction.
+model MonsterDamageModifier {
+  id             Int                @id @default(autoincrement())
+  monsterId      Int
+  monster        Monster            @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  kind           DamageModifierKind
+  damageTypeId   Int?
+  damageType     DamageType?        @relation(fields: [damageTypeId], references: [id])
+  nonMagicalOnly Boolean            @default(false)
+
+  translations MonsterDamageModifierTranslation[]
+}
+
+model MonsterDamageModifierTranslation {
+  damageModifierId Int
+  localeCode       String
+  note             String // "dégâts des sorts", "(grâce à peau de pierre)"
+  damageModifier   MonsterDamageModifier @relation(fields: [damageModifierId], references: [id], onDelete: Cascade)
+  locale           Locale                @relation(fields: [localeCode], references: [code])
+
+  @@id([damageModifierId, localeCode])
+}
+
+model MonsterConditionImmunity {
+  monsterId   Int
+  conditionId Int
+  monster     Monster   @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  condition   Condition @relation(fields: [conditionId], references: [id])
+
+  @@id([monsterId, conditionId])
+}
+
+model MonsterLanguage {
+  monsterId      Int
+  languageId     Int
+  understandOnly Boolean  @default(false) // "comprend le commun mais ne peut pas parler"
+  monster        Monster  @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  language       Language @relation(fields: [languageId], references: [id])
+
+  @@id([monsterId, languageId])
+}
+
+// ----------------------------------------------------------------------------
+// Actions et capacités
+// ----------------------------------------------------------------------------
+
+enum MonsterActionKind {
+  TRAIT // capacité spéciale (special_abilities) : Amphibie, Résistance légendaire…
+  ACTION
+  BONUS_ACTION
+  REACTION
+  LEGENDARY
+  LAIR
+}
+
+enum MonsterAttackType {
+  MELEE_WEAPON
+  RANGED_WEAPON
+  MELEE_SPELL
+  RANGED_SPELL
+}
+
+model MonsterAction {
+  id        Int               @id @default(autoincrement())
+  monsterId Int
+  monster   Monster           @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  kind      MonsterActionKind
+  position  Int
+
+  attackType    MonsterAttackType?
+  attackBonus   Int?
+  reachFt       Int?
+  normalRangeFt Int?
+  longRangeFt   Int?
+
+  saveAbilityId Int?
+  saveAbility   AbilityScore? @relation(fields: [saveAbilityId], references: [id])
+  saveDc        Int?
+  saveSuccess   SaveSuccess?
+
+  // JSONB Usage : { type: "recharge", dice: "1d6", minValue: 5 }
+  // | { type: "per_day", times: 3 } | { type: "per_rest", times: 1 }
+  usage         Json?
+  // Coût d'une action légendaire (1 par défaut, 2 ou 3 pour les plus fortes)
+  legendaryCost Int?
+
+  translations MonsterActionTranslation[]
+  damages      MonsterActionDamage[]
+  multiattack  MonsterMultiattackStep[]   @relation("Multiattack")
+  usedIn       MonsterMultiattackStep[]   @relation("MultiattackTarget")
+}
+
+model MonsterActionTranslation {
+  actionId    Int
+  localeCode  String
+  name        String // "Tentacule"
+  description String        @db.Text
+  action      MonsterAction @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  locale      Locale        @relation(fields: [localeCode], references: [code])
+
+  @@id([actionId, localeCode])
+}
+
+model MonsterActionDamage {
+  id           Int           @id @default(autoincrement())
+  actionId     Int
+  action       MonsterAction @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  position     Int
+  dice         String // "2d6+5" (regex Zod)
+  damageTypeId Int
+  damageType   DamageType    @relation(fields: [damageTypeId], references: [id])
+}
+
+// Attaques multiples : "l'aboleth effectue trois attaques de tentacule".
+// Même groupe = alternatives (OU) ; groupes différents = ET.
+model MonsterMultiattackStep {
+  id               Int           @id @default(autoincrement())
+  multiattackId    Int
+  multiattack      MonsterAction @relation("Multiattack", fields: [multiattackId], references: [id], onDelete: Cascade)
+  targetActionId   Int
+  targetAction     MonsterAction @relation("MultiattackTarget", fields: [targetActionId], references: [id], onDelete: Cascade)
+  count            Int
+  alternativeGroup Int           @default(1)
+}
+
+// ----------------------------------------------------------------------------
+// Incantation et formes
+// ----------------------------------------------------------------------------
+
+model MonsterSpellcasting {
+  id             Int          @id @default(autoincrement())
+  monsterId      Int
+  monster        Monster      @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  abilityScoreId Int
+  abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id])
+  saveDc         Int?
+  attackBonus    Int?
+  casterLevel    Int?
+  // Liste de sorts de référence ("sorts de clerc")
+  classId        Int?
+  class          Class?       @relation(fields: [classId], references: [id])
+  // JSONB SpellSlots : { "1": 4, "2": 3, … } ; null = incantation innée
+  slots          Json?
+
+  spells MonsterSpell[]
+}
+
+model MonsterSpell {
+  spellcastingId Int
+  spellId        Int
+  // JSONB Usage ; null = emplacements ou à volonté selon slots
+  usage          Json?
+  spellcasting   MonsterSpellcasting @relation(fields: [spellcastingId], references: [id], onDelete: Cascade)
+  spell          Spell               @relation(fields: [spellId], references: [id])
+
+  @@id([spellcastingId, spellId])
+}
+
+// Métamorphes : le loup-garou a une forme hybride et une forme de loup
+model MonsterForm {
+  monsterId     Int
+  formMonsterId Int
+  monster       Monster @relation("MonsterForms", fields: [monsterId], references: [id], onDelete: Cascade)
+  formMonster   Monster @relation("MonsterFormTarget", fields: [formMonsterId], references: [id], onDelete: Cascade)
+
+  @@id([monsterId, formMonsterId])
+}

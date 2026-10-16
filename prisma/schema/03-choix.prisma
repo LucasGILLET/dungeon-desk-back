@@ -1,0 +1,107 @@
+// ============================================================================
+// CHOIX (structure générique)
+// ----------------------------------------------------------------------------
+// Remplace les "option sets" récursifs du SRD : proficiency_choices,
+// starting_equipment_options, subfeature_options, expertise_options…
+// Pour l'instant utilisée par les classes ; les races, historiques et dons
+// (docs/modelisation/brouillons) y ajouteront leurs propriétaires et cibles.
+//
+//   Choice              "Choisissez 2 parmi…" (choose = 2)
+//   └ ChoiceOption       une option sélectionnable
+//     ├ ChoiceOptionItem  ce qu'elle donne (un ou plusieurs éléments)
+//     └ Choice            et/ou un sous-choix
+//
+// Le choix peut aussi porter sur une « réserve » au lieu d'options listées :
+// n'importe quel objet d'une catégorie (pool EQUIPMENT_CATEGORY).
+//
+// Exemples :
+//  - Guerrier : "(a) cotte de mailles ou (b) armure de cuir, arc long et
+//    20 flèches" → 2 options ; la seconde a 3 items (dont quantity = 20).
+//  - Magicien : "(a) une sacoche à composantes ou (b) un focaliseur
+//    arcanique" → l'option (b) a un sous-choix dans la catégorie.
+//  - Roublard (Expertise) : "(a) deux compétences ou (b) une compétence et
+//    les outils de voleur" → l'option (b) a un item et un sous-choix.
+// ============================================================================
+
+// À quoi sert le choix (détermine comment l'appliquer au personnage)
+enum ChoiceKind {
+  PROFICIENCY
+  MULTICLASS_PROFICIENCY // maîtrise au choix en multiclassage (barde, rôdeur, roublard)
+  EXPERTISE
+  STARTING_EQUIPMENT
+  SUBFEATURE // capacité enfant : terrain du Cercle de la Terre, manifestations occultes
+  FAVORED_ENEMY
+  FAVORED_TERRAIN
+}
+
+// Choix « libre » dans une réserve, sans liste d'options
+enum ChoicePool {
+  EQUIPMENT_CATEGORY // poolCategoryId
+}
+
+model Choice {
+  id     Int        @id @default(autoincrement())
+  kind   ChoiceKind
+  // Nombre d'options (ou d'objets de la réserve) à prendre. 0 = fixé par la
+  // table de classe (manifestations occultes : colonne invocations_known).
+  choose Int
+
+  // Propriétaire : exactement un (CHECK num_nonnulls(...) = 1)
+  classId        Int?
+  class          Class?        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subclassId     Int?
+  subclass       Subclass?     @relation(fields: [subclassId], references: [id], onDelete: Cascade)
+  classFeatureId Int?
+  classFeature   ClassFeature? @relation(fields: [classFeatureId], references: [id], onDelete: Cascade)
+  parentOptionId Int?          @unique // sous-choix d'une option
+  parentOption   ChoiceOption? @relation("NestedChoice", fields: [parentOptionId], references: [id], onDelete: Cascade)
+
+  // Réserve (alternative aux options)
+  pool           ChoicePool?
+  poolCategoryId Int?
+  poolCategory   EquipmentCategory? @relation(fields: [poolCategoryId], references: [id])
+
+  translations ChoiceTranslation[]
+  options      ChoiceOption[]
+}
+
+model ChoiceTranslation {
+  choiceId    Int
+  localeCode  String
+  description String // "Choisissez deux compétences parmi Arcanes, Histoire…"
+  choice      Choice @relation(fields: [choiceId], references: [id], onDelete: Cascade)
+  locale      Locale @relation(fields: [localeCode], references: [code])
+
+  @@id([choiceId, localeCode])
+}
+
+model ChoiceOption {
+  id       Int    @id @default(autoincrement())
+  choiceId Int
+  choice   Choice @relation(fields: [choiceId], references: [id], onDelete: Cascade)
+  position Int
+
+  items        ChoiceOptionItem[]
+  nestedChoice Choice?            @relation("NestedChoice")
+}
+
+// Ce que donne une option. Exactement une cible remplie (CHECK).
+model ChoiceOptionItem {
+  id       Int          @id @default(autoincrement())
+  optionId Int
+  option   ChoiceOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  quantity Int          @default(1) // 20 flèches
+
+  proficiencyId       Int?
+  proficiency         Proficiency?       @relation(fields: [proficiencyId], references: [id])
+  equipmentId         Int?
+  equipment           Equipment?         @relation(fields: [equipmentId], references: [id])
+  equipmentCategoryId Int? // "une arme de guerre au choix" dans un lot
+  equipmentCategory   EquipmentCategory? @relation("ChoiceItemCategory", fields: [equipmentCategoryId], references: [id])
+  classFeatureId      Int?
+  classFeature        ClassFeature?      @relation("ChoiceItemClassFeature", fields: [classFeatureId], references: [id])
+  creatureTypeId      Int?
+  creatureType        CreatureType?      @relation(fields: [creatureTypeId], references: [id])
+  terrainId           Int?
+  terrain             Terrain?           @relation(fields: [terrainId], references: [id])
+}

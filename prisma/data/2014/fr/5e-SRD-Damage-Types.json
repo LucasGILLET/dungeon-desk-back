@@ -1,0 +1,106 @@
+[
+  {
+    "index": "acid",
+    "name": "Acide",
+    "desc": [
+      "Le jet corrosif du souffle d’un dragon noir et les enzymes dissolvantes sécrétées par une gelée noire infligent des dégâts d’acides."
+    ],
+    "url": "/api/2014/damage-types/acid"
+  },
+  {
+    "index": "bludgeoning",
+    "name": "Contondant",
+    "desc": [
+      "Les attaques de force brute (marteaux, chute, constriction et effets similaires) infligent des dégâts contondants."
+    ],
+    "url": "/api/2014/damage-types/bludgeoning"
+  },
+  {
+    "index": "cold",
+    "name": "Froid",
+    "desc": [
+      "La froideur mortelle irradiant de la lance de glace d’un diable et le souffle glacial d’un dragon blanc infligent des dégâts de froid."
+    ],
+    "url": "/api/2014/damage-types/cold"
+  },
+  {
+    "index": "fire",
+    "name": "Feu",
+    "desc": [
+      "Les dragons rouges crachent du feu et de nombreux sorts invoquent des flammes qui infligent des dégâts de feu."
+    ],
+    "url": "/api/2014/damage-types/fire"
+  },
+  {
+    "index": "force",
+    "name": "Force",
+    "desc": [
+      "La Force est l’énergie magique pure concentrée sous une forme offensive. La plupart des effets qui infligent des dégâts de force sont des sorts, comme projectile magique et arme spirituelle."
+    ],
+    "url": "/api/2014/damage-types/force"
+  },
+  {
+    "index": "lightning",
+    "name": "Foudre",
+    "desc": [
+      "Le sort éclair et le souffle d’un dragon bleu infligent des dégâts de foudre."
+    ],
+    "url": "/api/2014/damage-types/lightning"
+  },
+  {
+    "index": "necrotic",
+    "name": "Nécrotique",
+    "desc": [
+      "Les dégâts nécrotiques, infligés par certains morts-vivants et sorts, flétrissent la matière et même l’âme."
+    ],
+    "url": "/api/2014/damage-types/necrotic"
+  },
+  {
+    "index": "piercing",
+    "name": "Perforant",
+    "desc": [
+      "Les attaques de perforation et d’empalement, incluant les lances et les morsures de monstres, infligent des dégâts perforants."
+    ],
+    "url": "/api/2014/damage-types/piercing"
+  },
+  {
+    "index": "poison",
+    "name": "Poison",
+    "desc": [
+      "Les dards venimeux et le gaz toxique du souffle du dragon vert infligent des dégâts de poison."
+    ],
+    "url": "/api/2014/damage-types/poison"
+  },
+  {
+    "index": "psychic",
+    "name": "Psychique",
+    "desc": [
+      "Les capacités mentales comme l’attaque psionique d’un illithid infligent des dégâts psychiques."
+    ],
+    "url": "/api/2014/damage-types/psychic"
+  },
+  {
+    "index": "radiant",
+    "name": "Radiant",
+    "desc": [
+      "Les dégâts radiants, infligés le sort colonne de flamme du clerc ou le châtiment angélique d’une arme, brûlent la chair comme le feu et surchargent l’esprit de pouvoir."
+    ],
+    "url": "/api/2014/damage-types/radiant"
+  },
+  {
+    "index": "slashing",
+    "name": "Tranchant",
+    "desc": [
+      "Les épées, les haches et les griffes des monstres infligent des dégâts tranchants."
+    ],
+    "url": "/api/2014/damage-types/slashing"
+  },
+  {
+    "index": "thunder",
+    "name": "Tonnerre",
+    "desc": [
+      "Le son commotionnant d’une explosion sonore, comme l’effet du sort vague tonnante, inflige des dégâts de tonnerre."
+    ],
+    "url": "/api/2014/damage-types/thunder"
+  }
+]

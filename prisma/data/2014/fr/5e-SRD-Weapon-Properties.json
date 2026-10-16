@@ -1,0 +1,91 @@
+[
+  {
+    "index": "ammunition",
+    "name": "Munitions",
+    "desc": [
+      "Vous ne pouvez utiliser une arme qui possède la propriété munitions pour une attaque à distance que si vous avez des munitions pour celle-ci. Pour chaque attaque réalisée avec cette arme, une munition est consommée. Prendre la munition d’un carquois ou autre contenant similaire fait partie de l’attaque (vous avez besoin d’une main libre pour recharger une arme à une main).",
+      "À la fin du combat, vous pouvez récupérer la moitié des munitions utilisées en passant une minute pour la recherche. Si vous utilisez ce type d’arme pour une attaque au corps à corps, l’arme est considérée comme une arme improvisée (voir les règles correspondantes). Une fronde doit être chargée pour infliger des dégâts de cette manière."
+    ],
+    "url": "/api/2014/weapon-properties/ammunition"
+  },
+  {
+    "index": "finesse",
+    "name": "Finesse",
+    "desc": [
+      "Lorsque vous effectuez une attaque avec une arme de finesse, vous pouvez au choix appliquer votre modificateur de Force ou celui de Dextérité à vos jets d’attaque et de dégâts. Le même modificateur s’applique aux deux jets."
+    ],
+    "url": "/api/2014/weapon-properties/finesse"
+  },
+  {
+    "index": "heavy",
+    "name": "Lourde",
+    "desc": [
+      "Les créatures de taille P ou TP ont un désavantage aux jets d’attaque avec une arme lourde. La taille et le poids d’une arme lourde sont en effet trop importants pour qu’une créature de taille P ou TP puisse l’utiliser efficacement."
+    ],
+    "url": "/api/2014/weapon-properties/heavy"
+  },
+  {
+    "index": "light",
+    "name": "Lumière",
+    "desc": [
+      "Une arme légère est petite et facile à manier, ce qui la rend idéale pour les combats à deux armes."
+    ],
+    "url": "/api/2014/weapon-properties/light"
+  },
+  {
+    "index": "loading",
+    "name": "Chargement",
+    "desc": [
+      "En raison du temps nécessaire pour charger cette arme, vous ne pouvez tirer qu’une seule munition par action, action bonus ou réaction, quel que soit le nombre d’attaques que vous possédez."
+    ],
+    "url": "/api/2014/weapon-properties/loading"
+  },
+  {
+    "index": "reach",
+    "name": "Portée",
+    "desc": [
+      "Une arme qui peut être utilisée pour effectuer une attaque à distance a une portée indiquée entre parenthèses après les propriétés munitions ou lancer."
+    ],
+    "url": "/api/2014/weapon-properties/reach"
+  },
+  {
+    "index": "special",
+    "name": "Spéciale",
+    "desc": [
+      "Une arme avec la propriété spéciale possède des règles spécifiques qui sont définies dans la description de l’arme (voir Armes spéciales ci-dessous)."
+    ],
+    "url": "/api/2014/weapon-properties/special"
+  },
+  {
+    "index": "thrown",
+    "name": "Lancer",
+    "desc": [
+      "Une arme qui possède la propriété lancer peut être lancée pour réaliser une attaque à distance. Si l’arme est une arme de corps à corps, vous utilisez la même caractéristique pour le jet d’attaque et de dégâts que vous auriez utilisée au corps à corps. Par exemple, si vous lancez une hachette, vous utilisez la Force, mais si vous lancez une dague, vous pouvez utiliser la Force ou la Dextérité, car la dague possède la propriété finesse."
+    ],
+    "url": "/api/2014/weapon-properties/thrown"
+  },
+  {
+    "index": "two-handed",
+    "name": "À deux mains",
+    "desc": [
+      "Cette arme nécessite les deux mains lorsque vous attaquez avec."
+    ],
+    "url": "/api/2014/weapon-properties/two-handed"
+  },
+  {
+    "index": "versatile",
+    "name": "Polyvalente",
+    "desc": [
+      "Cette arme peut être tenue à une ou deux mains. Le chiffre indiqué entre parenthèses correspond aux dégâts si l’arme est tenue à deux mains lors d’une attaque au corps à corps."
+    ],
+    "url": "/api/2014/weapon-properties/versatile"
+  },
+  {
+    "index": "monk",
+    "name": "Moine",
+    "desc": [
+      "Vous gagnez les avantages suivants lorsque vous êtes à mains nues ou ne maniez que des armes de moine et que vous n’êtes équipé ni d’armure ni de bouclier :"
+    ],
+    "url": "/api/2014/weapon-properties/monk"
+  }
+]

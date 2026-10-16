@@ -1,0 +1,236 @@
+[
+  {
+    "index": "acrobatics",
+    "name": "Acrobaties",
+    "desc": [
+      "Un jet de Dextérité (Acrobaties) couvre votre tentative pour rester sur vos pieds dans une situation délicate, comme lorsque vous essayez de courir sur de la glace, de tenir en équilibre sur une corde raide, ou de rester debout sur le pont d’un navire chahuté. Le MJ peut également demander un jet de Dextérité (Acrobaties) pour voir si vous pouvez effectuer des acrobaties, comme un plongeon, une roulade ou un saut périlleux."
+    ],
+    "ability_score": {
+      "index": "dex",
+      "name": "DEX",
+      "url": "/api/2014/ability-scores/dex"
+    },
+    "url": "/api/2014/skills/acrobatics"
+  },
+  {
+    "index": "animal-handling",
+    "name": "Dressage",
+    "desc": [
+      "Quand il est question de savoir si vous pouvez calmer un animal domestique, faire qu’une monture ne s’effraye pas, ou deviner les intentions d’un animal, le MJ peut demander un jet de Sagesse (Dressage). Vous pouvez également faire un jet de Sagesse (Dressage) pour contrôler votre monture lorsque vous tentez une manoeuvre risquée."
+    ],
+    "ability_score": {
+      "index": "wis",
+      "name": "SAG",
+      "url": "/api/2014/ability-scores/wis"
+    },
+    "url": "/api/2014/skills/animal-handling"
+  },
+  {
+    "index": "arcana",
+    "name": "Arcanes",
+    "desc": [
+      "Un jet d’Intelligence (Arcanes) évalue votre aptitude à vous rappeler des choses à propos de sorts, d’objets magiques, de symboles occultes, de traditions magiques, de plans d’existence ou des habitants de ces plans."
+    ],
+    "ability_score": {
+      "index": "int",
+      "name": "INT",
+      "url": "/api/2014/ability-scores/int"
+    },
+    "url": "/api/2014/skills/arcana"
+  },
+  {
+    "index": "athletics",
+    "name": "Athlétisme",
+    "desc": [
+      "Un jet de Force (Athlétisme) couvre les situations difficiles que vous rencontrez en grimpant, en sautant ou nageant."
+    ],
+    "ability_score": {
+      "index": "str",
+      "name": "FOR",
+      "url": "/api/2014/ability-scores/str"
+    },
+    "url": "/api/2014/skills/athletics"
+  },
+  {
+    "index": "deception",
+    "name": "Tromperie",
+    "desc": [
+      "Un jet de Charisme (Tromperie) détermine si vous pouvez cacher la vérité avec efficacité, soit verbalement, soit par vos actions. La tromperie peut englober beaucoup de choses, depuis l’ambiguïté de ses dires jusqu’au mensonge pur et simple. Des situations typiques sont d’essayer d’embobiner un garde, duper un commerçant, gagner de l’argent au jeu, vous faire passer pour quelqu’un d’autre à l’aide d’un déguisement, apaiser les soupçons de quelqu’un avec une fausse assurance, ou maintenir un visage impassible tout en racontant un mensonge flagrant."
+    ],
+    "ability_score": {
+      "index": "cha",
+      "name": "CHA",
+      "url": "/api/2014/ability-scores/cha"
+    },
+    "url": "/api/2014/skills/deception"
+  },
+  {
+    "index": "history",
+    "name": "Histoire",
+    "desc": [
+      "Un jet d’Intelligence (Histoire) évalue votre aptitude à vous rappeler des choses à propos d’événements historiques, de personnages légendaires, d’anciens royaumes, de conflits passés, de guerres récentes et de civilisations perdues."
+    ],
+    "ability_score": {
+      "index": "int",
+      "name": "INT",
+      "url": "/api/2014/ability-scores/int"
+    },
+    "url": "/api/2014/skills/history"
+  },
+  {
+    "index": "insight",
+    "name": "Perspicacité",
+    "desc": [
+      "Un jet de Sagesse (Perspicacité) détermine si vous pouvez déceler les véritables intentions d’une créature, comme lorsque vous tentez de savoir si elle ment ou pour prévoir son prochain mouvement. Cela implique de lire le langage du corps, détecter ses habitudes de langage et les changements dans ses manières."
+    ],
+    "ability_score": {
+      "index": "wis",
+      "name": "SAG",
+      "url": "/api/2014/ability-scores/wis"
+    },
+    "url": "/api/2014/skills/insight"
+  },
+  {
+    "index": "intimidation",
+    "name": "Intimidation",
+    "desc": [
+      "Lorsque vous essayez d’influencer les gens par des menaces ouvertes, des actions hostiles, ou de la violence physique, le MJ peut vous demander de faire un jet de Charisme (Intimidation). Cela peut appliquer pour essayer de soutirer des informations à un prisonnier, convaincre des voyous de renoncer à une confrontation, ou utiliser un tesson de bouteille pour convaincre un vizir sarcastique de réexaminer sa décision."
+    ],
+    "ability_score": {
+      "index": "cha",
+      "name": "CHA",
+      "url": "/api/2014/ability-scores/cha"
+    },
+    "url": "/api/2014/skills/intimidation"
+  },
+  {
+    "index": "investigation",
+    "name": "Investigation",
+    "desc": [
+      "Lorsque vous regardez autour de vous pour trouver des indices et faire des déductions sur la base de ces indices, vous faites un jet d’Intelligence (Investigation). Vous pouvez en déduire l’emplacement d’un objet caché,\r\ndiscerner en fonction de l’apparence d’une blessure le type\r\nd’arme utilisé, ou déterminer le point faible dans un tunnel\r\npour causer son effondrement. Se pencher sur d’anciens manuscrits à la recherche d’informations cachées peut aussi demander un jet d’Intelligence (Investigation)."
+    ],
+    "ability_score": {
+      "index": "int",
+      "name": "INT",
+      "url": "/api/2014/ability-scores/int"
+    },
+    "url": "/api/2014/skills/investigation"
+  },
+  {
+    "index": "medicine",
+    "name": "Médecine",
+    "desc": [
+      "Un jet de Sagesse (Médecine) permet d’essayer de stabiliser un compagnon mourant ou de diagnostiquer une maladie."
+    ],
+    "ability_score": {
+      "index": "wis",
+      "name": "SAG",
+      "url": "/api/2014/ability-scores/wis"
+    },
+    "url": "/api/2014/skills/medicine"
+  },
+  {
+    "index": "nature",
+    "name": "Nature",
+    "desc": [
+      "Un jet d’Intelligence (Nature) évalue votre aptitude à vous rappeler des informations sur un type de terrain, des plantes ou des animaux, la météo et les cycles naturels."
+    ],
+    "ability_score": {
+      "index": "int",
+      "name": "INT",
+      "url": "/api/2014/ability-scores/int"
+    },
+    "url": "/api/2014/skills/nature"
+  },
+  {
+    "index": "perception",
+    "name": "Perception",
+    "desc": [
+      "Un jet de Sagesse (Perception) permet de repérer, entendre ou détecter la présence de quelque chose. Il mesure votre conscience de l’environnement et l’acuité de vos sens. Par exemple, vous pouvez essayer d’entendre une conversation à travers une porte fermée, espionner par une fenêtre ouverte, ou entendre des monstres se faufiler dans la forêt. Vous pouvez aussi essayer de repérer des choses qui sont cachées ou difficiles à déceler, que ce soient des orcs en embuscade sur une route, des voyous cachés dans l’ombre d’une ruelle ou la lueur d’une chandelle sous une porte secrète fermée."
+    ],
+    "ability_score": {
+      "index": "wis",
+      "name": "SAG",
+      "url": "/api/2014/ability-scores/wis"
+    },
+    "url": "/api/2014/skills/perception"
+  },
+  {
+    "index": "performance",
+    "name": "Représentation",
+    "desc": [
+      "Un jet de Charisme (Représentation) détermine la façon dont vous pouvez enchanter un public par la musique, la danse, le théâtre, le conte ou toute autre forme de divertissement."
+    ],
+    "ability_score": {
+      "index": "cha",
+      "name": "CHA",
+      "url": "/api/2014/ability-scores/cha"
+    },
+    "url": "/api/2014/skills/performance"
+  },
+  {
+    "index": "persuasion",
+    "name": "Persuasion",
+    "desc": [
+      "Lorsque vous essayez d’influencer les gens avec tact, grâce, ou de bonnes\r\nmanières, le MJ peut vous demander de faire un jet de Charisme (Persuasion). En règle générale, vous utilisez la persuasion lorsque vous agissez de bonne foi, afin de favoriser l’amitié, faire des demandes cordiales, ou utiliser l’étiquette appropriée. Vous pouvez utiliser la persuasion pour convaincre un chambellan de laisser votre groupe voir le roi, négocier la paix entre deux tribus en guerre, ou motiver une foule de villageois."
+    ],
+    "ability_score": {
+      "index": "cha",
+      "name": "CHA",
+      "url": "/api/2014/ability-scores/cha"
+    },
+    "url": "/api/2014/skills/persuasion"
+  },
+  {
+    "index": "religion",
+    "name": "Religion",
+    "desc": [
+      "Un jet d’Intelligence (Religion) évalue votre aptitude à vous rappeler des choses à propos des dieux, des rites et des prières, la hiérarchie religieuse, les symboles sacrés et les pratiques de cultes secrets."
+    ],
+    "ability_score": {
+      "index": "int",
+      "name": "INT",
+      "url": "/api/2014/ability-scores/int"
+    },
+    "url": "/api/2014/skills/religion"
+  },
+  {
+    "index": "sleight-of-hand",
+    "name": "Escamotage",
+    "desc": [
+      "Chaque fois que vous tentez une manipulation ou une fourberie, comme prendre quelque chose à quelqu’un ou dissimuler un objet sur vous-même, faites un jet de Dextérité (Escamotage). Le MJ peut également demander un jet de Dextérité (Escamotage) pour déterminer si vous pouvez dérober une bourse ou glisser quelque chose dans la poche de quelqu’un."
+    ],
+    "ability_score": {
+      "index": "dex",
+      "name": "DEX",
+      "url": "/api/2014/ability-scores/dex"
+    },
+    "url": "/api/2014/skills/sleight-of-hand"
+  },
+  {
+    "index": "stealth",
+    "name": "Discrétion",
+    "desc": [
+      "Faite un jet de Dextérité (Discrétion) lorsque vous essayez de vous cacher des ennemis, de vous glisser entre des gardes, filer sans vous faire remarquer, ou vous échapper sans être vu ou entendu."
+    ],
+    "ability_score": {
+      "index": "dex",
+      "name": "DEX",
+      "url": "/api/2014/ability-scores/dex"
+    },
+    "url": "/api/2014/skills/stealth"
+  },
+  {
+    "index": "survival",
+    "name": "Survie",
+    "desc": [
+      "Le MJ peut vous demander de faire un jet de Sagesse (Survie) pour suivre des traces, chasser du gibier sauvage, guider votre groupe sur un terrain gelé, identifier des traces indiquant qu’un ours-hibou vit à proximité, prévoir le temps ou éviter des sables mouvants et autres catastrophes naturelles."
+    ],
+    "ability_score": {
+      "index": "wis",
+      "name": "SAG",
+      "url": "/api/2014/ability-scores/wis"
+    },
+    "url": "/api/2014/skills/survival"
+  }
+]

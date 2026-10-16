@@ -1,0 +1,285 @@
+// ============================================================================
+// RÉFÉRENTIELS
+// ----------------------------------------------------------------------------
+// Partagés entre éditions (pas d'editionId) : AbilityScore, Skill, Alignment,
+// DamageType, MagicSchool, CreatureType, Terrain.
+// Rattachés à une édition : Condition (l'épuisement change en 2024),
+// Language (2024 ajoute le druidique, le jargon des voleurs…), Proficiency
+// (dépend de l'équipement, lui-même propre à l'édition).
+// ============================================================================
+
+// --- Partagés ---------------------------------------------------------------
+
+model AbilityScore {
+  id       Int    @id @default(autoincrement())
+  index    String @unique // "str"
+  position Int // ordre d'affichage FOR, DEX, CON, INT, SAG, CHA
+
+  translations          AbilityScoreTranslation[]
+  savingThrowOf         ClassSavingThrow[]        @relation("ClassSavingThrows")
+  spellcastingOf        ClassSpellcasting[]       @relation("ClassSpellcastingAbility")
+  multiclassRequires    MulticlassRequirement[]   @relation("MulticlassRequirements")
+  skills                Skill[]
+  proficiencies         Proficiency[]
+  classPrimaryAbilities ClassPrimaryAbility[]
+  spells                Spell[]
+}
+
+model AbilityScoreTranslation {
+  abilityScoreId Int
+  localeCode     String
+  abbreviation   String // "FOR" / "STR"
+  name           String // "Force" / "Strength"
+  description    String?      @db.Text
+  abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id], onDelete: Cascade)
+  locale         Locale       @relation(fields: [localeCode], references: [code])
+
+  @@id([abilityScoreId, localeCode])
+}
+
+model Skill {
+  id             Int          @id @default(autoincrement())
+  index          String       @unique // "arcana"
+  abilityScoreId Int
+  abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id])
+
+  translations  SkillTranslation[]
+  proficiencies Proficiency[]
+}
+
+model SkillTranslation {
+  skillId     Int
+  localeCode  String
+  name        String // "Arcanes"
+  description String? @db.Text
+  skill       Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  locale      Locale  @relation(fields: [localeCode], references: [code])
+
+  @@id([skillId, localeCode])
+}
+
+enum AlignmentEthic {
+  LAWFUL
+  NEUTRAL
+  CHAOTIC
+}
+
+enum AlignmentMorality {
+  GOOD
+  NEUTRAL
+  EVIL
+}
+
+// Les 9 alignements
+model Alignment {
+  id       Int               @id @default(autoincrement())
+  index    String            @unique // "lawful-good"
+  ethic    AlignmentEthic
+  morality AlignmentMorality
+
+  translations AlignmentTranslation[]
+}
+
+model AlignmentTranslation {
+  alignmentId  Int
+  localeCode   String
+  name         String // "Loyal bon"
+  abbreviation String // "LB" / "LG"
+  description  String?   @db.Text
+  alignment    Alignment @relation(fields: [alignmentId], references: [id], onDelete: Cascade)
+  locale       Locale    @relation(fields: [localeCode], references: [code])
+
+  @@id([alignmentId, localeCode])
+}
+
+model DamageType {
+  id    Int    @id @default(autoincrement())
+  index String @unique // "fire"
+
+  translations     DamageTypeTranslation[]
+  weaponStats      WeaponStats[]
+  spellDamageTypes SpellDamageType[]
+}
+
+model DamageTypeTranslation {
+  damageTypeId Int
+  localeCode   String
+  name         String // "Feu"
+  description  String?    @db.Text
+  damageType   DamageType @relation(fields: [damageTypeId], references: [id], onDelete: Cascade)
+  locale       Locale     @relation(fields: [localeCode], references: [code])
+
+  @@id([damageTypeId, localeCode])
+}
+
+model MagicSchool {
+  id    Int    @id @default(autoincrement())
+  index String @unique // "evocation"
+
+  translations MagicSchoolTranslation[]
+  spells       Spell[]
+}
+
+model MagicSchoolTranslation {
+  magicSchoolId Int
+  localeCode    String
+  name          String // "Évocation"
+  description   String?     @db.Text
+  magicSchool   MagicSchool @relation(fields: [magicSchoolId], references: [id], onDelete: Cascade)
+  locale        Locale      @relation(fields: [localeCode], references: [code])
+
+  @@id([magicSchoolId, localeCode])
+}
+
+model CreatureType {
+  id    Int    @id @default(autoincrement())
+  index String @unique // "dragon", "undead"
+
+  translations      CreatureTypeTranslation[]
+  choiceOptionItems ChoiceOptionItem[]
+}
+
+model CreatureTypeTranslation {
+  creatureTypeId Int
+  localeCode     String
+  name           String // "Dragon", "Mort-vivant"
+  pluralName     String // "Dragons", "Morts-vivants" (ennemi juré du rôdeur)
+  creatureType   CreatureType @relation(fields: [creatureTypeId], references: [id], onDelete: Cascade)
+  locale         Locale       @relation(fields: [localeCode], references: [code])
+
+  @@id([creatureTypeId, localeCode])
+}
+
+// Terrains de prédilection (rôdeur 2014), auparavant de simples chaînes
+model Terrain {
+  id    Int    @id @default(autoincrement())
+  index String @unique // "arctic"
+
+  translations      TerrainTranslation[]
+  choiceOptionItems ChoiceOptionItem[]
+}
+
+model TerrainTranslation {
+  terrainId  Int
+  localeCode String
+  name       String // "Arctique"
+  terrain    Terrain @relation(fields: [terrainId], references: [id], onDelete: Cascade)
+  locale     Locale  @relation(fields: [localeCode], references: [code])
+
+  @@id([terrainId, localeCode])
+}
+
+// --- Rattachés à une édition ------------------------------------------------
+
+model Condition {
+  id        Int     @id @default(autoincrement())
+  editionId Int
+  edition   Edition @relation(fields: [editionId], references: [id])
+  index     String // "blinded"
+
+  translations ConditionTranslation[]
+
+  @@unique([editionId, index])
+}
+
+model ConditionTranslation {
+  conditionId Int
+  localeCode  String
+  name        String // "Aveuglé"
+  description String    @db.Text
+  condition   Condition @relation(fields: [conditionId], references: [id], onDelete: Cascade)
+  locale      Locale    @relation(fields: [localeCode], references: [code])
+
+  @@id([conditionId, localeCode])
+}
+
+enum LanguageRarity {
+  STANDARD
+  EXOTIC // 2014
+  RARE // 2024
+  SECRET // druidique, jargon des voleurs (2024)
+}
+
+model Language {
+  id        Int            @id @default(autoincrement())
+  editionId Int
+  edition   Edition        @relation(fields: [editionId], references: [id])
+  index     String // "dwarvish"
+  rarity    LanguageRarity
+  // Alphabet utilisé : le sylvestre s'écrit avec l'alphabet elfique
+  scriptId  Int?
+  script    Language?      @relation("LanguageScript", fields: [scriptId], references: [id])
+  writtenBy Language[]     @relation("LanguageScript")
+
+  source    ContentSource @default(SRD)
+  ownerId   Int?
+  owner     User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  translations LanguageTranslation[]
+
+  @@unique([editionId, index])
+}
+
+model LanguageTranslation {
+  languageId      Int
+  localeCode      String
+  name            String // "Nain"
+  typicalSpeakers String? // "Nains"
+  description     String?  @db.Text
+  language        Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+  locale          Locale   @relation(fields: [localeCode], references: [code])
+
+  @@id([languageId, localeCode])
+}
+
+enum ProficiencyType {
+  SKILL
+  SAVING_THROW
+  ARMOR
+  WEAPON
+  ARTISAN_TOOL
+  MUSICAL_INSTRUMENT
+  GAMING_SET
+  VEHICLE
+  OTHER
+}
+
+// Une maîtrise désigne exactement une cible (CHECK) :
+//  - compétence ("skill-arcana" → Arcanes)
+//  - jet de sauvegarde ("saving-throw-int" → Intelligence)
+//  - objet précis ("battleaxes" → Hache d'armes)
+//  - catégorie d'équipement ("light-armor" → Armures légères)
+model Proficiency {
+  id                  Int                @id @default(autoincrement())
+  editionId           Int
+  edition             Edition            @relation(fields: [editionId], references: [id])
+  index               String
+  type                ProficiencyType
+  skillId             Int?
+  skill               Skill?             @relation(fields: [skillId], references: [id])
+  abilityScoreId      Int?
+  abilityScore        AbilityScore?      @relation(fields: [abilityScoreId], references: [id])
+  equipmentId         Int?
+  equipment           Equipment?         @relation(fields: [equipmentId], references: [id])
+  equipmentCategoryId Int?
+  equipmentCategory   EquipmentCategory? @relation(fields: [equipmentCategoryId], references: [id])
+
+  translations       ProficiencyTranslation[]
+  multiclassClasses  ClassMulticlassProficiency[] @relation("MulticlassProficiencies")
+  classProficiencies ClassProficiency[]
+  choiceOptionItems  ChoiceOptionItem[]
+
+  @@unique([editionId, index])
+}
+
+model ProficiencyTranslation {
+  proficiencyId Int
+  localeCode    String
+  name          String // "Armures légères"
+  proficiency   Proficiency @relation(fields: [proficiencyId], references: [id], onDelete: Cascade)
+  locale        Locale      @relation(fields: [localeCode], references: [code])
+
+  @@id([proficiencyId, localeCode])
+}

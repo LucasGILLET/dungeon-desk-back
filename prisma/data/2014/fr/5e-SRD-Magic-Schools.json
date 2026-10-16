@@ -1,0 +1,50 @@
+[
+  {
+    "index": "abjuration",
+    "name": "Abjuration",
+    "desc": "Les sorts d'abjuration ont un caractère protecteur, même si certains d'entre eux peuvent être utilisés de manière offensive. Ils créent des barrières magiques, annulent les effets néfastes, nuisent aux intrus ou bannissent des créatures vers d'autres plans d'existence.",
+    "url": "/api/2014/magic-schools/abjuration"
+  },
+  {
+    "index": "conjuration",
+    "name": "Invocation",
+    "desc": "Les sorts d’invocations se concentrent sur le transport d'objets et de créatures d’un endroit à l’autre.  Certains sorts font apparaître des créatures et objets près de l’invocateur, alors que d’autres lui permettent de se téléporter sur de grandes distances.  Certaines invocations créent des objets ou effets à partir de rien. ",
+    "url": "/api/2014/magic-schools/conjuration"
+  },
+  {
+    "index": "divination",
+    "name": "Divination",
+    "desc": "Les sorts de divination permettent de découvrir des informations, qu'il s'agisse de secrets tombés depuis longtemps dans l'oubli, d'aperçus de l'avenir, de l'emplacement d'objets cachés, de la vérité qui se cache derrière les illusions, ou encore de visions de personnes ou de lieux lointains.",
+    "url": "/api/2014/magic-schools/divination"
+  },
+  {
+    "index": "enchantment",
+    "name": "Enchantement",
+    "desc": "Les sorts d'enchantement agissent sur l'esprit d'autrui; ils influencent ou contrôlent leur comportement. Ces sorts peuvent amener des ennemis à considérer l’enchanteur comme un ami, forcer des créatures à agir d'une certaine manière, voire contrôler une autre créature comme une marionnette. ",
+    "url": "/api/2014/magic-schools/enchantment"
+  },
+  {
+    "index": "evocation",
+    "name": "Évocation",
+    "desc": "Les sorts d'évocation manipulent l'énergie magique pour produire l'effet souhaité. Certains invoquent des bouffées de feu ou des éclairs. D'autres canalisent l'énergie positive pour soigner les blessures. ",
+    "url": "/api/2014/magic-schools/evocation"
+  },
+  {
+    "index": "illusion",
+    "name": "Illusion",
+    "desc": "Les sorts d’illusions trompent les sens et l’esprit d’autrui. Elles poussent les gens à voir des choses qui n'existent pas, à ne pas remarquer ce qui est bien là, à entendre des bruits fantômes ou à se souvenir d'événements qui ne se sont jamais produits. Certaines illusions créent des images fantômes que n'importe quelle créature peut voir, mais les illusions les plus insidieuses implantent une image directement dans l'esprit d'une créature.",
+    "url": "/api/2014/magic-schools/illusion"
+  },
+  {
+    "index": "necromancy",
+    "name": "Nécromancie",
+    "desc": "Les sorts de nécromancie manipulent les énergies de la vie et de la mort. Ces sorts peuvent conférer une réserve supplémentaire de force vitale, drainer l'énergie vitale d'une autre créature, créer des morts-vivants, voire ramener les morts à la vie.",
+    "url": "/api/2014/magic-schools/necromancy"
+  },
+  {
+    "index": "transmutation",
+    "name": "Transmutation",
+    "desc": "Les sorts de transmutation modifient les propriétés d'une créature, d'un objet ou d'un environnement. Ils peuvent transformer un ennemi en une créature inoffensive, renforcer la force d'un allié, faire bouger un objet sur l'ordre du lanceur de sorts, ou améliorer les capacités de guérison innées d'une créature pour lui permettre de se remettre rapidement de ses blessures.",
+    "url": "/api/2014/magic-schools/transmutation"
+  }
+]

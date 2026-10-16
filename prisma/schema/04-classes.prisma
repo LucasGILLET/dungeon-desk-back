@@ -1,0 +1,388 @@
+// ============================================================================
+// CLASSES, SOUS-CLASSES ET CAPACITÉS DE CLASSE (rattachées à une édition)
+// ----------------------------------------------------------------------------
+// Sources 2014 : 5e-SRD-Classes, -Levels, -Subclasses, -Features.
+// Les choix (maîtrises, équipement de départ, multiclassage, options de
+// capacités) passent par la structure générique de 03-choix.
+// Aucune donnée dérivable n'est stockée : bonus de maîtrise = f(niveau),
+// capacités d'un niveau = ClassFeature.level.
+// ============================================================================
+
+model Class {
+  id            Int     @id @default(autoincrement())
+  editionId     Int
+  edition       Edition @relation(fields: [editionId], references: [id])
+  index         String // "wizard"
+  hitDie        Int // 6 → d6
+  // Niveau de choix de la sous-classe : clerc 1, magicien 2, autres 3 (tous 3
+  // en 2024). Remplace getLevel1SubclassClasses() côté front.
+  subclassLevel Int
+
+  source    ContentSource @default(SRD)
+  ownerId   Int?
+  owner     User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  translations            ClassTranslation[]
+  primaryAbilities        ClassPrimaryAbility[]
+  savingThrows            ClassSavingThrow[]
+  proficiencies           ClassProficiency[]
+  startingEquipment       ClassStartingEquipment[]
+  choices                 Choice[] // maîtrises au choix, équipement au choix, multiclassage
+  levels                  ClassLevel[]
+  tableColumns            ClassTableColumn[]
+  features                ClassFeature[]
+  subclasses              Subclass[]
+  spellcasting            ClassSpellcasting?
+  spells                  ClassSpell[]
+  multiclassRequirements  MulticlassRequirement[]
+  multiclassProficiencies ClassMulticlassProficiency[]
+
+  @@unique([editionId, index])
+}
+
+model ClassTranslation {
+  classId       Int
+  localeCode    String
+  name          String // "Magicien"
+  description   String? @db.Text
+  // Nom générique des sous-classes : "Tradition arcanique" (2014),
+  // "Sous-classe de magicien" (2024)
+  subclassLabel String
+  class         Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  locale        Locale  @relation(fields: [localeCode], references: [code])
+
+  @@id([classId, localeCode])
+}
+
+// Caractéristique principale (2024 l'affiche en tête de classe ; en 2014 elle
+// sert de repère pour l'interface)
+model ClassPrimaryAbility {
+  classId        Int
+  abilityScoreId Int
+  class          Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id])
+
+  @@id([classId, abilityScoreId])
+}
+
+model ClassSavingThrow {
+  classId        Int
+  abilityScoreId Int
+  class          Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  abilityScore   AbilityScore @relation("ClassSavingThrows", fields: [abilityScoreId], references: [id])
+
+  @@id([classId, abilityScoreId])
+}
+
+// Maîtrises acquises d'office
+model ClassProficiency {
+  classId       Int
+  proficiencyId Int
+  class         Class       @relation(fields: [classId], references: [id], onDelete: Cascade)
+  proficiency   Proficiency @relation(fields: [proficiencyId], references: [id])
+
+  @@id([classId, proficiencyId])
+}
+
+// Équipement de départ fixe ("un grimoire")
+model ClassStartingEquipment {
+  classId     Int
+  equipmentId Int
+  quantity    Int       @default(1)
+  class       Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
+  equipment   Equipment @relation(fields: [equipmentId], references: [id])
+
+  @@id([classId, equipmentId])
+}
+
+// ----------------------------------------------------------------------------
+// Progression par niveau (la "table de classe" du Manuel des joueurs)
+// ----------------------------------------------------------------------------
+
+model ClassLevel {
+  id      Int   @id @default(autoincrement())
+  classId Int
+  class   Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  level   Int // 1..20
+
+  // Nombre cumulé d'augmentations de caractéristique (le guerrier en a plus)
+  abilityScoreImprovements Int @default(0)
+
+  // Incantation (null si la classe ne lance pas de sorts à ce niveau)
+  cantripsKnown Int?
+  spellsKnown   Int? // sorts connus (barde, ensorceleur, occultiste, rôdeur 2014)
+  spellSlots    ClassLevelSpellSlot[]
+
+  // Valeurs des colonnes propres à la classe (rages, attaque sournoise…)
+  values ClassLevelValue[]
+
+  @@unique([classId, level])
+}
+
+// Une ligne par niveau de sort > 0 ; pour l'occultiste, emplacements de pacte
+model ClassLevelSpellSlot {
+  classLevelId Int
+  spellLevel   Int // 1..9
+  slots        Int
+  classLevel   ClassLevel @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+
+  @@id([classLevelId, spellLevel])
+}
+
+// Colonnes spécifiques de la table de classe. Remplace l'objet libre
+// `class_specific` du SRD (31 clés différentes : rage_count, sneak_attack,
+// ki_points, martial_arts…). Une sous-classe peut ajouter sa colonne
+// (subclass_specific, ex. Secrets magiques supplémentaires du Collège du
+// Savoir). En 2024, "Bottes d'armes" est une colonne comme une autre.
+enum ClassColumnValueType {
+  INTEGER // rages : 3
+  DICE // attaque sournoise : 3d6
+  BOOLEAN // forme sauvage : vol autorisé
+}
+
+model ClassTableColumn {
+  id         Int                  @id @default(autoincrement())
+  classId    Int
+  class      Class                @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subclassId Int? // colonne ajoutée par une sous-classe
+  subclass   Subclass?            @relation(fields: [subclassId], references: [id], onDelete: Cascade)
+  key        String // "rage_count" (clé du SRD, utilisée par le code)
+  valueType  ClassColumnValueType
+  position   Int
+
+  translations ClassTableColumnTranslation[]
+  values       ClassLevelValue[]
+
+  @@unique([classId, key])
+}
+
+model ClassTableColumnTranslation {
+  columnId   Int
+  localeCode String
+  label      String // "Rages"
+  column     ClassTableColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  locale     Locale           @relation(fields: [localeCode], references: [code])
+
+  @@id([columnId, localeCode])
+}
+
+// Une seule valeur remplie selon ClassTableColumn.valueType (CHECK)
+model ClassLevelValue {
+  id           Int              @id @default(autoincrement())
+  classLevelId Int
+  columnId     Int
+  intValue     Int?
+  diceCount    Int?
+  diceValue    Int?
+  boolValue    Boolean?
+  classLevel   ClassLevel       @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+  column       ClassTableColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  @@unique([classLevelId, columnId])
+}
+
+// ----------------------------------------------------------------------------
+// Incantation
+// ----------------------------------------------------------------------------
+
+// Sert au calcul des emplacements en multiclassage
+enum CasterType {
+  FULL // barde, clerc, druide, ensorceleur, magicien
+  HALF // paladin, rôdeur
+  THIRD // chevalier occulte, escroc arcanique (portés par la sous-classe)
+  PACT // occultiste
+}
+
+model ClassSpellcasting {
+  classId        Int          @id
+  class          Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  abilityScoreId Int
+  abilityScore   AbilityScore @relation("ClassSpellcastingAbility", fields: [abilityScoreId], references: [id])
+  startLevel     Int // 1 ou 2
+  casterType     CasterType
+  ritualCasting  Boolean      @default(false)
+
+  sections SpellcastingSection[]
+}
+
+// Rubriques de règles : "Tours de magie", "Emplacements de sorts", "Focaliseur"…
+model SpellcastingSection {
+  id           Int               @id @default(autoincrement())
+  classId      Int
+  spellcasting ClassSpellcasting @relation(fields: [classId], references: [classId], onDelete: Cascade)
+  position     Int
+
+  translations SpellcastingSectionTranslation[]
+}
+
+model SpellcastingSectionTranslation {
+  sectionId   Int
+  localeCode  String
+  title       String // "Tours de magie"
+  description String              @db.Text
+  section     SpellcastingSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  locale      Locale              @relation(fields: [localeCode], references: [code])
+
+  @@id([sectionId, localeCode])
+}
+
+// Liste de sorts de la classe
+model ClassSpell {
+  classId Int
+  spellId Int
+  class   Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  spell   Spell @relation(fields: [spellId], references: [id], onDelete: Cascade)
+
+  @@id([classId, spellId])
+}
+
+// ----------------------------------------------------------------------------
+// Multiclassage
+// ----------------------------------------------------------------------------
+
+// Lignes d'un même groupe = alternatives (OU) ; groupes différents = ET.
+//  - Paladin : FOR 13 (groupe 1) ET CHA 13 (groupe 2)
+//  - Guerrier : FOR 13 OU DEX 13 (même groupe 1)
+model MulticlassRequirement {
+  id               Int          @id @default(autoincrement())
+  classId          Int
+  class            Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  abilityScoreId   Int
+  abilityScore     AbilityScore @relation("MulticlassRequirements", fields: [abilityScoreId], references: [id])
+  minimumScore     Int          @default(13)
+  alternativeGroup Int          @default(1)
+}
+
+model ClassMulticlassProficiency {
+  classId       Int
+  proficiencyId Int
+  class         Class       @relation(fields: [classId], references: [id], onDelete: Cascade)
+  proficiency   Proficiency @relation("MulticlassProficiencies", fields: [proficiencyId], references: [id])
+
+  @@id([classId, proficiencyId])
+}
+
+// ----------------------------------------------------------------------------
+// Sous-classes
+// ----------------------------------------------------------------------------
+
+model Subclass {
+  id         Int         @id @default(autoincrement())
+  editionId  Int
+  edition    Edition     @relation(fields: [editionId], references: [id])
+  index      String // "evocation"
+  classId    Int
+  class      Class       @relation(fields: [classId], references: [id], onDelete: Cascade)
+  // Lanceurs à un tiers (chevalier occulte…) : la sous-classe porte l'incantation
+  casterType CasterType?
+
+  source    ContentSource @default(SRD)
+  ownerId   Int?
+  owner     User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  translations SubclassTranslation[]
+  features     ClassFeature[]
+  spells       SubclassSpell[] // sorts de domaine, de serment, de cercle…
+  tableColumns ClassTableColumn[]
+  choices      Choice[]
+
+  @@unique([editionId, index])
+}
+
+model SubclassTranslation {
+  subclassId  Int
+  localeCode  String
+  name        String // "École d'évocation"
+  description String?  @db.Text
+  subclass    Subclass @relation(fields: [subclassId], references: [id], onDelete: Cascade)
+  locale      Locale   @relation(fields: [localeCode], references: [code])
+
+  @@id([subclassId, localeCode])
+}
+
+// Sorts toujours préparés, obtenus à un niveau de classe donné. Pour le Cercle
+// de la Terre, la liste dépend aussi du terrain choisi : requiredFeatureId
+// pointe vers la capacité de terrain ("Cercle de la Terre : Arctique").
+model SubclassSpell {
+  id                 Int           @id @default(autoincrement())
+  subclassId         Int
+  spellId            Int
+  requiredClassLevel Int
+  requiredFeatureId  Int?
+  subclass           Subclass      @relation(fields: [subclassId], references: [id], onDelete: Cascade)
+  spell              Spell         @relation(fields: [spellId], references: [id], onDelete: Cascade)
+  requiredFeature    ClassFeature? @relation("SubclassSpellFeature", fields: [requiredFeatureId], references: [id], onDelete: Cascade)
+
+  @@unique([subclassId, spellId, requiredFeatureId])
+}
+
+// ----------------------------------------------------------------------------
+// Capacités de classe
+// ----------------------------------------------------------------------------
+
+model ClassFeature {
+  id         Int            @id @default(autoincrement())
+  editionId  Int
+  edition    Edition        @relation(fields: [editionId], references: [id])
+  index      String // "arcane-recovery"
+  level      Int // niveau de classe d'obtention
+  classId    Int
+  class      Class          @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subclassId Int? // null = capacité commune à la classe
+  subclass   Subclass?      @relation(fields: [subclassId], references: [id], onDelete: Cascade)
+  // Sous-capacité : "Cercle de la Terre : Arctique" → "Cercle de la Terre",
+  // chaque Manifestation occulte → "Manifestations occultes"
+  parentId   Int?
+  parent     ClassFeature?  @relation("ClassFeatureTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children   ClassFeature[] @relation("ClassFeatureTree")
+
+  source    ContentSource @default(SRD)
+  ownerId   Int?
+  owner     User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  translations  ClassFeatureTranslation[]
+  prerequisites ClassFeaturePrerequisite[] @relation("FeaturePrerequisites")
+  requiredBy    ClassFeaturePrerequisite[] @relation("RequiredFeature")
+  choices       Choice[] // expertise, style de combat, ennemi juré…
+  choiceItems   ChoiceOptionItem[]         @relation("ChoiceItemClassFeature")
+  grantsSpells  SubclassSpell[]            @relation("SubclassSpellFeature")
+
+  @@unique([editionId, index])
+  @@index([classId, level])
+}
+
+model ClassFeatureTranslation {
+  classFeatureId Int
+  localeCode     String
+  name           String // "Restauration arcanique"
+  description    String       @db.Text
+  classFeature   ClassFeature @relation(fields: [classFeatureId], references: [id], onDelete: Cascade)
+  locale         Locale       @relation(fields: [localeCode], references: [code])
+
+  @@id([classFeatureId, localeCode])
+}
+
+enum ClassFeaturePrerequisiteType {
+  LEVEL // Manifestation "Soif de vie" : occultiste niveau 15
+  FEATURE // "Pacte du grimoire" requis
+  SPELL // "Décharge occulte" connue
+}
+
+// Une seule cible remplie selon `type` (CHECK)
+model ClassFeaturePrerequisite {
+  id                Int                          @id @default(autoincrement())
+  classFeatureId    Int
+  classFeature      ClassFeature                 @relation("FeaturePrerequisites", fields: [classFeatureId], references: [id], onDelete: Cascade)
+  type              ClassFeaturePrerequisiteType
+  minimumLevel      Int?
+  requiredFeatureId Int?
+  requiredFeature   ClassFeature?                @relation("RequiredFeature", fields: [requiredFeatureId], references: [id], onDelete: Cascade)
+  requiredSpellId   Int?
+  requiredSpell     Spell?                       @relation(fields: [requiredSpellId], references: [id], onDelete: Cascade)
+}

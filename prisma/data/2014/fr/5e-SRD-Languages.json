@@ -1,0 +1,170 @@
+[
+  {
+    "index": "common",
+    "name": "Commun",
+    "type": "Standard",
+    "typical_speakers": [
+      "Humans"
+    ],
+    "script": "Common",
+    "url": "/api/2014/languages/common"
+  },
+  {
+    "index": "dwarvish",
+    "name": "Nain",
+    "desc": "Le Nain est composé de consonnes dures et de sons gutturaux.",
+    "type": "Standard",
+    "typical_speakers": [
+      "Dwarves"
+    ],
+    "script": "Dwarvish",
+    "url": "/api/2014/languages/dwarvish"
+  },
+  {
+    "index": "elvish",
+    "name": "Elfique",
+    "desc": "L’Elfique est fluide, avec des intonations subtiles et une grammaire complexe. La littérature elfique est riche et variée, et les chansons et poèmes sont célèbres chez les autres races. De nombreux bardes apprennent cette langue pour pouvoir ajouter des ballades elfiques à leur répertoire.",
+    "type": "Standard",
+    "typical_speakers": [
+      "Elves"
+    ],
+    "script": "Elvish",
+    "url": "/api/2014/languages/elvish"
+  },
+  {
+    "index": "giant",
+    "name": "Géant",
+    "type": "Standard",
+    "typical_speakers": [
+      "Ogres",
+      "Giants"
+    ],
+    "script": "Dwarvish",
+    "url": "/api/2014/languages/giant"
+  },
+  {
+    "index": "gnomish",
+    "name": "Gnome",
+    "desc": "Le Gnome, qui utilise l’alphabet nain, est connu pour ses traités techniques et ses catalogues de connaissances sur le monde naturel.",
+    "type": "Standard",
+    "typical_speakers": [
+      "Gnomes"
+    ],
+    "script": "Dwarvish",
+    "url": "/api/2014/languages/gnomish"
+  },
+  {
+    "index": "goblin",
+    "name": "Gobelin",
+    "type": "Standard",
+    "typical_speakers": [
+      "Goblinoids"
+    ],
+    "script": "Dwarvish",
+    "url": "/api/2014/languages/goblin"
+  },
+  {
+    "index": "halfling",
+    "name": "Halfelin",
+    "desc": "Le Halfelin n’est pas secret, mais les halfelins ne sont pas enclins à le partager avec le reste du monde. Ils écrivent très peu, et n’ont donc pas un corps littéraire riche. Leur tradition orale, en revanche, est puissante.",
+    "type": "Standard",
+    "typical_speakers": [
+      "Halflings"
+    ],
+    "script": "Common",
+    "url": "/api/2014/languages/halfling"
+  },
+  {
+    "index": "orc",
+    "name": "Orc",
+    "desc": "L’Orc est une langue rauque et grinçante composée de consonnes dures. Elle n’a pas d'alphabet propre et utilise plutôt l’alphabet nain.",
+    "type": "Standard",
+    "typical_speakers": [
+      "Orcs"
+    ],
+    "script": "Dwarvish",
+    "url": "/api/2014/languages/orc"
+  },
+  {
+    "index": "abyssal",
+    "name": "Abyssal",
+    "type": "Exotic",
+    "typical_speakers": [
+      "Demons"
+    ],
+    "script": "Infernal",
+    "url": "/api/2014/languages/abyssal"
+  },
+  {
+    "index": "celestial",
+    "name": "Céleste",
+    "type": "Exotic",
+    "typical_speakers": [
+      "Celestials"
+    ],
+    "script": "Celestial",
+    "url": "/api/2014/languages/celestial"
+  },
+  {
+    "index": "draconic",
+    "name": "Lignée draconique",
+    "desc": "Le Draconique est vu comme une des plus anciennes langues et est souvent utilisé pour étudier la magie. Le son paraît rude aux autres créatures et inclut beaucoup de consonnes dures et de sibilantes.",
+    "type": "Exotic",
+    "typical_speakers": [
+      "Dragons",
+      "Dragonborn"
+    ],
+    "script": "Draconic",
+    "url": "/api/2014/languages/draconic"
+  },
+  {
+    "index": "deep-speech",
+    "name": "Profond",
+    "type": "Exotic",
+    "typical_speakers": [
+      "Aboleths",
+      "Cloakers"
+    ],
+    "url": "/api/2014/languages/deep-speech"
+  },
+  {
+    "index": "infernal",
+    "name": "Infernal",
+    "type": "Exotic",
+    "typical_speakers": [
+      "Devils"
+    ],
+    "script": "Infernal",
+    "url": "/api/2014/languages/infernal"
+  },
+  {
+    "index": "primordial",
+    "name": "Primordial",
+    "type": "Exotic",
+    "typical_speakers": [
+      "Elementals"
+    ],
+    "script": "Dwarvish",
+    "url": "/api/2014/languages/primordial"
+  },
+  {
+    "index": "sylvan",
+    "name": "Sylvestre",
+    "type": "Exotic",
+    "typical_speakers": [
+      "Fey creatures"
+    ],
+    "script": "Elvish",
+    "url": "/api/2014/languages/sylvan"
+  },
+  {
+    "index": "undercommon",
+    "name": "Commun des Profondeurs",
+    "type": "Exotic",
+    "typical_speakers": [
+      "Underdark traders"
+    ],
+    "script": "Elvish",
+    "url": "/api/2014/languages/undercommon"
+  }
+]

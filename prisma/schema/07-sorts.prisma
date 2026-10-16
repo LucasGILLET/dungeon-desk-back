@@ -1,0 +1,136 @@
+// ============================================================================
+// SORTS (rattachés à une édition)
+// ----------------------------------------------------------------------------
+// Les chaînes du SRD ("1 action", "90 feet", "Concentration, up to 1 minute")
+// sont décomposées en colonnes neutres + enums, filtrables (sorts de rituel,
+// de concentration, à zone en cône…). Seule la partie réellement textuelle
+// (déclencheur d'une réaction, portée spéciale) reste en traduction.
+// Listes de sorts : ClassSpell et SubclassSpell (04-classes).
+// ============================================================================
+
+enum CastingTimeUnit {
+  ACTION
+  BONUS_ACTION
+  REACTION // déclencheur dans SpellTranslation.castingTimeNote
+  MINUTE
+  HOUR
+}
+
+enum SpellRangeType {
+  SELF // "Personnelle" (éventuellement avec une zone : cône de 15 pieds)
+  TOUCH
+  DISTANCE // rangeFt
+  SIGHT
+  UNLIMITED
+  SPECIAL
+}
+
+enum SpellDurationType {
+  INSTANTANEOUS
+  ROUND
+  MINUTE
+  HOUR
+  DAY
+  UNTIL_DISPELLED
+  SPECIAL
+}
+
+enum AttackType {
+  MELEE
+  RANGED
+}
+
+enum SaveSuccess {
+  NONE // aucun effet en cas de réussite
+  HALF // moitié des dégâts
+  OTHER // décrit dans le texte
+}
+
+enum AreaType {
+  CONE
+  CUBE
+  CYLINDER
+  LINE
+  SPHERE
+  EMANATION // 2024
+}
+
+model Spell {
+  id        Int         @id @default(autoincrement())
+  editionId Int
+  edition   Edition     @relation(fields: [editionId], references: [id])
+  index     String // "fireball"
+  level     Int // 0 = tour de magie
+  schoolId  Int
+  school    MagicSchool @relation(fields: [schoolId], references: [id])
+
+  castingTimeAmount Int             @default(1)
+  castingTimeUnit   CastingTimeUnit
+  ritual            Boolean         @default(false)
+
+  rangeType SpellRangeType
+  rangeFt   Int?
+
+  verbal           Boolean  @default(false)
+  somatic          Boolean  @default(false)
+  material         Boolean  @default(false)
+  materialCostGp   Decimal? @db.Decimal(10, 2) // composante avec un coût
+  materialConsumed Boolean  @default(false)
+
+  durationType   SpellDurationType
+  durationAmount Int?
+  concentration  Boolean           @default(false)
+
+  attackType    AttackType?
+  saveAbilityId Int?
+  saveAbility   AbilityScore? @relation(fields: [saveAbilityId], references: [id])
+  saveSuccess   SaveSuccess?
+  areaType      AreaType?
+  areaSizeFt    Int?
+
+  // JSONB DiceScaling, dégâts selon le niveau d'emplacement ou de personnage :
+  // { by: "slot_level" | "character_level", values: { "3": "8d6", "4": "9d6" } }
+  damageScaling  Json?
+  // JSONB DiceScaling, soins : { by: "slot_level", values: { "1": "1d8+MOD" } }
+  healingScaling Json?
+
+  source    ContentSource @default(SRD)
+  ownerId   Int?
+  owner     User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  translations              SpellTranslation[]
+  damageTypes               SpellDamageType[]
+  classes                   ClassSpell[]
+  subclasses                SubclassSpell[]
+  classFeaturePrerequisites ClassFeaturePrerequisite[]
+
+  @@unique([editionId, index])
+  @@index([editionId, level])
+}
+
+model SpellTranslation {
+  spellId         Int
+  localeCode      String
+  name            String // "Boule de feu"
+  description     String  @db.Text
+  higherLevels    String? @db.Text // "Aux niveaux supérieurs"
+  materialText    String? // "une minuscule boule de guano de chauve-souris et du soufre"
+  castingTimeNote String? // déclencheur : "que vous effectuez lorsque…"
+  rangeNote       String? // précisions de portée ou de durée SPECIAL
+  spell           Spell   @relation(fields: [spellId], references: [id], onDelete: Cascade)
+  locale          Locale  @relation(fields: [localeCode], references: [code])
+
+  @@id([spellId, localeCode])
+}
+
+// Types de dégâts possibles (plusieurs pour Orbe chromatique)
+model SpellDamageType {
+  spellId      Int
+  damageTypeId Int
+  spell        Spell      @relation(fields: [spellId], references: [id], onDelete: Cascade)
+  damageType   DamageType @relation(fields: [damageTypeId], references: [id])
+
+  @@id([spellId, damageTypeId])
+}

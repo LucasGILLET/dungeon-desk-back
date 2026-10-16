@@ -51,5 +51,9 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.3.2",
     "vitest": "^4.0.18"
+  },
+  "prisma": {
+    "schema": "prisma/schema",
+    "seed": "ts-node src/seed/index.ts"
   }
 }

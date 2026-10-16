@@ -1,0 +1,997 @@
+// Socle des données de jeu (SRD) — dungeon-desk — BROUILLON
+// Généré depuis docs/modelisation/socle/*.prisma (ne pas éditer à la main).
+// Relations vers Locale (tables *Translation) et Edition (contenu de jeu)
+// omises pour la lisibilité : voir les colonnes localeCode / editionId.
+
+Enum ContentSource {
+  SRD
+  HOMEBREW
+}
+
+Enum Size {
+  TINY
+  SMALL
+  MEDIUM
+  LARGE
+  HUGE
+  GARGANTUAN
+}
+
+Enum Currency {
+  CP
+  SP
+  EP
+  GP
+  PP
+}
+
+Enum AlignmentEthic {
+  LAWFUL
+  NEUTRAL
+  CHAOTIC
+}
+
+Enum AlignmentMorality {
+  GOOD
+  NEUTRAL
+  EVIL
+}
+
+Enum LanguageRarity {
+  STANDARD
+  EXOTIC
+  RARE
+  SECRET
+}
+
+Enum ProficiencyType {
+  SKILL
+  SAVING_THROW
+  ARMOR
+  WEAPON
+  ARTISAN_TOOL
+  MUSICAL_INSTRUMENT
+  GAMING_SET
+  VEHICLE
+  OTHER
+}
+
+Enum EquipmentKind {
+  WEAPON
+  ARMOR
+  ADVENTURING_GEAR
+  AMMUNITION
+  TOOL
+  MOUNT
+  VEHICLE
+  PACK
+  FOCUS
+}
+
+Enum WeaponCategory {
+  SIMPLE
+  MARTIAL
+}
+
+Enum WeaponRange {
+  MELEE
+  RANGED
+}
+
+Enum ArmorCategory {
+  LIGHT
+  MEDIUM
+  HEAVY
+  SHIELD
+}
+
+Enum VehicleSpeedUnit {
+  FEET_PER_ROUND
+  MILES_PER_HOUR
+}
+
+Enum ChoiceKind {
+  PROFICIENCY
+  MULTICLASS_PROFICIENCY
+  EXPERTISE
+  STARTING_EQUIPMENT
+  SUBFEATURE
+  FAVORED_ENEMY
+  FAVORED_TERRAIN
+}
+
+Enum ChoicePool {
+  EQUIPMENT_CATEGORY
+}
+
+Enum ClassColumnValueType {
+  INTEGER
+  DICE
+  BOOLEAN
+}
+
+Enum CasterType {
+  FULL
+  HALF
+  THIRD
+  PACT
+}
+
+Enum ClassFeaturePrerequisiteType {
+  LEVEL
+  FEATURE
+  SPELL
+}
+
+Enum CastingTimeUnit {
+  ACTION
+  BONUS_ACTION
+  REACTION
+  MINUTE
+  HOUR
+}
+
+Enum SpellRangeType {
+  SELF
+  TOUCH
+  DISTANCE
+  SIGHT
+  UNLIMITED
+  SPECIAL
+}
+
+Enum SpellDurationType {
+  INSTANTANEOUS
+  ROUND
+  MINUTE
+  HOUR
+  DAY
+  UNTIL_DISPELLED
+  SPECIAL
+}
+
+Enum AttackType {
+  MELEE
+  RANGED
+}
+
+Enum SaveSuccess {
+  NONE
+  HALF
+  OTHER
+}
+
+Enum AreaType {
+  CONE
+  CUBE
+  CYLINDER
+  LINE
+  SPHERE
+  EMANATION
+}
+
+Table Locale {
+  code varchar [pk, note: '"fr", "en"']
+  name varchar [not null, note: 'nom dans sa propre langue : "Français", "English"']
+  isDefault boolean [not null, default: false, note: 'langue de repli (une seule)']
+  position int [not null]
+  Note: 'Relations vers Locale non dessinées (référencée par presque toutes les tables).'
+}
+
+Table Edition {
+  id int [pk, increment]
+  code varchar [unique, not null, note: '"2014", "2024"']
+  releaseYear int [not null]
+  isDefault boolean [not null, default: false]
+  position int [not null]
+  Note: 'Relations vers Edition non dessinées (référencée par presque toutes les tables).'
+}
+
+Table EditionTranslation {
+  editionId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"D&D 5e (2014)", "D&D 5e révisé (2024)"']
+  attribution varchar [not null]
+  indexes {
+    (editionId, localeCode) [pk]
+  }
+}
+
+Table AbilityScore {
+  id int [pk, increment]
+  index varchar [unique, not null, note: '"str"']
+  position int [not null, note: 'ordre d\'affichage FOR, DEX, CON, INT, SAG, CHA']
+}
+
+Table AbilityScoreTranslation {
+  abilityScoreId int [not null]
+  localeCode varchar [not null]
+  abbreviation varchar [not null, note: '"FOR" / "STR"']
+  name varchar [not null, note: '"Force" / "Strength"']
+  description varchar
+  indexes {
+    (abilityScoreId, localeCode) [pk]
+  }
+}
+
+Table Skill {
+  id int [pk, increment]
+  index varchar [unique, not null, note: '"arcana"']
+  abilityScoreId int [not null]
+}
+
+Table SkillTranslation {
+  skillId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Arcanes"']
+  description varchar
+  indexes {
+    (skillId, localeCode) [pk]
+  }
+}
+
+Table Alignment {
+  id int [pk, increment]
+  index varchar [unique, not null, note: '"lawful-good"']
+  ethic AlignmentEthic [not null]
+  morality AlignmentMorality [not null]
+}
+
+Table AlignmentTranslation {
+  alignmentId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Loyal bon"']
+  abbreviation varchar [not null, note: '"LB" / "LG"']
+  description varchar
+  indexes {
+    (alignmentId, localeCode) [pk]
+  }
+}
+
+Table DamageType {
+  id int [pk, increment]
+  index varchar [unique, not null, note: '"fire"']
+}
+
+Table DamageTypeTranslation {
+  damageTypeId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Feu"']
+  description varchar
+  indexes {
+    (damageTypeId, localeCode) [pk]
+  }
+}
+
+Table MagicSchool {
+  id int [pk, increment]
+  index varchar [unique, not null, note: '"evocation"']
+}
+
+Table MagicSchoolTranslation {
+  magicSchoolId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Évocation"']
+  description varchar
+  indexes {
+    (magicSchoolId, localeCode) [pk]
+  }
+}
+
+Table CreatureType {
+  id int [pk, increment]
+  index varchar [unique, not null, note: '"dragon", "undead"']
+}
+
+Table CreatureTypeTranslation {
+  creatureTypeId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Dragon", "Mort-vivant"']
+  pluralName varchar [not null, note: '"Dragons", "Morts-vivants" (ennemi juré du rôdeur)']
+  indexes {
+    (creatureTypeId, localeCode) [pk]
+  }
+}
+
+Table Terrain {
+  id int [pk, increment]
+  index varchar [unique, not null, note: '"arctic"']
+}
+
+Table TerrainTranslation {
+  terrainId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Arctique"']
+  indexes {
+    (terrainId, localeCode) [pk]
+  }
+}
+
+Table Condition {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"blinded"']
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table ConditionTranslation {
+  conditionId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Aveuglé"']
+  description varchar [not null]
+  indexes {
+    (conditionId, localeCode) [pk]
+  }
+}
+
+Table Language {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"dwarvish"']
+  rarity LanguageRarity [not null]
+  scriptId int
+  source ContentSource [not null, default: 'SRD']
+  ownerId int
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table LanguageTranslation {
+  languageId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Nain"']
+  typicalSpeakers varchar [note: '"Nains"']
+  description varchar
+  indexes {
+    (languageId, localeCode) [pk]
+  }
+}
+
+Table Proficiency {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null]
+  type ProficiencyType [not null]
+  skillId int
+  abilityScoreId int
+  equipmentId int
+  equipmentCategoryId int
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table ProficiencyTranslation {
+  proficiencyId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Armures légères"']
+  indexes {
+    (proficiencyId, localeCode) [pk]
+  }
+}
+
+Table EquipmentCategory {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"simple-melee-weapons", "holy-symbols"']
+  parentId int
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table EquipmentCategoryTranslation {
+  equipmentCategoryId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Armes courantes de corps à corps"']
+  indexes {
+    (equipmentCategoryId, localeCode) [pk]
+  }
+}
+
+Table Equipment {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"longsword"']
+  kind EquipmentKind [not null]
+  costAmount int
+  costCurrency Currency
+  weightLb decimal
+  bundleSize int [not null, default: 1]
+  imageUrl varchar
+  source ContentSource [not null, default: 'SRD']
+  ownerId int
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table EquipmentTranslation {
+  equipmentId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Épée longue"']
+  description varchar
+  indexes {
+    (equipmentId, localeCode) [pk]
+  }
+}
+
+Table EquipmentCategoryItem {
+  equipmentId int [not null]
+  categoryId int [not null]
+  indexes {
+    (equipmentId, categoryId) [pk]
+  }
+}
+
+Table PackContent {
+  packId int [not null]
+  itemId int [not null]
+  quantity int [not null, default: 1]
+  indexes {
+    (packId, itemId) [pk]
+  }
+}
+
+Table WeaponStats {
+  equipmentId int [pk]
+  category WeaponCategory [not null]
+  range WeaponRange [not null]
+  damageDice varchar
+  damageTypeId int
+  versatileDice varchar [note: 'dégâts à deux mains (propriété Polyvalente)']
+  normalRangeFt int [note: 'portée normale (armes à distance et de lancer)']
+  longRangeFt int
+}
+
+Table WeaponProperty {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"finesse", "versatile"']
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table WeaponPropertyTranslation {
+  weaponPropertyId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Finesse"']
+  description varchar [not null]
+  indexes {
+    (weaponPropertyId, localeCode) [pk]
+  }
+}
+
+Table WeaponStatsProperty {
+  weaponId int [not null]
+  propertyId int [not null]
+  indexes {
+    (weaponId, propertyId) [pk]
+  }
+}
+
+Table ArmorStats {
+  equipmentId int [pk]
+  category ArmorCategory [not null]
+  baseArmorClass int [not null, note: '11, ou +2 pour un bouclier']
+  addsDexModifier boolean [not null]
+  maxDexModifier int [note: '2 pour les armures intermédiaires']
+  strengthMinimum int
+  stealthDisadvantage boolean [not null, default: false]
+}
+
+Table VehicleStats {
+  equipmentId int [pk]
+  speed decimal
+  speedUnit VehicleSpeedUnit
+  capacityLb int
+}
+
+Table Choice {
+  id int [pk, increment]
+  kind ChoiceKind [not null]
+  choose int [not null]
+  classId int
+  subclassId int
+  classFeatureId int
+  parentOptionId int [unique, note: 'sous-choix d\'une option']
+  pool ChoicePool
+  poolCategoryId int
+}
+
+Table ChoiceTranslation {
+  choiceId int [not null]
+  localeCode varchar [not null]
+  description varchar [not null, note: '"Choisissez deux compétences parmi Arcanes, Histoire…"']
+  indexes {
+    (choiceId, localeCode) [pk]
+  }
+}
+
+Table ChoiceOption {
+  id int [pk, increment]
+  choiceId int [not null]
+  position int [not null]
+}
+
+Table ChoiceOptionItem {
+  id int [pk, increment]
+  optionId int [not null]
+  quantity int [not null, default: 1, note: '20 flèches']
+  proficiencyId int
+  equipmentId int
+  equipmentCategoryId int [note: '"une arme de guerre au choix" dans un lot']
+  classFeatureId int
+  creatureTypeId int
+  terrainId int
+}
+
+Table Class {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"wizard"']
+  hitDie int [not null, note: '6 → d6']
+  subclassLevel int [not null]
+  source ContentSource [not null, default: 'SRD']
+  ownerId int
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table ClassTranslation {
+  classId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Magicien"']
+  description varchar
+  subclassLabel varchar [not null]
+  indexes {
+    (classId, localeCode) [pk]
+  }
+}
+
+Table ClassPrimaryAbility {
+  classId int [not null]
+  abilityScoreId int [not null]
+  indexes {
+    (classId, abilityScoreId) [pk]
+  }
+}
+
+Table ClassSavingThrow {
+  classId int [not null]
+  abilityScoreId int [not null]
+  indexes {
+    (classId, abilityScoreId) [pk]
+  }
+}
+
+Table ClassProficiency {
+  classId int [not null]
+  proficiencyId int [not null]
+  indexes {
+    (classId, proficiencyId) [pk]
+  }
+}
+
+Table ClassStartingEquipment {
+  classId int [not null]
+  equipmentId int [not null]
+  quantity int [not null, default: 1]
+  indexes {
+    (classId, equipmentId) [pk]
+  }
+}
+
+Table ClassLevel {
+  id int [pk, increment]
+  classId int [not null]
+  level int [not null, note: '1..20']
+  abilityScoreImprovements int [not null, default: 0]
+  cantripsKnown int
+  spellsKnown int [note: 'sorts connus (barde, ensorceleur, occultiste, rôdeur 2014)']
+  indexes {
+    (classId, level) [unique]
+  }
+}
+
+Table ClassLevelSpellSlot {
+  classLevelId int [not null]
+  spellLevel int [not null, note: '1..9']
+  slots int [not null]
+  indexes {
+    (classLevelId, spellLevel) [pk]
+  }
+}
+
+Table ClassTableColumn {
+  id int [pk, increment]
+  classId int [not null]
+  subclassId int [note: 'colonne ajoutée par une sous-classe']
+  key varchar [not null, note: '"rage_count" (clé du SRD, utilisée par le code)']
+  valueType ClassColumnValueType [not null]
+  position int [not null]
+  indexes {
+    (classId, key) [unique]
+  }
+}
+
+Table ClassTableColumnTranslation {
+  columnId int [not null]
+  localeCode varchar [not null]
+  label varchar [not null, note: '"Rages"']
+  indexes {
+    (columnId, localeCode) [pk]
+  }
+}
+
+Table ClassLevelValue {
+  id int [pk, increment]
+  classLevelId int [not null]
+  columnId int [not null]
+  intValue int
+  diceCount int
+  diceValue int
+  boolValue boolean
+  indexes {
+    (classLevelId, columnId) [unique]
+  }
+}
+
+Table ClassSpellcasting {
+  classId int [pk]
+  abilityScoreId int [not null]
+  startLevel int [not null, note: '1 ou 2']
+  casterType CasterType [not null]
+  ritualCasting boolean [not null, default: false]
+}
+
+Table SpellcastingSection {
+  id int [pk, increment]
+  classId int [not null]
+  position int [not null]
+}
+
+Table SpellcastingSectionTranslation {
+  sectionId int [not null]
+  localeCode varchar [not null]
+  title varchar [not null, note: '"Tours de magie"']
+  description varchar [not null]
+  indexes {
+    (sectionId, localeCode) [pk]
+  }
+}
+
+Table ClassSpell {
+  classId int [not null]
+  spellId int [not null]
+  indexes {
+    (classId, spellId) [pk]
+  }
+}
+
+Table MulticlassRequirement {
+  id int [pk, increment]
+  classId int [not null]
+  abilityScoreId int [not null]
+  minimumScore int [not null, default: 13]
+  alternativeGroup int [not null, default: 1]
+}
+
+Table ClassMulticlassProficiency {
+  classId int [not null]
+  proficiencyId int [not null]
+  indexes {
+    (classId, proficiencyId) [pk]
+  }
+}
+
+Table Subclass {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"evocation"']
+  classId int [not null]
+  casterType CasterType
+  source ContentSource [not null, default: 'SRD']
+  ownerId int
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table SubclassTranslation {
+  subclassId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"École d\'évocation"']
+  description varchar
+  indexes {
+    (subclassId, localeCode) [pk]
+  }
+}
+
+Table SubclassSpell {
+  id int [pk, increment]
+  subclassId int [not null]
+  spellId int [not null]
+  requiredClassLevel int [not null]
+  requiredFeatureId int
+  indexes {
+    (subclassId, spellId, requiredFeatureId) [unique]
+  }
+}
+
+Table ClassFeature {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"arcane-recovery"']
+  level int [not null, note: 'niveau de classe d\'obtention']
+  classId int [not null]
+  subclassId int [note: 'null = capacité commune à la classe']
+  parentId int
+  source ContentSource [not null, default: 'SRD']
+  ownerId int
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table ClassFeatureTranslation {
+  classFeatureId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Restauration arcanique"']
+  description varchar [not null]
+  indexes {
+    (classFeatureId, localeCode) [pk]
+  }
+}
+
+Table ClassFeaturePrerequisite {
+  id int [pk, increment]
+  classFeatureId int [not null]
+  type ClassFeaturePrerequisiteType [not null]
+  minimumLevel int
+  requiredFeatureId int
+  requiredSpellId int
+}
+
+Table Spell {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"fireball"']
+  level int [not null, note: '0 = tour de magie']
+  schoolId int [not null]
+  castingTimeAmount int [not null, default: 1]
+  castingTimeUnit CastingTimeUnit [not null]
+  ritual boolean [not null, default: false]
+  rangeType SpellRangeType [not null]
+  rangeFt int
+  verbal boolean [not null, default: false]
+  somatic boolean [not null, default: false]
+  material boolean [not null, default: false]
+  materialCostGp decimal [note: 'composante avec un coût']
+  materialConsumed boolean [not null, default: false]
+  durationType SpellDurationType [not null]
+  durationAmount int
+  concentration boolean [not null, default: false]
+  attackType AttackType
+  saveAbilityId int
+  saveSuccess SaveSuccess
+  areaType AreaType
+  areaSizeFt int
+  damageScaling jsonb
+  healingScaling jsonb
+  source ContentSource [not null, default: 'SRD']
+  ownerId int
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table SpellTranslation {
+  spellId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Boule de feu"']
+  description varchar [not null]
+  higherLevels varchar [note: '"Aux niveaux supérieurs"']
+  materialText varchar [note: '"une minuscule boule de guano de chauve-souris et du soufre"']
+  castingTimeNote varchar [note: 'déclencheur : "que vous effectuez lorsque…"']
+  rangeNote varchar [note: 'précisions de portée ou de durée SPECIAL']
+  indexes {
+    (spellId, localeCode) [pk]
+  }
+}
+
+Table SpellDamageType {
+  spellId int [not null]
+  damageTypeId int [not null]
+  indexes {
+    (spellId, damageTypeId) [pk]
+  }
+}
+
+Ref: AbilityScoreTranslation.abilityScoreId > AbilityScore.id
+Ref: Skill.abilityScoreId > AbilityScore.id
+Ref: SkillTranslation.skillId > Skill.id
+Ref: AlignmentTranslation.alignmentId > Alignment.id
+Ref: DamageTypeTranslation.damageTypeId > DamageType.id
+Ref: MagicSchoolTranslation.magicSchoolId > MagicSchool.id
+Ref: CreatureTypeTranslation.creatureTypeId > CreatureType.id
+Ref: TerrainTranslation.terrainId > Terrain.id
+Ref: ConditionTranslation.conditionId > Condition.id
+Ref: Language.scriptId > Language.id
+Ref: LanguageTranslation.languageId > Language.id
+Ref: Proficiency.skillId > Skill.id
+Ref: Proficiency.abilityScoreId > AbilityScore.id
+Ref: Proficiency.equipmentId > Equipment.id
+Ref: Proficiency.equipmentCategoryId > EquipmentCategory.id
+Ref: ProficiencyTranslation.proficiencyId > Proficiency.id
+Ref: EquipmentCategory.parentId > EquipmentCategory.id
+Ref: EquipmentCategoryTranslation.equipmentCategoryId > EquipmentCategory.id
+Ref: EquipmentTranslation.equipmentId > Equipment.id
+Ref: EquipmentCategoryItem.equipmentId > Equipment.id
+Ref: EquipmentCategoryItem.categoryId > EquipmentCategory.id
+Ref: PackContent.packId > Equipment.id
+Ref: PackContent.itemId > Equipment.id
+Ref: WeaponStats.equipmentId - Equipment.id
+Ref: WeaponStats.damageTypeId > DamageType.id
+Ref: WeaponPropertyTranslation.weaponPropertyId > WeaponProperty.id
+Ref: WeaponStatsProperty.weaponId > WeaponStats.equipmentId
+Ref: WeaponStatsProperty.propertyId > WeaponProperty.id
+Ref: ArmorStats.equipmentId - Equipment.id
+Ref: VehicleStats.equipmentId - Equipment.id
+Ref: Choice.classId > Class.id
+Ref: Choice.subclassId > Subclass.id
+Ref: Choice.classFeatureId > ClassFeature.id
+Ref: Choice.parentOptionId - ChoiceOption.id
+Ref: Choice.poolCategoryId > EquipmentCategory.id
+Ref: ChoiceTranslation.choiceId > Choice.id
+Ref: ChoiceOption.choiceId > Choice.id
+Ref: ChoiceOptionItem.optionId > ChoiceOption.id
+Ref: ChoiceOptionItem.proficiencyId > Proficiency.id
+Ref: ChoiceOptionItem.equipmentId > Equipment.id
+Ref: ChoiceOptionItem.equipmentCategoryId > EquipmentCategory.id
+Ref: ChoiceOptionItem.classFeatureId > ClassFeature.id
+Ref: ChoiceOptionItem.creatureTypeId > CreatureType.id
+Ref: ChoiceOptionItem.terrainId > Terrain.id
+Ref: ClassTranslation.classId > Class.id
+Ref: ClassPrimaryAbility.classId > Class.id
+Ref: ClassPrimaryAbility.abilityScoreId > AbilityScore.id
+Ref: ClassSavingThrow.classId > Class.id
+Ref: ClassSavingThrow.abilityScoreId > AbilityScore.id
+Ref: ClassProficiency.classId > Class.id
+Ref: ClassProficiency.proficiencyId > Proficiency.id
+Ref: ClassStartingEquipment.classId > Class.id
+Ref: ClassStartingEquipment.equipmentId > Equipment.id
+Ref: ClassLevel.classId > Class.id
+Ref: ClassLevelSpellSlot.classLevelId > ClassLevel.id
+Ref: ClassTableColumn.classId > Class.id
+Ref: ClassTableColumn.subclassId > Subclass.id
+Ref: ClassTableColumnTranslation.columnId > ClassTableColumn.id
+Ref: ClassLevelValue.classLevelId > ClassLevel.id
+Ref: ClassLevelValue.columnId > ClassTableColumn.id
+Ref: ClassSpellcasting.classId - Class.id
+Ref: ClassSpellcasting.abilityScoreId > AbilityScore.id
+Ref: SpellcastingSection.classId > ClassSpellcasting.classId
+Ref: SpellcastingSectionTranslation.sectionId > SpellcastingSection.id
+Ref: ClassSpell.classId > Class.id
+Ref: ClassSpell.spellId > Spell.id
+Ref: MulticlassRequirement.classId > Class.id
+Ref: MulticlassRequirement.abilityScoreId > AbilityScore.id
+Ref: ClassMulticlassProficiency.classId > Class.id
+Ref: ClassMulticlassProficiency.proficiencyId > Proficiency.id
+Ref: Subclass.classId > Class.id
+Ref: SubclassTranslation.subclassId > Subclass.id
+Ref: SubclassSpell.subclassId > Subclass.id
+Ref: SubclassSpell.spellId > Spell.id
+Ref: SubclassSpell.requiredFeatureId > ClassFeature.id
+Ref: ClassFeature.classId > Class.id
+Ref: ClassFeature.subclassId > Subclass.id
+Ref: ClassFeature.parentId > ClassFeature.id
+Ref: ClassFeatureTranslation.classFeatureId > ClassFeature.id
+Ref: ClassFeaturePrerequisite.classFeatureId > ClassFeature.id
+Ref: ClassFeaturePrerequisite.requiredFeatureId > ClassFeature.id
+Ref: ClassFeaturePrerequisite.requiredSpellId > Spell.id
+Ref: Spell.schoolId > MagicSchool.id
+Ref: Spell.saveAbilityId > AbilityScore.id
+Ref: SpellTranslation.spellId > Spell.id
+Ref: SpellDamageType.spellId > Spell.id
+Ref: SpellDamageType.damageTypeId > DamageType.id
+
+TableGroup "Socle des données de jeu" [color: #7F8C8D] {
+  Locale
+  Edition
+  EditionTranslation
+}
+
+TableGroup "Référentiels" [color: #3498DB] {
+  AbilityScore
+  AbilityScoreTranslation
+  Skill
+  SkillTranslation
+  Alignment
+  AlignmentTranslation
+  DamageType
+  DamageTypeTranslation
+  MagicSchool
+  MagicSchoolTranslation
+  CreatureType
+  CreatureTypeTranslation
+  Terrain
+  TerrainTranslation
+  Condition
+  ConditionTranslation
+  Language
+  LanguageTranslation
+  Proficiency
+  ProficiencyTranslation
+}
+
+TableGroup "Équipement" [color: #D35400] {
+  EquipmentCategory
+  EquipmentCategoryTranslation
+  Equipment
+  EquipmentTranslation
+  EquipmentCategoryItem
+  PackContent
+  WeaponStats
+  WeaponProperty
+  WeaponPropertyTranslation
+  WeaponStatsProperty
+  ArmorStats
+  VehicleStats
+}
+
+TableGroup "Choix" [color: #2C3E50] {
+  Choice
+  ChoiceTranslation
+  ChoiceOption
+  ChoiceOptionItem
+}
+
+TableGroup "Classes, sous-classes et capacités de classe" [color: #24BAB1] {
+  Class
+  ClassTranslation
+  ClassPrimaryAbility
+  ClassSavingThrow
+  ClassProficiency
+  ClassStartingEquipment
+  ClassLevel
+  ClassLevelSpellSlot
+  ClassTableColumn
+  ClassTableColumnTranslation
+  ClassLevelValue
+  ClassSpellcasting
+  SpellcastingSection
+  SpellcastingSectionTranslation
+  ClassSpell
+  MulticlassRequirement
+  ClassMulticlassProficiency
+  Subclass
+  SubclassTranslation
+  SubclassSpell
+  ClassFeature
+  ClassFeatureTranslation
+  ClassFeaturePrerequisite
+}
+
+TableGroup "Sorts" [color: #8E44AD] {
+  Spell
+  SpellTranslation
+  SpellDamageType
+}
