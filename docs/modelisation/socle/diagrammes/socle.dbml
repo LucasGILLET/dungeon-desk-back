@@ -188,12 +188,13 @@ Table Edition {
 }
 
 Table EditionTranslation {
+  id int [pk, increment]
   editionId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"D&D 5e (2014)", "D&D 5e révisé (2024)"']
   attribution varchar [not null]
   indexes {
-    (editionId, localeCode) [pk]
+    (editionId, localeCode) [unique]
   }
 }
 
@@ -204,13 +205,14 @@ Table AbilityScore {
 }
 
 Table AbilityScoreTranslation {
+  id int [pk, increment]
   abilityScoreId int [not null]
   localeCode varchar [not null]
   abbreviation varchar [not null, note: '"FOR" / "STR"']
   name varchar [not null, note: '"Force" / "Strength"']
   description varchar
   indexes {
-    (abilityScoreId, localeCode) [pk]
+    (abilityScoreId, localeCode) [unique]
   }
 }
 
@@ -221,12 +223,13 @@ Table Skill {
 }
 
 Table SkillTranslation {
+  id int [pk, increment]
   skillId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Arcanes"']
   description varchar
   indexes {
-    (skillId, localeCode) [pk]
+    (skillId, localeCode) [unique]
   }
 }
 
@@ -238,13 +241,14 @@ Table Alignment {
 }
 
 Table AlignmentTranslation {
+  id int [pk, increment]
   alignmentId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Loyal bon"']
   abbreviation varchar [not null, note: '"LB" / "LG"']
   description varchar
   indexes {
-    (alignmentId, localeCode) [pk]
+    (alignmentId, localeCode) [unique]
   }
 }
 
@@ -254,12 +258,13 @@ Table DamageType {
 }
 
 Table DamageTypeTranslation {
+  id int [pk, increment]
   damageTypeId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Feu"']
   description varchar
   indexes {
-    (damageTypeId, localeCode) [pk]
+    (damageTypeId, localeCode) [unique]
   }
 }
 
@@ -269,12 +274,13 @@ Table MagicSchool {
 }
 
 Table MagicSchoolTranslation {
+  id int [pk, increment]
   magicSchoolId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Évocation"']
   description varchar
   indexes {
-    (magicSchoolId, localeCode) [pk]
+    (magicSchoolId, localeCode) [unique]
   }
 }
 
@@ -284,12 +290,13 @@ Table CreatureType {
 }
 
 Table CreatureTypeTranslation {
+  id int [pk, increment]
   creatureTypeId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Dragon", "Mort-vivant"']
   pluralName varchar [not null, note: '"Dragons", "Morts-vivants" (ennemi juré du rôdeur)']
   indexes {
-    (creatureTypeId, localeCode) [pk]
+    (creatureTypeId, localeCode) [unique]
   }
 }
 
@@ -299,11 +306,12 @@ Table Terrain {
 }
 
 Table TerrainTranslation {
+  id int [pk, increment]
   terrainId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Arctique"']
   indexes {
-    (terrainId, localeCode) [pk]
+    (terrainId, localeCode) [unique]
   }
 }
 
@@ -317,12 +325,13 @@ Table Condition {
 }
 
 Table ConditionTranslation {
+  id int [pk, increment]
   conditionId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Aveuglé"']
   description varchar [not null]
   indexes {
-    (conditionId, localeCode) [pk]
+    (conditionId, localeCode) [unique]
   }
 }
 
@@ -342,13 +351,14 @@ Table Language {
 }
 
 Table LanguageTranslation {
+  id int [pk, increment]
   languageId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Nain"']
   typicalSpeakers varchar [note: '"Nains"']
   description varchar
   indexes {
-    (languageId, localeCode) [pk]
+    (languageId, localeCode) [unique]
   }
 }
 
@@ -367,11 +377,12 @@ Table Proficiency {
 }
 
 Table ProficiencyTranslation {
+  id int [pk, increment]
   proficiencyId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Armures légères"']
   indexes {
-    (proficiencyId, localeCode) [pk]
+    (proficiencyId, localeCode) [unique]
   }
 }
 
@@ -386,11 +397,12 @@ Table EquipmentCategory {
 }
 
 Table EquipmentCategoryTranslation {
+  id int [pk, increment]
   equipmentCategoryId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Armes courantes de corps à corps"']
   indexes {
-    (equipmentCategoryId, localeCode) [pk]
+    (equipmentCategoryId, localeCode) [unique]
   }
 }
 
@@ -414,29 +426,32 @@ Table Equipment {
 }
 
 Table EquipmentTranslation {
+  id int [pk, increment]
   equipmentId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Épée longue"']
   description varchar
   indexes {
-    (equipmentId, localeCode) [pk]
+    (equipmentId, localeCode) [unique]
   }
 }
 
 Table EquipmentCategoryItem {
+  id int [pk, increment]
   equipmentId int [not null]
   categoryId int [not null]
   indexes {
-    (equipmentId, categoryId) [pk]
+    (equipmentId, categoryId) [unique]
   }
 }
 
 Table PackContent {
+  id int [pk, increment]
   packId int [not null]
   itemId int [not null]
   quantity int [not null, default: 1]
   indexes {
-    (packId, itemId) [pk]
+    (packId, itemId) [unique]
   }
 }
 
@@ -461,20 +476,22 @@ Table WeaponProperty {
 }
 
 Table WeaponPropertyTranslation {
+  id int [pk, increment]
   weaponPropertyId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Finesse"']
   description varchar [not null]
   indexes {
-    (weaponPropertyId, localeCode) [pk]
+    (weaponPropertyId, localeCode) [unique]
   }
 }
 
 Table WeaponStatsProperty {
+  id int [pk, increment]
   weaponId int [not null]
   propertyId int [not null]
   indexes {
-    (weaponId, propertyId) [pk]
+    (weaponId, propertyId) [unique]
   }
 }
 
@@ -508,11 +525,12 @@ Table Choice {
 }
 
 Table ChoiceTranslation {
+  id int [pk, increment]
   choiceId int [not null]
   localeCode varchar [not null]
   description varchar [not null, note: '"Choisissez deux compétences parmi Arcanes, Histoire…"']
   indexes {
-    (choiceId, localeCode) [pk]
+    (choiceId, localeCode) [unique]
   }
 }
 
@@ -550,46 +568,51 @@ Table Class {
 }
 
 Table ClassTranslation {
+  id int [pk, increment]
   classId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Magicien"']
   description varchar
   subclassLabel varchar [not null]
   indexes {
-    (classId, localeCode) [pk]
+    (classId, localeCode) [unique]
   }
 }
 
 Table ClassPrimaryAbility {
+  id int [pk, increment]
   classId int [not null]
   abilityScoreId int [not null]
   indexes {
-    (classId, abilityScoreId) [pk]
+    (classId, abilityScoreId) [unique]
   }
 }
 
 Table ClassSavingThrow {
+  id int [pk, increment]
   classId int [not null]
   abilityScoreId int [not null]
   indexes {
-    (classId, abilityScoreId) [pk]
+    (classId, abilityScoreId) [unique]
   }
 }
 
 Table ClassProficiency {
+  id int [pk, increment]
   classId int [not null]
   proficiencyId int [not null]
   indexes {
-    (classId, proficiencyId) [pk]
+    (classId, proficiencyId) [unique]
   }
 }
 
 Table ClassStartingEquipment {
+  id int [pk, increment]
   classId int [not null]
   equipmentId int [not null]
   quantity int [not null, default: 1]
   indexes {
-    (classId, equipmentId) [pk]
+    (classId, equipmentId) [unique]
   }
 }
 
@@ -606,11 +629,12 @@ Table ClassLevel {
 }
 
 Table ClassLevelSpellSlot {
+  id int [pk, increment]
   classLevelId int [not null]
   spellLevel int [not null, note: '1..9']
   slots int [not null]
   indexes {
-    (classLevelId, spellLevel) [pk]
+    (classLevelId, spellLevel) [unique]
   }
 }
 
@@ -627,11 +651,12 @@ Table ClassTableColumn {
 }
 
 Table ClassTableColumnTranslation {
+  id int [pk, increment]
   columnId int [not null]
   localeCode varchar [not null]
   label varchar [not null, note: '"Rages"']
   indexes {
-    (columnId, localeCode) [pk]
+    (columnId, localeCode) [unique]
   }
 }
 
@@ -663,20 +688,22 @@ Table SpellcastingSection {
 }
 
 Table SpellcastingSectionTranslation {
+  id int [pk, increment]
   sectionId int [not null]
   localeCode varchar [not null]
   title varchar [not null, note: '"Tours de magie"']
   description varchar [not null]
   indexes {
-    (sectionId, localeCode) [pk]
+    (sectionId, localeCode) [unique]
   }
 }
 
 Table ClassSpell {
+  id int [pk, increment]
   classId int [not null]
   spellId int [not null]
   indexes {
-    (classId, spellId) [pk]
+    (classId, spellId) [unique]
   }
 }
 
@@ -689,10 +716,11 @@ Table MulticlassRequirement {
 }
 
 Table ClassMulticlassProficiency {
+  id int [pk, increment]
   classId int [not null]
   proficiencyId int [not null]
   indexes {
-    (classId, proficiencyId) [pk]
+    (classId, proficiencyId) [unique]
   }
 }
 
@@ -712,12 +740,13 @@ Table Subclass {
 }
 
 Table SubclassTranslation {
+  id int [pk, increment]
   subclassId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"École d\'évocation"']
   description varchar
   indexes {
-    (subclassId, localeCode) [pk]
+    (subclassId, localeCode) [unique]
   }
 }
 
@@ -750,12 +779,13 @@ Table ClassFeature {
 }
 
 Table ClassFeatureTranslation {
+  id int [pk, increment]
   classFeatureId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Restauration arcanique"']
   description varchar [not null]
   indexes {
-    (classFeatureId, localeCode) [pk]
+    (classFeatureId, localeCode) [unique]
   }
 }
 
@@ -804,6 +834,7 @@ Table Spell {
 }
 
 Table SpellTranslation {
+  id int [pk, increment]
   spellId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Boule de feu"']
@@ -813,15 +844,16 @@ Table SpellTranslation {
   castingTimeNote varchar [note: 'déclencheur : "que vous effectuez lorsque…"']
   rangeNote varchar [note: 'précisions de portée ou de durée SPECIAL']
   indexes {
-    (spellId, localeCode) [pk]
+    (spellId, localeCode) [unique]
   }
 }
 
 Table SpellDamageType {
+  id int [pk, increment]
   spellId int [not null]
   damageTypeId int [not null]
   indexes {
-    (spellId, damageTypeId) [pk]
+    (spellId, damageTypeId) [unique]
   }
 }
 
