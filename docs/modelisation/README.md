@@ -58,6 +58,23 @@ GET /api/srd/:edition/classes?lang=fr
 GET /api/srd/:edition/classes/:index?lang=fr
 ```
 
+## Back-office (Directus)
+
+Directus sert à éditer les données de jeu (et leurs traductions) depuis une interface web. Il ne crée ni ne modifie aucune table : la structure reste gérée par les migrations Prisma.
+
+```bash
+cp .env.directus.example .env.directus   # renseigner SECRET, ADMIN_PASSWORD (et ADMIN_TOKEN pour les scripts)
+docker compose -f docker-compose.yml -f docker-compose.directus.yml up -d directus
+```
+
+Puis http://localhost:8055, avec `ADMIN_EMAIL` / `ADMIN_PASSWORD` de `.env.directus`.
+
+**Cohabitation avec Prisma** : Directus range ses tables système (`directus_*`) dans le schéma PostgreSQL `directus` (`DB_SEARCH_PATH=directus,public`) et lit les tables du socle dans `public`. Prisma ne gère que `public` : il ne voit pas les tables de Directus, et `prisma migrate dev` ne signale aucune dérive. Sans ce schéma séparé, Prisma proposerait de supprimer les 33 tables de Directus.
+
+Exigence de Directus : chaque table doit avoir une clé primaire simple (voir `conventions.md`).
+
+À faire : versionner la configuration de l'interface (snapshot Directus) et les rôles.
+
 ## Base locale
 
 La base de développement est le service `postgres` de `docker-compose.yml` :

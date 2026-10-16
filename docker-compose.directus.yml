@@ -1,0 +1,51 @@
+# Back-office Directus pour les données de jeu (SRD), en local.
+#
+#   cp .env.directus.example .env.directus   # puis renseigner les secrets
+#   docker compose -f docker-compose.yml -f docker-compose.directus.yml up -d directus
+#   → http://localhost:8055
+#
+# Cohabitation avec Prisma : Directus range ses tables système (directus_*) dans
+# le schéma PostgreSQL `directus` (DB_SEARCH_PATH), et lit les tables du socle
+# dans `public`. Prisma ne gère que `public` : il ne voit pas les tables de
+# Directus, et `prisma migrate dev` ne signale aucune dérive.
+# Directus ne crée ni ne modifie jamais de table : la structure reste gérée par
+# les migrations Prisma.
+
+services:
+  # Crée le schéma `directus` avant le premier démarrage (Directus ne le crée pas)
+  directus-schema:
+    image: postgres:16-alpine
+    depends_on:
+      - postgres
+    environment:
+      PGPASSWORD: password123
+    command: >-
+      sh -c "until pg_isready -h postgres -U admin -q; do sleep 1; done;
+      psql -h postgres -U admin -d dungeon_desk_db -c 'CREATE SCHEMA IF NOT EXISTS directus'"
+    restart: "no"
+
+  directus:
+    image: directus/directus:12.4.1
+    restart: always
+    ports:
+      - "8055:8055"
+    env_file:
+      - .env.directus
+    environment:
+      DB_CLIENT: pg
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_DATABASE: dungeon_desk_db
+      DB_USER: admin
+      DB_PASSWORD: password123
+      DB_SEARCH_PATH: directus,public
+      PUBLIC_URL: http://localhost:8055
+      TELEMETRY: "false"
+    volumes:
+      - directus_uploads:/directus/uploads
+    depends_on:
+      directus-schema:
+        condition: service_completed_successfully
+
+volumes:
+  directus_uploads:

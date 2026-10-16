@@ -48,3 +48,5 @@ key.json
 *.pem
 service-account.json
 gcp-key.json
+# Directus (secrets locaux)
+.env.directus
