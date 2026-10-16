@@ -43,6 +43,8 @@ function displayTemplate(m: Model): string | null {
   if (m.name === 'Locale') return '{{name}}';
   if (m.name === 'Edition') return '{{code}}';
   if (m.name === 'ClassLevel') return 'Niveau {{level}}';
+  // Statistiques 1-1 d'un objet : affichées par le nom de l'objet
+  if (['WeaponStats', 'ArmorStats', 'VehicleStats'].includes(m.name)) return '{{equipmentId.translations.name}} ({{equipmentId.index}})';
   if (hasIndex) return '{{index}}';
   return null;
 }
@@ -129,6 +131,9 @@ function fieldMeta(m: Model, f: Field): Json | null {
     Object.assign(meta, { interface: 'boolean', display: 'boolean', width: 'half' });
   } else if (f.type === 'Int' || f.type === 'Decimal') {
     Object.assign(meta, { interface: 'input', width: 'half' });
+  } else if (f.type === 'String' && f.name !== 'index') {
+    // Texte court (colonne text sans @db.Text) : une ligne, pas une zone multiligne
+    Object.assign(meta, { interface: 'input', width: /Dice$|^key$|^code$/.test(f.name) ? 'half' : 'full' });
   } else if (f.name === 'index') {
     Object.assign(meta, { interface: 'input', options: { slug: true, font: 'monospace' }, width: 'half', note: 'Clé stable en anglais, utilisée par le code et les URL' });
   }
@@ -167,6 +172,37 @@ async function configureTranslations(): Promise<number> {
       sort: 3,
     });
     count++;
+  }
+  return count;
+}
+
+// --- Listes liées (générique, déduit du schéma Prisma) -------------------------------
+
+// Pour chaque relation 1-n du schéma (champ liste Prisma), une liste liée dans la
+// fiche du parent : capacités d'une sous-classe, options d'un choix, objets d'une
+// catégorie… Les formulaires soignés ci-dessous remplacent ensuite certaines de
+// ces listes par des relations n-n (sorts d'une classe, propriétés d'une arme…).
+async function configureRelations(): Promise<number> {
+  let count = 0;
+  // Tables pivots référencées par presque tout (langues, éditions) : pas de listes
+  const HUBS = new Set(['Locale', 'Edition']);
+  for (const parent of models) {
+    if (isTranslation(parent) || HUBS.has(parent.name)) continue;
+    for (const field of parent.fields) {
+      if (field.kind !== 'object' || !field.isList) continue;
+      const child = byName.get(field.type)!;
+      if (isTranslation(child)) continue; // les traductions passent par l'onglet de traductions
+      const back = child.fields.find((f) => f.relationName === field.relationName && f.relationFromFields?.length);
+      if (!back) continue;
+      const template = displayTemplate(child) ?? '{{id}}';
+      await api('PATCH', `/relations/${child.name}/${back.relationFromFields![0]}`, { meta: { one_field: field.name } });
+      await upsertAlias(parent.name, field.name, {
+        special: ['o2m'], interface: 'list-o2m', options: { template, enableLink: true },
+        display: 'related-values', display_options: { template },
+        translations: label(parent.name, field.name) ? fr(label(parent.name, field.name)!) : null,
+      });
+      count++;
+    }
   }
   return count;
 }
@@ -282,18 +318,44 @@ async function configureBackgroundForms(): Promise<void> {
   ]);
 }
 
+// Champ visible seulement pour certains types d'objet (kind)
+const onlyForKinds = (kinds: string[]) => [{ name: 'Masqué', rule: { _and: [{ kind: { _nin: kinds } }] }, hidden: true }];
+
+async function configureEquipmentForms(): Promise<void> {
+  // Statistiques 1-1 : la clé primaire de WeaponStats est l'id de l'objet
+  await o2m('Equipment', 'weapon', 'WeaponStats', 'equipmentId', '{{category}} · {{range}} · {{damageDice}} {{damageTypeId.translations.name}}');
+  await o2m('Equipment', 'armor', 'ArmorStats', 'equipmentId', '{{category}} · CA {{baseArmorClass}}');
+  await o2m('Equipment', 'vehicle', 'VehicleStats', 'equipmentId', '{{speed}} {{speedUnit}}');
+  await m2m('Equipment', 'categories', 'EquipmentCategoryItem', 'equipmentId', 'categoryId', '{{categoryId.translations.name}}', 'items');
+  await m2m('EquipmentCategory', 'items', 'EquipmentCategoryItem', 'categoryId', 'equipmentId', '{{equipmentId.translations.name}}', 'categories');
+  await o2m('Equipment', 'packContents', 'PackContent', 'packId', '{{quantity}} × {{itemId.translations.name}}');
+  await m2m('WeaponStats', 'properties', 'WeaponStatsProperty', 'weaponId', 'propertyId', '{{propertyId.translations.name}}');
+  await groups('Equipment', [
+    ['grp_general', 'Général', ['index', 'editionId', 'kind', 'source', 'categories']],
+    ['grp_prix', 'Prix et poids', ['costAmount', 'costCurrency', 'weightLb', 'bundleSize']],
+    ['grp_stats', 'Statistiques', ['weapon', 'armor', 'vehicle', 'packContents']],
+  ]);
+  await api('PATCH', '/fields/Equipment/weapon', { meta: { conditions: onlyForKinds(['WEAPON']) } });
+  await api('PATCH', '/fields/Equipment/armor', { meta: { conditions: onlyForKinds(['ARMOR']) } });
+  await api('PATCH', '/fields/Equipment/vehicle', { meta: { conditions: onlyForKinds(['MOUNT', 'VEHICLE']) } });
+  await api('PATCH', '/fields/Equipment/packContents', { meta: { conditions: onlyForKinds(['PACK']) } });
+  await api('PATCH', '/fields/WeaponStats/versatileDice', { meta: { note: 'Seulement pour les armes polyvalentes' } });
+}
+
 async function main(): Promise<void> {
   const started = Date.now();
   await configureSettings();
   await configureMenu();
   const fields = await configureFields();
   const translations = await configureTranslations();
+  const relations = await configureRelations();
   await configureClassForms();
   await configureSpellForms();
+  await configureEquipmentForms();
   await configureRaceForms();
   await configureBackgroundForms();
   const roles = await configureRoles(srdModels.map((m) => m.name), srdModels.filter(isTranslation).map((m) => m.name));
-  console.log(`[directus] ${models.length} collections, ${fields} champs, ${translations} onglets de traduction, ${roles} ; ${((Date.now() - started) / 1000).toFixed(1)} s`);
+  console.log(`[directus] ${models.length} collections, ${fields} champs, ${translations} onglets de traduction, ${relations} listes liées, ${roles} ; ${((Date.now() - started) / 1000).toFixed(1)} s`);
 }
 
 main().catch((error) => {
