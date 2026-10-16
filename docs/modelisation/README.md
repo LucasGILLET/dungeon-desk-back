@@ -73,7 +73,15 @@ Puis http://localhost:8055, avec `ADMIN_EMAIL` / `ADMIN_PASSWORD` de `.env.direc
 
 Exigence de Directus : chaque table doit avoir une clé primaire simple (voir `conventions.md`).
 
-À faire : versionner la configuration de l'interface (snapshot Directus) et les rôles.
+**Configuration de l'interface** (menus, libellés français, formulaires en sections, listes liées, onglets de traduction) et **rôles** (« Éditeur des données de jeu », « Traducteur ») : appliqués par un script versionné, idempotent, à relancer après chaque migration :
+
+```bash
+npm run directus:config
+```
+
+Le script ([`src/directus/`](../../src/directus/)) lit le schéma Prisma et ne touche qu'à la présentation et aux droits, jamais à la structure des tables. Le snapshot Directus (`directus schema snapshot`) n'est volontairement pas utilisé : il contient aussi la structure des tables, et entrerait en concurrence avec les migrations Prisma.
+
+**Licence** : Directus 12 limite l'offre gratuite à 25 collections. Le projet utilise l'Open Innovation Grant (gratuit pour les particuliers et petites structures, renouvelé chaque année) : renseigner `LICENSE_KEY` dans `.env.directus`. La clé est liée au `PUBLIC_URL` (5 activations au total) ; désactiver la licence dans Paramètres → Licence avant de détruire une instance. Sans licence, Directus verrouille le projet et désactive les collections au-delà de la limite (le script les réactive).
 
 ## Base locale
 
