@@ -12,7 +12,7 @@ Ce document complète l'en-tête de [`prisma/schema/00-base.prisma`](../../prism
 | Clé étrangère | `<relation>Id` | `abilityScoreId` |
 | Clé de langue | `localeCode` (→ `Locale.code`) | `"fr"` |
 | Clé métier | `index`, slug anglais en kebab-case, repris du SRD | `"arcane-recovery"` |
-| Clé primaire | toujours un `id` autoincrémenté, même pour les traductions et liaisons (Directus ignore les clés composées) ; la clé naturelle devient un `@@unique` | `@@unique([classId, localeCode])` |
+| Clé primaire | toujours un `id` autoincrémenté, même pour les traductions et liaisons (Directus ignore les clés composées) ; la clé naturelle devient un `@@unique`. Une clé primaire n'est jamais aussi une clé étrangère : pour une table 1-1, `id` + `equipmentId @unique` (Directus ne suit pas une relation au-delà d'un niveau sinon) | `@@unique([classId, localeCode])` |
 | Unité dans un nom de colonne | suffixe explicite | `rangeFt`, `weightLb`, `materialCostGp` |
 | Enum | PascalCase, valeurs SCREAMING_SNAKE_CASE | `CastingTimeUnit.BONUS_ACTION` |
 

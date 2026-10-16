@@ -467,7 +467,8 @@ Table PackContent {
 }
 
 Table WeaponStats {
-  equipmentId int [pk]
+  id int [pk, increment]
+  equipmentId int [unique, not null]
   category WeaponCategory [not null]
   range WeaponRange [not null]
   damageDice varchar
@@ -507,7 +508,8 @@ Table WeaponStatsProperty {
 }
 
 Table ArmorStats {
-  equipmentId int [pk]
+  id int [pk, increment]
+  equipmentId int [unique, not null]
   category ArmorCategory [not null]
   baseArmorClass int [not null, note: '11, ou +2 pour un bouclier']
   addsDexModifier boolean [not null]
@@ -517,7 +519,8 @@ Table ArmorStats {
 }
 
 Table VehicleStats {
-  equipmentId int [pk]
+  id int [pk, increment]
+  equipmentId int [unique, not null]
   speed decimal
   speedUnit VehicleSpeedUnit
   capacityLb int
@@ -696,7 +699,8 @@ Table ClassLevelValue {
 }
 
 Table ClassSpellcasting {
-  classId int [pk]
+  id int [pk, increment]
+  classId int [unique, not null]
   abilityScoreId int [not null]
   startLevel int [not null, note: '1 ou 2']
   casterType CasterType [not null]
@@ -705,7 +709,7 @@ Table ClassSpellcasting {
 
 Table SpellcastingSection {
   id int [pk, increment]
-  classId int [not null]
+  spellcastingId int [not null]
   position int [not null]
 }
 
@@ -1144,7 +1148,7 @@ Ref: PackContent.itemId > Equipment.id
 Ref: WeaponStats.equipmentId - Equipment.id
 Ref: WeaponStats.damageTypeId > DamageType.id
 Ref: WeaponPropertyTranslation.weaponPropertyId > WeaponProperty.id
-Ref: WeaponStatsProperty.weaponId > WeaponStats.equipmentId
+Ref: WeaponStatsProperty.weaponId > WeaponStats.id
 Ref: WeaponStatsProperty.propertyId > WeaponProperty.id
 Ref: ArmorStats.equipmentId - Equipment.id
 Ref: VehicleStats.equipmentId - Equipment.id
@@ -1188,7 +1192,7 @@ Ref: ClassLevelValue.classLevelId > ClassLevel.id
 Ref: ClassLevelValue.columnId > ClassTableColumn.id
 Ref: ClassSpellcasting.classId - Class.id
 Ref: ClassSpellcasting.abilityScoreId > AbilityScore.id
-Ref: SpellcastingSection.classId > ClassSpellcasting.classId
+Ref: SpellcastingSection.spellcastingId > ClassSpellcasting.id
 Ref: SpellcastingSectionTranslation.sectionId > SpellcastingSection.id
 Ref: ClassSpell.classId > Class.id
 Ref: ClassSpell.spellId > Spell.id

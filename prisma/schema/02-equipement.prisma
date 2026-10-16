@@ -129,7 +129,10 @@ enum WeaponRange {
 }
 
 model WeaponStats {
-  equipmentId   Int            @id
+  id            Int            @id @default(autoincrement())
+  // Clé propre (une clé primaire n'est jamais une clé étrangère : Directus ne
+  // suit pas les relations au-delà d'un niveau sinon)
+  equipmentId   Int            @unique
   equipment     Equipment      @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
   category      WeaponCategory
   range         WeaponRange
@@ -172,7 +175,7 @@ model WeaponStatsProperty {
   id         Int            @id @default(autoincrement())
   weaponId   Int
   propertyId Int
-  weapon     WeaponStats    @relation(fields: [weaponId], references: [equipmentId], onDelete: Cascade)
+  weapon     WeaponStats    @relation(fields: [weaponId], references: [id], onDelete: Cascade)
   property   WeaponProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@unique([weaponId, propertyId])
@@ -188,7 +191,10 @@ enum ArmorCategory {
 }
 
 model ArmorStats {
-  equipmentId         Int           @id
+  id                  Int           @id @default(autoincrement())
+  // Clé propre (une clé primaire n'est jamais une clé étrangère : Directus ne
+  // suit pas les relations au-delà d'un niveau sinon)
+  equipmentId         Int           @unique
   equipment           Equipment     @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
   category            ArmorCategory
   baseArmorClass      Int // 11, ou +2 pour un bouclier
@@ -206,7 +212,10 @@ enum VehicleSpeedUnit {
 }
 
 model VehicleStats {
-  equipmentId Int               @id
+  id          Int               @id @default(autoincrement())
+  // Clé propre (une clé primaire n'est jamais une clé étrangère : Directus ne
+  // suit pas les relations au-delà d'un niveau sinon)
+  equipmentId Int               @unique
   equipment   Equipment         @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
   speed       Decimal?          @db.Decimal(6, 1)
   speedUnit   VehicleSpeedUnit?

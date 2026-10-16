@@ -207,6 +207,7 @@ export const FIELDS: Record<string, string> = {
   'WeaponStats.normalRangeFt': 'Portée normale (pieds)',
   'WeaponStats.longRangeFt': 'Portée longue (pieds)',
   'WeaponStats.properties': 'Propriétés',
+  'WeaponProperty.weaponStatsProperties': 'Armes ayant cette propriété',
   'ArmorStats.equipmentId': 'Objet',
   'ArmorStats.category': "Catégorie d'armure",
   'ArmorStats.baseArmorClass': 'Classe d\'armure de base',

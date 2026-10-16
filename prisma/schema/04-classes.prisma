@@ -203,7 +203,8 @@ enum CasterType {
 }
 
 model ClassSpellcasting {
-  classId        Int          @id
+  id             Int          @id @default(autoincrement())
+  classId        Int          @unique
   class          Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
   abilityScoreId Int
   abilityScore   AbilityScore @relation("ClassSpellcastingAbility", fields: [abilityScoreId], references: [id])
@@ -216,10 +217,10 @@ model ClassSpellcasting {
 
 // Rubriques de règles : "Tours de magie", "Emplacements de sorts", "Focaliseur"…
 model SpellcastingSection {
-  id           Int               @id @default(autoincrement())
-  classId      Int
-  spellcasting ClassSpellcasting @relation(fields: [classId], references: [classId], onDelete: Cascade)
-  position     Int
+  id             Int               @id @default(autoincrement())
+  spellcastingId Int
+  spellcasting   ClassSpellcasting @relation(fields: [spellcastingId], references: [id], onDelete: Cascade)
+  position       Int
 
   translations SpellcastingSectionTranslation[]
 }

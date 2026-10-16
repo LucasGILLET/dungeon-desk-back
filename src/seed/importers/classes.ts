@@ -189,7 +189,7 @@ export class ClassImporter {
     // --- Incantation ---
     if (en.spellcasting) {
       const info: Json[] = en.spellcasting.info;
-      await tx.classSpellcasting.create({
+      const spellcasting = await tx.classSpellcasting.create({
         data: {
           classId,
           abilityScoreId: await ability(en.spellcasting.spellcasting_ability.index),
@@ -199,7 +199,7 @@ export class ClassImporter {
         },
       });
       for (const [position, section] of info.entries()) {
-        const created = await tx.spellcastingSection.create({ data: { classId, position } });
+        const created = await tx.spellcastingSection.create({ data: { spellcastingId: spellcasting.id, position } });
         const rows = [{ localeCode: 'en', data: { title: section.name, description: text(section.desc) ?? '' } }];
         for (const [localeCode, other] of Object.entries(localized(classes, en.index, (r) => r.spellcasting?.info?.[position]))) {
           if (other && text(other.desc) !== text(section.desc)) {

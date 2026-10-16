@@ -13,6 +13,9 @@
 //     ex. "wizard") = clé métier stable, neutre en langue. Toutes les tables,
 //     y compris traductions et liaisons, ont une clé primaire `id` simple
 //     (exigé par Directus) ; l'ancienne clé composée devient un @@unique.
+//     Une clé primaire n'est jamais aussi une clé étrangère (tables 1-1 comme
+//     WeaponStats : `id` + `equipmentId @unique`), sinon Directus ne suit pas
+//     les relations au-delà d'un niveau.
 //
 //  2. Éditions : tout contenu de jeu porte `editionId`, avec l'unicité
 //     @@unique([editionId, index]). Le magicien 2014 et le magicien 2024 sont
