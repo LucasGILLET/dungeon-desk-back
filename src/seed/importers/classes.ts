@@ -1,7 +1,7 @@
 // Classes : classe, table de progression, incantation, multiclassage, choix,
 // sous-classes et capacités. Une transaction par classe.
 import { CasterType, ChoiceKind, ClassColumnValueType, ClassFeaturePrerequisiteType, PrismaClient } from '@prisma/client';
-import { Json, LOCALES, LocaleCode, loadSrd, log, readJson, Refs, replaceTranslations, SrdFile, text, translationsFor, TX_OPTIONS, Tx } from '../context';
+import { Json, LOCALES, LocaleCode, loadMerged, loadSrd, log, MergedFile, readJson, Refs, replaceTranslations, SrdFile, text, translationsFor, TX_OPTIONS, Tx } from '../context';
 import { ChoiceImporter } from './choices';
 
 const CASTER_TYPES: Record<string, CasterType> = {
@@ -13,8 +13,8 @@ const CASTER_TYPES: Record<string, CasterType> = {
 interface Sources {
   classes: SrdFile;
   levels: SrdFile;
-  subclasses: SrdFile;
-  features: SrdFile;
+  subclasses: MergedFile;
+  features: MergedFile;
   spells: SrdFile;
   labels: Json;
 }
@@ -53,8 +53,9 @@ export class ClassImporter {
     this.src = {
       classes: loadSrd(edition, 'Classes'),
       levels: loadSrd(edition, 'Levels'),
-      subclasses: loadSrd(edition, 'Subclasses'),
-      features: loadSrd(edition, 'Features'),
+      // Sous-classes maison (domaine de la Guerre, Archifée…) : fichiers custom en français
+      subclasses: loadMerged(edition, 'Subclasses', 'custom-subclasses.json', 'fr'),
+      features: loadMerged(edition, 'Features', 'custom-features.json', 'fr'),
       spells: loadSrd(edition, 'Spells'),
       labels: readJson(`${edition}/custom/class-labels.json`),
     };
@@ -217,10 +218,11 @@ export class ClassImporter {
     // --- Sous-classes ---
     const subclassIds = new Map<string, number>();
     for (const sub of ownSubclasses) {
+      const sdata = { classId, source: subclasses.isHomebrew(sub.index) ? ('HOMEBREW' as const) : ('SRD' as const) };
       const row = await tx.subclass.upsert({
         where: { editionId_index: { editionId, index: sub.index } },
-        create: { editionId, index: sub.index, classId },
-        update: { classId },
+        create: { editionId, index: sub.index, ...sdata },
+        update: sdata,
       });
       subclassIds.set(sub.index, row.id);
       await replaceTranslations(tx, 'subclassTranslation', 'subclassId', row.id,
@@ -239,7 +241,10 @@ export class ClassImporter {
     // --- Capacités : création, puis parents, prérequis et choix ---
     const featureIds = new Map<string, number>();
     for (const f of ownFeatures) {
-      const fdata = { level: f.level, classId, subclassId: f.subclass ? subclassIds.get(f.subclass.index)! : null };
+      const fdata = {
+        level: f.level, classId, subclassId: f.subclass ? subclassIds.get(f.subclass.index)! : null,
+        source: features.isHomebrew(f.index) ? ('HOMEBREW' as const) : ('SRD' as const),
+      };
       const row = await tx.classFeature.upsert({
         where: { editionId_index: { editionId, index: f.index } },
         create: { editionId, index: f.index, ...fdata },

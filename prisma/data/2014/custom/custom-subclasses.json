@@ -1,0 +1,417 @@
+[
+  {
+    "index": "war",
+    "class": {
+      "index": "cleric"
+    },
+    "name": "Domaine de la Guerre",
+    "subclass_flavor": "Divine Domain",
+    "desc": [
+      "Un clerc martial qui bénit les batailles et guide les guerriers au combat."
+    ],
+    "spells": [
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-1",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "divine-favor",
+          "name": "Faveur divine"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-1",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "shield-of-faith",
+          "name": "Bouclier de la foi"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-3",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "spiritual-weapon",
+          "name": "Arme spirituelle"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-3",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "magic-weapon",
+          "name": "Arme magique"
+        }
+      }
+    ]
+  },
+  {
+    "index": "light",
+    "class": {
+      "index": "cleric"
+    },
+    "name": "Domaine de la Lumière",
+    "subclass_flavor": "Divine Domain",
+    "desc": [
+      "Un clerc qui combat les ténèbres avec la lumière divine et le feu sacré."
+    ],
+    "spells": [
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-1",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "faerie-fire",
+          "name": "Lueurs féeriques"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-1",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "burning-hands",
+          "name": "Mains brûlantes"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-3",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "flaming-sphere",
+          "name": "Sphère de feu"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-5",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "daylight",
+          "name": "Lumière du jour"
+        }
+      }
+    ]
+  },
+  {
+    "index": "nature",
+    "class": {
+      "index": "cleric"
+    },
+    "name": "Domaine de la Nature",
+    "subclass_flavor": "Divine Domain",
+    "desc": [
+      "Un clerc connecté au monde naturel et à ses créatures."
+    ],
+    "spells": [
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-1",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "goodberry",
+          "name": "Baies magiques"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-1",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "speak-with-animals",
+          "name": "Communication avec les animaux"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-3",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "spike-growth",
+          "name": "Croissance d'épines"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-7",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "freedom-of-movement",
+          "name": "Liberté de mouvement"
+        }
+      }
+    ]
+  },
+  {
+    "index": "trickery",
+    "class": {
+      "index": "cleric"
+    },
+    "name": "Domaine de la Duperie",
+    "subclass_flavor": "Divine Domain",
+    "desc": [
+      "Un clerc rusé qui utilise l'illusion et la tromperie pour servir sa divinité."
+    ],
+    "spells": [
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-1",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "charm-person",
+          "name": "Charme-personne"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-1",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "disguise-self",
+          "name": "Déguisement"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-3",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "mirror-image",
+          "name": "Image miroir"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "cleric-3",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "invisibility",
+          "name": "Invisibilité"
+        }
+      }
+    ]
+  },
+  {
+    "index": "wild-magic",
+    "class": {
+      "index": "sorcerer"
+    },
+    "name": "Magie Sauvage",
+    "subclass_flavor": "Sorcerous Origin",
+    "desc": [
+      "Votre magie innée provient des forces chaotiques du chaos lui-même."
+    ],
+    "spells": [
+      {
+        "prerequisites": [
+          {
+            "index": "sorcerer-1",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "detect-magic",
+          "name": "Détection de la magie"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "sorcerer-1",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "faerie-fire",
+          "name": "Lueurs féeriques"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "sorcerer-3",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "blur",
+          "name": "Flou"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "sorcerer-3",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "levitate",
+          "name": "Lévitation"
+        }
+      }
+    ]
+  },
+  {
+    "index": "great-old-one",
+    "class": {
+      "index": "warlock"
+    },
+    "name": "Le Grand Ancien",
+    "subclass_flavor": "Otherworldly Patron",
+    "desc": [
+      "Votre patron est une entité mystérieuse dont la nature est étrangère au tissu de la réalité."
+    ],
+    "spells": [
+      {
+        "prerequisites": [
+          {
+            "index": "warlock-1",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "sleep",
+          "name": "Sommeil"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "warlock-3",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "detect-thoughts",
+          "name": "Détection des pensées"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "warlock-3",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "suggestion",
+          "name": "Suggestion"
+        }
+      }
+    ]
+  },
+  {
+    "index": "archfey",
+    "class": {
+      "index": "warlock"
+    },
+    "name": "L'Archifée",
+    "subclass_flavor": "Otherworldly Patron",
+    "desc": [
+      "Votre patron est un seigneur ou une dame des fées, une créature de légende."
+    ],
+    "spells": [
+      {
+        "prerequisites": [
+          {
+            "index": "warlock-1",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "faerie-fire",
+          "name": "Lueurs féeriques"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "warlock-1",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "sleep",
+          "name": "Sommeil"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "warlock-3",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "calm-emotions",
+          "name": "Apaisement des émotions"
+        }
+      },
+      {
+        "prerequisites": [
+          {
+            "index": "warlock-3",
+            "type": "level"
+          }
+        ],
+        "spell": {
+          "index": "suggestion",
+          "name": "Suggestion"
+        }
+      }
+    ]
+  }
+]

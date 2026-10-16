@@ -1,0 +1,457 @@
+[
+  {
+    "index": "war-priest",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "war"
+    },
+    "name": "Prêtre guerrier",
+    "level": 1,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "channel-divinity-guided-strike",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "war"
+    },
+    "name": "Canalisation Divine : Frappe guidée",
+    "level": 2,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "channel-divinity-war-gods-blessing",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "war"
+    },
+    "name": "Canalisation Divine : Bénédiction de guerre",
+    "level": 6,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "war-divine-strike",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "war"
+    },
+    "name": "Frappe guerrière",
+    "level": 8,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "avatar-of-battle",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "war"
+    },
+    "name": "Avatar de bataille",
+    "level": 17,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "light-bonus-cantrip",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "light"
+    },
+    "name": "Sort mineur bonus",
+    "level": 1,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "warding-flare",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "light"
+    },
+    "name": "Lueur protectrice",
+    "level": 1,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "channel-divinity-radiance-of-the-dawn",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "light"
+    },
+    "name": "Canalisation Divine : Rayonnement du soleil",
+    "level": 2,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "improved-flare",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "light"
+    },
+    "name": "Lueur protectrice améliorée",
+    "level": 6,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "light-potent-spellcasting",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "light"
+    },
+    "name": "Amélioration des sorts mineurs",
+    "level": 8,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "corona-of-light",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "light"
+    },
+    "name": "Couronne de lumière",
+    "level": 17,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "acolyte-of-nature",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "nature"
+    },
+    "name": "Acolyte de la nature",
+    "level": 1,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "nature-bonus-proficiency",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "nature"
+    },
+    "name": "Maîtrise des armures lourdes",
+    "level": 1,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "channel-divinity-charm-animals-and-plants",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "nature"
+    },
+    "name": "Canalisation Divine : Charme des animaux et des plantes",
+    "level": 2,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "dampen-elements",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "nature"
+    },
+    "name": "Résistance aux éléments",
+    "level": 6,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "nature-divine-strike",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "nature"
+    },
+    "name": "Frappe élémentaire",
+    "level": 8,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "master-of-nature",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "nature"
+    },
+    "name": "Maître de la nature",
+    "level": 17,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "blessing-of-the-trickster",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "trickery"
+    },
+    "name": "Bénédiction du filou",
+    "level": 1,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "channel-divinity-invoke-duplicity",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "trickery"
+    },
+    "name": "Canalisation Divine : Invoquer un double",
+    "level": 2,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "channel-divinity-cloak-of-shadows",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "trickery"
+    },
+    "name": "Canalisation Divine : Manteau d'ombre",
+    "level": 6,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "trickery-divine-strike",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "trickery"
+    },
+    "name": "Frappe furtive",
+    "level": 8,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "improved-duplicity",
+    "class": {
+      "index": "cleric"
+    },
+    "subclass": {
+      "index": "trickery"
+    },
+    "name": "Duperie améliorée",
+    "level": 17,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "wild-magic-surge",
+    "class": {
+      "index": "sorcerer"
+    },
+    "subclass": {
+      "index": "wild-magic"
+    },
+    "name": "Poussée de magie sauvage",
+    "level": 1,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "tides-of-chaos",
+    "class": {
+      "index": "sorcerer"
+    },
+    "subclass": {
+      "index": "wild-magic"
+    },
+    "name": "Marées de chaos",
+    "level": 1,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "bend-luck",
+    "class": {
+      "index": "sorcerer"
+    },
+    "subclass": {
+      "index": "wild-magic"
+    },
+    "name": "Chance surnaturelle",
+    "level": 6,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "controlled-chaos",
+    "class": {
+      "index": "sorcerer"
+    },
+    "subclass": {
+      "index": "wild-magic"
+    },
+    "name": "Chaos contrôlé",
+    "level": 14,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "spell-bombardment",
+    "class": {
+      "index": "sorcerer"
+    },
+    "subclass": {
+      "index": "wild-magic"
+    },
+    "name": "Bombardement de sorts",
+    "level": 18,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "awakened-mind",
+    "class": {
+      "index": "warlock"
+    },
+    "subclass": {
+      "index": "great-old-one"
+    },
+    "name": "Télépathie",
+    "level": 1,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "entropic-ward",
+    "class": {
+      "index": "warlock"
+    },
+    "subclass": {
+      "index": "great-old-one"
+    },
+    "name": "Protection psychique",
+    "level": 6,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "thought-shield",
+    "class": {
+      "index": "warlock"
+    },
+    "subclass": {
+      "index": "great-old-one"
+    },
+    "name": "Résistance psychique",
+    "level": 10,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "create-thrall",
+    "class": {
+      "index": "warlock"
+    },
+    "subclass": {
+      "index": "great-old-one"
+    },
+    "name": "Créer un serviteur",
+    "level": 14,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "fey-presence",
+    "class": {
+      "index": "warlock"
+    },
+    "subclass": {
+      "index": "archfey"
+    },
+    "name": "Présence féerique",
+    "level": 1,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "misty-escape",
+    "class": {
+      "index": "warlock"
+    },
+    "subclass": {
+      "index": "archfey"
+    },
+    "name": "Fuite brumeuse",
+    "level": 6,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "beguiling-defenses",
+    "class": {
+      "index": "warlock"
+    },
+    "subclass": {
+      "index": "archfey"
+    },
+    "name": "Défenses de charme",
+    "level": 10,
+    "prerequisites": [],
+    "desc": []
+  },
+  {
+    "index": "dark-delirium",
+    "class": {
+      "index": "warlock"
+    },
+    "subclass": {
+      "index": "archfey"
+    },
+    "name": "Délire ensorcelant",
+    "level": 14,
+    "prerequisites": [],
+    "desc": []
+  }
+]

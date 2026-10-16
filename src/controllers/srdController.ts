@@ -39,7 +39,9 @@ function pick<T extends Translated>(translations: T[], ctx: LangContext): T & { 
   return { ...row, lang: row?.localeCode };
 }
 
-const inLangs = (ctx: LangContext) => ({ where: { localeCode: { in: [ctx.lang, ctx.fallback] } } });
+// Toutes les langues : un contenu maison n'existe parfois que dans la langue de son
+// auteur (sous-classes custom en français) ; pick() retombe alors sur celle-ci.
+const allLangs = { orderBy: { localeCode: 'asc' as const } };
 
 function setCache(res: Response) {
   res.set('Cache-Control', 'public, max-age=3600');
@@ -50,7 +52,7 @@ export const getClasses = async (req: Request, res: Response) => {
     const ctx = await resolveLang(req);
     const classes = await prisma.class.findMany({
       where: { edition: { code: req.params.edition } },
-      include: { translations: inLangs(ctx) },
+      include: { translations: allLangs },
       orderBy: { index: 'asc' },
     });
     setCache(res);
@@ -67,7 +69,7 @@ export const getClasses = async (req: Request, res: Response) => {
 export const getClassByIndex = async (req: Request, res: Response) => {
   try {
     const ctx = await resolveLang(req);
-    const t = inLangs(ctx);
+    const t = allLangs;
     const cls = await prisma.class.findFirst({
       where: { index: req.params.index, edition: { code: req.params.edition } },
       include: {

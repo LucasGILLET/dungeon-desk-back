@@ -110,8 +110,18 @@ describe('SRD Controller', () => {
       ]);
       const query = (prisma.class.findMany as any).mock.calls[0][0];
       expect(query.where).toEqual({ edition: { code: '2014' } });
-      // Seules la langue demandée et la langue de repli sont chargées
-      expect(query.include.translations.where.localeCode.in).toEqual(['fr', 'en']);
+      expect(query.include.translations).toEqual({ orderBy: { localeCode: 'asc' } });
+    });
+
+    it("should fall back to the author's language for homebrew content", async () => {
+      (prisma.class.findMany as any).mockResolvedValue([
+        { index: 'wizard', hitDie: 6, subclassLevel: 2, translations: [{ localeCode: 'fr', name: 'Magicien' }] },
+      ]);
+
+      const res = await request(app).get('/api/srd/2014/classes?lang=en');
+
+      expect(res.status).toBe(200);
+      expect(res.body[0]).toMatchObject({ name: 'Magicien', lang: 'fr' });
     });
 
     it('should use Accept-Language when no lang is given', async () => {
