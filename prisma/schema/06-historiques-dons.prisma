@@ -27,6 +27,9 @@ model Background {
   personalityOptions BackgroundPersonalityOption[]
   choices            Choice[] // langues au choix, équipement au choix (dont une somme en po)
 
+  // Personnages qui l'utilisent
+  characters Character[]
+
   @@unique([editionId, index])
 }
 
@@ -83,6 +86,11 @@ model BackgroundPersonalityOption {
 
   translations PersonalityOptionTranslation[]
   alignments   PersonalityOptionAlignment[] // idéaux : alignements associés
+
+  // Personnages qui l'utilisent
+  characters CharacterPersonality[]
+
+  @@unique([backgroundId, kind, position])
 }
 
 model PersonalityOptionTranslation {
@@ -124,6 +132,9 @@ model Feat {
 
   translations  FeatTranslation[]
   prerequisites FeatPrerequisite[]
+
+  // Personnages qui l'utilisent
+  characterLevels CharacterLevel[]
 
   @@unique([editionId, index])
 }

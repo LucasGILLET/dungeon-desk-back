@@ -181,6 +181,13 @@ Enum AreaType {
   EMANATION
 }
 
+Enum AbilityGenerationMethod {
+  STANDARD_ARRAY
+  POINT_BUY
+  ROLLED
+  MANUAL
+}
+
 Table Locale {
   code varchar [pk, note: '"fr", "en"']
   name varchar [not null, note: 'nom dans sa propre langue : "Français", "English"']
@@ -529,6 +536,7 @@ Table VehicleStats {
 Table Choice {
   id int [pk, increment]
   kind ChoiceKind [not null]
+  position int [not null, default: 0]
   choose int [not null]
   classId int
   subclassId int
@@ -1010,6 +1018,9 @@ Table BackgroundPersonalityOption {
   backgroundId int [not null]
   kind PersonalityKind [not null]
   position int [not null, note: 'valeur du dé (d8 pour les traits, d6 pour le reste)']
+  indexes {
+    (backgroundId, kind, position) [unique]
+  }
 }
 
 Table PersonalityOptionTranslation {
@@ -1119,6 +1130,153 @@ Table SpellDamageType {
   damageTypeId int [not null]
   indexes {
     (spellId, damageTypeId) [unique]
+  }
+}
+
+Table Character {
+  id int [pk, increment]
+  userId int [not null]
+  editionId int [not null]
+  name varchar [not null]
+  raceId int [not null]
+  subraceId int
+  backgroundId int
+  alignmentId int
+  abilityMethod AbilityGenerationMethod [not null, default: 'MANUAL']
+  experiencePoints int [not null, default: 0]
+  currentHitPoints int
+  temporaryHitPoints int [not null, default: 0]
+  deathSaveSuccesses int [not null, default: 0]
+  deathSaveFailures int [not null, default: 0]
+  inspiration boolean [not null, default: false]
+  appearance varchar
+  backstory varchar
+  notes varchar
+  portraitUrl varchar
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+}
+
+Table CharacterAbilityScore {
+  id int [pk, increment]
+  characterId int [not null]
+  abilityScoreId int [not null]
+  score int [not null]
+  indexes {
+    (characterId, abilityScoreId) [unique]
+  }
+}
+
+Table CharacterClass {
+  id int [pk, increment]
+  characterId int [not null]
+  classId int [not null]
+  subclassId int
+  position int [not null, note: '0 = classe de départ (maîtrises complètes, équipement de départ)']
+  hitDiceUsed int [not null, default: 0, note: 'dés de vie dépensés depuis le dernier repos long']
+  indexes {
+    (characterId, classId) [unique]
+  }
+}
+
+Table CharacterLevel {
+  id int [pk, increment]
+  characterClassId int [not null]
+  classLevel int [not null, note: '1..20 dans la classe']
+  characterLevel int [not null, note: '1..20 tous niveaux confondus']
+  hitPointRoll int
+  featId int
+  indexes {
+    (characterClassId, classLevel) [unique]
+  }
+}
+
+Table CharacterAbilityIncrease {
+  id int [pk, increment]
+  characterLevelId int [not null]
+  abilityScoreId int [not null]
+  bonus int [not null, note: '1 ou 2']
+  indexes {
+    (characterLevelId, abilityScoreId) [unique]
+  }
+}
+
+Table CharacterChoice {
+  id int [pk, increment]
+  characterId int [not null]
+  choiceId int [not null]
+  optionId int
+  languageId int
+  equipmentId int
+  characterLevelId int
+}
+
+Table CharacterSpell {
+  id int [pk, increment]
+  characterId int [not null]
+  characterClassId int [not null]
+  spellId int [not null]
+  prepared boolean [not null, default: false]
+  indexes {
+    (characterClassId, spellId) [unique]
+  }
+}
+
+Table CharacterSpellSlotUsage {
+  id int [pk, increment]
+  characterId int [not null]
+  spellLevel int [not null, note: '1..9']
+  pact boolean [not null, default: false, note: 'emplacements de pacte de l\'occultiste']
+  used int [not null]
+  indexes {
+    (characterId, spellLevel, pact) [unique]
+  }
+}
+
+Table CharacterFeatureUsage {
+  id int [pk, increment]
+  characterId int [not null]
+  classFeatureId int
+  traitId int
+  used int [not null]
+}
+
+Table CharacterItem {
+  id int [pk, increment]
+  characterId int [not null]
+  equipmentId int
+  name varchar [note: 'objet libre, ou nom personnalisé d\'un objet du catalogue']
+  description varchar
+  quantity int [not null, default: 1]
+  equipped boolean [not null, default: false]
+  attuned boolean [not null, default: false]
+  position int [not null, default: 0]
+}
+
+Table CharacterCurrency {
+  id int [pk, increment]
+  characterId int [not null]
+  currency Currency [not null]
+  amount int [not null]
+  indexes {
+    (characterId, currency) [unique]
+  }
+}
+
+Table CharacterPersonality {
+  id int [pk, increment]
+  characterId int [not null]
+  kind PersonalityKind [not null]
+  optionId int
+  customText varchar
+}
+
+Table CharacterCondition {
+  id int [pk, increment]
+  characterId int [not null]
+  conditionId int [not null]
+  indexes {
+    (characterId, conditionId) [unique]
   }
 }
 
@@ -1247,6 +1405,39 @@ Ref: Spell.saveAbilityId > AbilityScore.id
 Ref: SpellTranslation.spellId > Spell.id
 Ref: SpellDamageType.spellId > Spell.id
 Ref: SpellDamageType.damageTypeId > DamageType.id
+Ref: Character.raceId > Race.id
+Ref: Character.subraceId > Subrace.id
+Ref: Character.backgroundId > Background.id
+Ref: Character.alignmentId > Alignment.id
+Ref: CharacterAbilityScore.characterId > Character.id
+Ref: CharacterAbilityScore.abilityScoreId > AbilityScore.id
+Ref: CharacterClass.characterId > Character.id
+Ref: CharacterClass.classId > Class.id
+Ref: CharacterClass.subclassId > Subclass.id
+Ref: CharacterLevel.characterClassId > CharacterClass.id
+Ref: CharacterLevel.featId > Feat.id
+Ref: CharacterAbilityIncrease.characterLevelId > CharacterLevel.id
+Ref: CharacterAbilityIncrease.abilityScoreId > AbilityScore.id
+Ref: CharacterChoice.characterId > Character.id
+Ref: CharacterChoice.choiceId > Choice.id
+Ref: CharacterChoice.optionId > ChoiceOption.id
+Ref: CharacterChoice.languageId > Language.id
+Ref: CharacterChoice.equipmentId > Equipment.id
+Ref: CharacterChoice.characterLevelId > CharacterLevel.id
+Ref: CharacterSpell.characterId > Character.id
+Ref: CharacterSpell.characterClassId > CharacterClass.id
+Ref: CharacterSpell.spellId > Spell.id
+Ref: CharacterSpellSlotUsage.characterId > Character.id
+Ref: CharacterFeatureUsage.characterId > Character.id
+Ref: CharacterFeatureUsage.classFeatureId > ClassFeature.id
+Ref: CharacterFeatureUsage.traitId > Trait.id
+Ref: CharacterItem.characterId > Character.id
+Ref: CharacterItem.equipmentId > Equipment.id
+Ref: CharacterCurrency.characterId > Character.id
+Ref: CharacterPersonality.characterId > Character.id
+Ref: CharacterPersonality.optionId > BackgroundPersonalityOption.id
+Ref: CharacterCondition.characterId > Character.id
+Ref: CharacterCondition.conditionId > Condition.id
 
 TableGroup "Socle des données de jeu" [color: #7F8C8D] {
   Locale
@@ -1357,4 +1548,20 @@ TableGroup "Sorts" [color: #E67E22] {
   Spell
   SpellTranslation
   SpellDamageType
+}
+
+TableGroup "Personnages" [color: #C0392B] {
+  Character
+  CharacterAbilityScore
+  CharacterClass
+  CharacterLevel
+  CharacterAbilityIncrease
+  CharacterChoice
+  CharacterSpell
+  CharacterSpellSlotUsage
+  CharacterFeatureUsage
+  CharacterItem
+  CharacterCurrency
+  CharacterPersonality
+  CharacterCondition
 }

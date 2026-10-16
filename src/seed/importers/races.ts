@@ -4,7 +4,7 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { SizesSchema, SpeedsSchema, TraitActionSchema } from '../../srd/jsonb';
 import { Json, loadMerged, loadSrd, log, MergedFile, Refs, replaceTranslations, SrdFile, text, translationsFor, TX_OPTIONS, Tx } from '../context';
-import { ChoiceImporter } from './choices';
+import { ChoiceImporter, ChoiceSpec } from './choices';
 
 const localized = (file: SrdFile, index: string, pick: (row: Json) => Json) => {
   const fr = file.get('fr', index);
@@ -59,17 +59,15 @@ export async function importRaces(prisma: PrismaClient, refs: Refs, edition: str
         data: await Promise.all((en.proficiencies ?? []).map(async (p: Json) => ({ traitId, proficiencyId: await refs.id('proficiency', p.index) }))),
         skipDuplicates: true,
       });
-      await tx.choice.deleteMany({ where: { traitId } });
       const specific = en.trait_specific ?? {};
-      const sets: [Json, Parameters<ChoiceImporter['create']>[2], (r: Json) => Json][] = [
+      const sets: [Json, ChoiceSpec['kind'], (r: Json) => Json][] = [
         [en.proficiency_choices, 'PROFICIENCY', (r) => r.proficiency_choices],
         [en.language_options, 'LANGUAGE', (r) => r.language_options],
         [specific.spell_options, 'SPELL', (r) => r.trait_specific?.spell_options],
         [specific.subtrait_options, 'SUBFEATURE', (r) => r.trait_specific?.subtrait_options],
       ];
-      for (const [set, kind, pick] of sets) {
-        if (set) await choices.create(tx, { traitId }, kind, set, localized(traits, en.index, pick));
-      }
+      await choices.sync(tx, { traitId }, sets.filter(([set]) => set)
+        .map(([set, kind, pick]) => ({ kind, set, localized: localized(traits, en.index, pick) })));
     }, TX_OPTIONS);
   }
 
@@ -95,13 +93,14 @@ export async function importRaces(prisma: PrismaClient, refs: Refs, edition: str
       });
       await tx.raceTrait.deleteMany({ where: { raceId } });
       await tx.raceTrait.createMany({ data: en.traits.map((t: Json) => ({ raceId, traitId: traitIds.get(t.index)! })) });
-      await tx.choice.deleteMany({ where: { raceId } });
+      const raceChoices: ChoiceSpec[] = [];
       if (en.ability_bonus_options) {
-        await choices.create(tx, { raceId }, 'ABILITY_SCORE_INCREASE', en.ability_bonus_options, localized(races, en.index, (r) => r.ability_bonus_options));
+        raceChoices.push({ kind: 'ABILITY_SCORE_INCREASE', set: en.ability_bonus_options, localized: localized(races, en.index, (r) => r.ability_bonus_options) });
       }
       if (en.language_options) {
-        await choices.create(tx, { raceId }, 'LANGUAGE', en.language_options, localized(races, en.index, (r) => r.language_options));
+        raceChoices.push({ kind: 'LANGUAGE', set: en.language_options, localized: localized(races, en.index, (r) => r.language_options) });
       }
+      await choices.sync(tx, { raceId }, raceChoices);
       return raceId;
     }, TX_OPTIONS);
     raceIds.set(en.index, raceId);

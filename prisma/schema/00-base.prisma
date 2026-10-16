@@ -133,6 +133,9 @@ model Edition {
   traits              Trait[]
   backgrounds         Background[]
   feats               Feat[]
+
+  // Personnages qui l'utilisent
+  characters Character[]
 }
 
 model EditionTranslation {

@@ -5,7 +5,6 @@ Domaines modélisés et relus, mais pas encore branchés sur `prisma/schema/` : 
 | Fichier | Étape de la feuille de route |
 |---|---|
 | `08-monstres.prisma` | 9 — monstres |
-| `09-personnage.prisma` | 7 — modèle de personnage (aperçu en commentaires) |
 
 Pour brancher un domaine, avec son importeur et sa propre migration :
 

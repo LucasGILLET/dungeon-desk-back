@@ -17,8 +17,9 @@ const byName = new Map(models.map((m) => [m.name, m]));
 const enumValues = new Map(enums.map((e) => [e.name, e.values.map((v) => v.name)]));
 
 // Tables applicatives : visibles, mais hors des données de jeu (ni rôles ni formulaires soignés)
-export const APP_MODELS = new Set(['User', 'Character', 'Npc']);
-export const srdModels = models.filter((m) => !APP_MODELS.has(m.name));
+// Données de l'application (utilisateurs, personnages, PNJ), hors rôles des données de jeu
+export const isAppModel = (name: string) => ['User', 'Npc'].includes(name) || name.startsWith('Character');
+export const srdModels = models.filter((m) => !isAppModel(m.name));
 export const isTranslation = (m: Model) => m.name.endsWith('Translation') && byName.has(m.name.slice(0, -'Translation'.length));
 
 const LABEL_FIELDS = ['name', 'label', 'title', 'text', 'description'];
@@ -43,6 +44,10 @@ function displayTemplate(m: Model): string | null {
   if (m.name === 'Locale') return '{{name}}';
   if (m.name === 'Edition') return '{{code}}';
   if (m.name === 'ClassLevel') return 'Niveau {{level}}';
+  if (m.name === 'Character') return '{{name}}';
+  if (m.name === 'CharacterClass') return '{{classId.index}} {{subclassId.index}}';
+  if (m.name === 'CharacterLevel') return 'Niveau {{characterLevel}} (classe {{classLevel}})';
+  if (m.name === 'CharacterItem') return '{{quantity}} × {{equipmentId.index}}{{name}}';
   // Statistiques 1-1 d'un objet : affichées par le nom de l'objet
   if (['WeaponStats', 'ArmorStats', 'VehicleStats'].includes(m.name)) return '{{equipmentId.translations.name}} ({{equipmentId.index}})';
   if (hasIndex) return '{{index}}';
@@ -192,6 +197,7 @@ async function configureRelations(): Promise<number> {
       if (field.kind !== 'object' || !field.isList) continue;
       const child = byName.get(field.type)!;
       if (isTranslation(child)) continue; // les traductions passent par l'onglet de traductions
+      if (isAppModel(child.name) && !isAppModel(parent.name)) continue; // pas de liste de personnages dans les fiches de jeu
       const back = child.fields.find((f) => f.relationName === field.relationName && f.relationFromFields?.length);
       if (!back) continue;
       const template = displayTemplate(child) ?? '{{id}}';

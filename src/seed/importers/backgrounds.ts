@@ -4,7 +4,7 @@
 // équipement maison.
 import { PersonalityKind, PrismaClient } from '@prisma/client';
 import { Json, loadMerged, loadSrd, log, MergedFile, parseUrl, Refs, replaceTranslations, text, translationsFor, TX_OPTIONS } from '../context';
-import { ChoiceImporter } from './choices';
+import { ChoiceImporter, ChoiceSpec } from './choices';
 
 // Option set ({ from: { options } }) ou simple liste ([{ string }]) selon la source
 function personalityTexts(value: Json): { text: string; alignments: string[] }[] {
@@ -75,25 +75,30 @@ export async function importBackgrounds(prisma: PrismaClient, refs: Refs, editio
         data: await Promise.all([...equipment].map(async ([index, quantity]) => ({ backgroundId, equipmentId: await refs.id('equipment', index), quantity }))),
       });
 
-      await tx.choice.deleteMany({ where: { backgroundId } });
-      if (en.language_options) {
-        await choices.create(tx, { backgroundId }, 'LANGUAGE', en.language_options, { fr: backgrounds.get('fr', en.index)?.language_options });
-      }
-      for (const [i, set] of (en.starting_equipment_options ?? []).entries()) {
-        await choices.create(tx, { backgroundId }, 'STARTING_EQUIPMENT', set, { fr: backgrounds.get('fr', en.index)?.starting_equipment_options?.[i] });
-      }
+      const fr = backgrounds.get('fr', en.index);
+      const backgroundChoices: ChoiceSpec[] = [
+        ...(en.language_options ? [{ kind: 'LANGUAGE' as const, set: en.language_options, localized: { fr: fr?.language_options } }] : []),
+        ...(en.starting_equipment_options ?? []).map((set: Json, i: number) => ({
+          kind: 'STARTING_EQUIPMENT' as const, set, localized: { fr: fr?.starting_equipment_options?.[i] },
+        })),
+      ];
+      await choices.sync(tx, { backgroundId }, backgroundChoices);
 
-      // Tables de personnalité (une ligne par entrée, traductions par position)
-      await tx.backgroundPersonalityOption.deleteMany({ where: { backgroundId } });
+      // Tables de personnalité (une ligne par entrée, traductions par position).
+      // Mises à jour en place : les personnages référencent ces entrées.
       for (const [kind, field] of PERSONALITY) {
         const enTexts = personalityTexts(en[field]);
-        const frTexts = personalityTexts(backgrounds.get('fr', en.index)?.[field]);
+        const frTexts = personalityTexts(fr?.[field]);
+        await tx.backgroundPersonalityOption.deleteMany({ where: { backgroundId, kind, position: { gt: enTexts.length } } });
         for (const [i, entry] of enTexts.entries()) {
-          const option = await tx.backgroundPersonalityOption.create({ data: { backgroundId, kind, position: i + 1 } });
+          const key = { backgroundId, kind, position: i + 1 };
+          const option = await tx.backgroundPersonalityOption.upsert({ where: { backgroundId_kind_position: key }, create: key, update: {} });
           const rows = [{ optionId: option.id, localeCode: 'en', text: entry.text }];
-          const fr = frTexts[i]?.text;
-          if (fr && fr !== entry.text) rows.push({ optionId: option.id, localeCode: 'fr', text: fr });
+          const frText = frTexts[i]?.text;
+          if (frText && frText !== entry.text) rows.push({ optionId: option.id, localeCode: 'fr', text: frText });
+          await tx.personalityOptionTranslation.deleteMany({ where: { optionId: option.id } });
           await tx.personalityOptionTranslation.createMany({ data: rows });
+          await tx.personalityOptionAlignment.deleteMany({ where: { optionId: option.id } });
           if (entry.alignments.length) {
             await tx.personalityOptionAlignment.createMany({
               data: await Promise.all(entry.alignments.map(async (a) => ({ optionId: option.id, alignmentId: await refs.id('alignment', a) }))),

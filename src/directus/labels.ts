@@ -53,6 +53,18 @@ export const COLLECTIONS: Record<string, [string, string]> = {
   Edition: ['Édition', 'Éditions'],
   User: ['Utilisateur', 'Utilisateurs'],
   Character: ['Personnage', 'Personnages'],
+  CharacterAbilityScore: ['Caractéristique', 'Caractéristiques'],
+  CharacterClass: ['Classe du personnage', 'Classes du personnage'],
+  CharacterLevel: ['Montée de niveau', 'Montées de niveau'],
+  CharacterAbilityIncrease: ['Augmentation de caractéristique', 'Augmentations de caractéristique'],
+  CharacterChoice: ['Réponse à un choix', 'Réponses aux choix'],
+  CharacterSpell: ['Sort connu', 'Sorts connus'],
+  CharacterSpellSlotUsage: ['Emplacement utilisé', 'Emplacements utilisés'],
+  CharacterFeatureUsage: ['Utilisation de capacité', 'Utilisations de capacités'],
+  CharacterItem: ['Objet', 'Inventaire'],
+  CharacterCurrency: ['Argent', 'Argent'],
+  CharacterPersonality: ['Personnalité', 'Personnalité'],
+  CharacterCondition: ['État', 'États'],
   Npc: ['PNJ', 'PNJ'],
 };
 

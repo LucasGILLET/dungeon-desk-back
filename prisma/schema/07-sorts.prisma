@@ -107,6 +107,9 @@ model Spell {
   classFeaturePrerequisites ClassFeaturePrerequisite[]
   choiceOptionItems         ChoiceOptionItem[]
 
+  // Personnages qui l'utilisent
+  characterSpells CharacterSpell[]
+
   @@unique([editionId, index])
   @@index([editionId, level])
 }

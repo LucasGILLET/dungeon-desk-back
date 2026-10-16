@@ -39,6 +39,9 @@ model Class {
   multiclassRequirements  MulticlassRequirement[]
   multiclassProficiencies ClassMulticlassProficiency[]
 
+  // Personnages qui l'utilisent
+  characterClasses CharacterClass[]
+
   @@unique([editionId, index])
 }
 
@@ -301,6 +304,9 @@ model Subclass {
   tableColumns ClassTableColumn[]
   choices      Choice[]
 
+  // Personnages qui l'utilisent
+  characterClasses CharacterClass[]
+
   @@unique([editionId, index])
 }
 
@@ -364,6 +370,9 @@ model ClassFeature {
   choices       Choice[] // expertise, style de combat, ennemi juré…
   choiceItems   ChoiceOptionItem[]         @relation("ChoiceItemClassFeature")
   grantsSpells  SubclassSpell[]            @relation("SubclassSpellFeature")
+
+  // Personnages qui l'utilisent
+  characterUsage CharacterFeatureUsage[]
 
   @@unique([editionId, index])
   @@index([classId, level])

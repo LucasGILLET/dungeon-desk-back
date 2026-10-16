@@ -27,6 +27,10 @@ model AbilityScore {
   raceAbilityBonuses    RaceAbilityBonus[]
   subraceAbilityBonuses SubraceAbilityBonus[]
   featPrerequisites     FeatPrerequisite[]
+
+  // Personnages qui l'utilisent
+  characterScores    CharacterAbilityScore[]
+  characterIncreases CharacterAbilityIncrease[]
 }
 
 model AbilityScoreTranslation {
@@ -85,6 +89,9 @@ model Alignment {
 
   translations                AlignmentTranslation[]
   personalityOptionAlignments PersonalityOptionAlignment[]
+
+  // Personnages qui l'utilisent
+  characters Character[]
 }
 
 model AlignmentTranslation {
@@ -192,6 +199,9 @@ model Condition {
 
   translations ConditionTranslation[]
 
+  // Personnages qui l'utilisent
+  characters CharacterCondition[]
+
   @@unique([editionId, index])
 }
 
@@ -234,6 +244,9 @@ model Language {
   translations      LanguageTranslation[]
   choiceOptionItems ChoiceOptionItem[]
   raceLanguages     RaceLanguage[]
+
+  // Personnages qui l'utilisent
+  characterChoices CharacterChoice[]
 
   @@unique([editionId, index])
 }

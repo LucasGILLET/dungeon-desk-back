@@ -50,11 +50,14 @@ enum ChoicePool {
 }
 
 model Choice {
-  id     Int        @id @default(autoincrement())
-  kind   ChoiceKind
+  id       Int        @id @default(autoincrement())
+  kind     ChoiceKind
+  // Ordre chez le propriétaire : le seed met à jour les choix par position,
+  // pour que les id référencés par les personnages restent stables.
+  position Int        @default(0)
   // Nombre d'options (ou d'objets de la réserve) à prendre. 0 = fixé par la
   // table de classe (manifestations occultes : colonne invocations_known).
-  choose Int
+  choose   Int
 
   // Propriétaire : exactement un (CHECK num_nonnulls(...) = 1)
   classId        Int?
@@ -81,6 +84,9 @@ model Choice {
 
   translations ChoiceTranslation[]
   options      ChoiceOption[]
+
+  // Personnages qui l'utilisent
+  characterChoices CharacterChoice[]
 }
 
 model ChoiceTranslation {
@@ -102,6 +108,9 @@ model ChoiceOption {
 
   items        ChoiceOptionItem[]
   nestedChoice Choice?            @relation("NestedChoice")
+
+  // Personnages qui l'utilisent
+  characterChoices CharacterChoice[]
 }
 
 // Ce que donne une option. Exactement une cible remplie (CHECK).

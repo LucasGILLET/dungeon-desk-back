@@ -1,0 +1,276 @@
+// ============================================================================
+// PERSONNAGES
+// ----------------------------------------------------------------------------
+// Un personnage ne stocke que ce que le joueur a décidé et son état en partie :
+//
+//   décisions      race, historique, classes, montées de niveau, choix, sorts
+//   état en partie PV actuels, emplacements de sorts et capacités utilisés,
+//                  états préjudiciables, inventaire, argent
+//
+// Tout le reste se calcule à partir des données de jeu : modificateurs, PV
+// max, bonus de maîtrise, maîtrises, capacités, sorts de domaine… Corriger une
+// capacité dans le back-office corrige donc tous les personnages.
+//
+// Les données de jeu sont référencées, jamais copiées. Leur suppression est
+// bloquée (Restrict) tant qu'un personnage les utilise ; le seed met à jour
+// les choix en place au lieu de les recréer, pour que leurs id restent stables.
+//
+// Règles vérifiées par l'API (src/characters) et non par la base : tout le
+// contenu vient de l'édition du personnage, un choix n'est accessible que si
+// le personnage a sa race, sa classe, le niveau de la capacité…
+// ============================================================================
+
+enum AbilityGenerationMethod {
+  STANDARD_ARRAY // 15, 14, 13, 12, 10, 8
+  POINT_BUY // 27 points, valeurs de 8 à 15
+  ROLLED
+  MANUAL
+}
+
+model Character {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  editionId Int
+  edition   Edition @relation(fields: [editionId], references: [id])
+  name      String
+
+  raceId       Int
+  race         Race        @relation(fields: [raceId], references: [id], onDelete: Restrict)
+  subraceId    Int?
+  subrace      Subrace?    @relation(fields: [subraceId], references: [id], onDelete: Restrict)
+  backgroundId Int?
+  background   Background? @relation(fields: [backgroundId], references: [id], onDelete: Restrict)
+  alignmentId  Int?
+  alignment    Alignment?  @relation(fields: [alignmentId], references: [id], onDelete: Restrict)
+
+  abilityMethod AbilityGenerationMethod @default(MANUAL)
+
+  // État en partie. currentHitPoints null = PV au maximum.
+  experiencePoints   Int     @default(0)
+  currentHitPoints   Int?
+  temporaryHitPoints Int     @default(0)
+  deathSaveSuccesses Int     @default(0)
+  deathSaveFailures  Int     @default(0)
+  inspiration        Boolean @default(false)
+
+  // Texte libre du joueur
+  appearance  String? @db.Text
+  backstory   String? @db.Text
+  notes       String? @db.Text
+  portraitUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  abilityScores  CharacterAbilityScore[]
+  classes        CharacterClass[]
+  choices        CharacterChoice[]
+  spells         CharacterSpell[]
+  items          CharacterItem[]
+  currencies     CharacterCurrency[]
+  personality    CharacterPersonality[]
+  conditions     CharacterCondition[]
+  spellSlotUsage CharacterSpellSlotUsage[]
+  featureUsage   CharacterFeatureUsage[]
+
+  @@index([userId])
+}
+
+// Valeur de base d'une caractéristique, avant bonus raciaux et augmentations
+// de niveau (une ligne par caractéristique)
+model CharacterAbilityScore {
+  id             Int          @id @default(autoincrement())
+  characterId    Int
+  character      Character    @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  abilityScoreId Int
+  abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id], onDelete: Restrict)
+  score          Int
+
+  @@unique([characterId, abilityScoreId])
+}
+
+// ----------------------------------------------------------------------------
+// Classes et montées de niveau
+// ----------------------------------------------------------------------------
+
+// Une ligne par classe : le multiclassage est natif. Le niveau dans la classe
+// est le nombre de CharacterLevel.
+model CharacterClass {
+  id          Int       @id @default(autoincrement())
+  characterId Int
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  classId     Int
+  class       Class     @relation(fields: [classId], references: [id], onDelete: Restrict)
+  subclassId  Int?
+  subclass    Subclass? @relation(fields: [subclassId], references: [id], onDelete: Restrict)
+  position    Int // 0 = classe de départ (maîtrises complètes, équipement de départ)
+  hitDiceUsed Int       @default(0) // dés de vie dépensés depuis le dernier repos long
+
+  levels CharacterLevel[]
+  spells CharacterSpell[]
+
+  @@unique([characterId, classId])
+}
+
+// Une montée de niveau. characterLevel donne l'ordre de prise entre classes
+// (multiclassage) et doit aller de 1 à N sur l'ensemble du personnage.
+model CharacterLevel {
+  id               Int            @id @default(autoincrement())
+  characterClassId Int
+  characterClass   CharacterClass @relation(fields: [characterClassId], references: [id], onDelete: Cascade)
+  classLevel       Int // 1..20 dans la classe
+  characterLevel   Int // 1..20 tous niveaux confondus
+  // Dé de vie lancé ; null = valeur moyenne (maximum du dé au niveau 1)
+  hitPointRoll     Int?
+
+  // Amélioration de caractéristiques (niveaux 4, 8…) : soit un don, soit des
+  // augmentations (+2, ou +1/+1)
+  featId           Int?
+  feat             Feat?                      @relation(fields: [featId], references: [id], onDelete: Restrict)
+  abilityIncreases CharacterAbilityIncrease[]
+  // Choix faits à ce niveau (supprimés si on annule la montée de niveau)
+  choices          CharacterChoice[]
+
+  @@unique([characterClassId, classLevel])
+}
+
+model CharacterAbilityIncrease {
+  id               Int            @id @default(autoincrement())
+  characterLevelId Int
+  characterLevel   CharacterLevel @relation(fields: [characterLevelId], references: [id], onDelete: Cascade)
+  abilityScoreId   Int
+  abilityScore     AbilityScore   @relation(fields: [abilityScoreId], references: [id], onDelete: Restrict)
+  bonus            Int // 1 ou 2
+
+  @@unique([characterLevelId, abilityScoreId])
+}
+
+// ----------------------------------------------------------------------------
+// Choix
+// ----------------------------------------------------------------------------
+
+// Réponse à un Choice : une option listée, ou un élément de la réserve du
+// choix (une langue au choix, une arme de guerre au choix). Exactement une
+// cible (CHECK). Un choix « 2 parmi… » donne deux lignes.
+model CharacterChoice {
+  id               Int             @id @default(autoincrement())
+  characterId      Int
+  character        Character       @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  choiceId         Int
+  choice           Choice          @relation(fields: [choiceId], references: [id], onDelete: Restrict)
+  optionId         Int?
+  option           ChoiceOption?   @relation(fields: [optionId], references: [id], onDelete: Restrict)
+  languageId       Int?
+  language         Language?       @relation(fields: [languageId], references: [id], onDelete: Restrict)
+  equipmentId      Int?
+  equipment        Equipment?      @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+  characterLevelId Int?
+  characterLevel   CharacterLevel? @relation(fields: [characterLevelId], references: [id], onDelete: Cascade)
+
+  @@index([characterId])
+}
+
+// ----------------------------------------------------------------------------
+// Sorts
+// ----------------------------------------------------------------------------
+
+// Sorts connus, ou inscrits dans le grimoire, au titre d'une classe. Les sorts
+// toujours préparés (domaine, serment) et ceux des traits raciaux ne sont pas
+// stockés : ils se déduisent de la sous-classe et de la race.
+model CharacterSpell {
+  id               Int            @id @default(autoincrement())
+  characterId      Int
+  character        Character      @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  characterClassId Int
+  characterClass   CharacterClass @relation(fields: [characterClassId], references: [id], onDelete: Cascade)
+  spellId          Int
+  spell            Spell          @relation(fields: [spellId], references: [id], onDelete: Restrict)
+  prepared         Boolean        @default(false)
+
+  @@unique([characterClassId, spellId])
+}
+
+model CharacterSpellSlotUsage {
+  id          Int       @id @default(autoincrement())
+  characterId Int
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  spellLevel  Int // 1..9
+  pact        Boolean   @default(false) // emplacements de pacte de l'occultiste
+  used        Int
+
+  @@unique([characterId, spellLevel, pact])
+}
+
+// Utilisations d'une capacité de classe (rage, canalisation d'énergie divine)
+// ou d'un trait (souffle du drakéide) depuis le dernier repos. Exactement une
+// cible (CHECK).
+model CharacterFeatureUsage {
+  id             Int           @id @default(autoincrement())
+  characterId    Int
+  character      Character     @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  classFeatureId Int?
+  classFeature   ClassFeature? @relation(fields: [classFeatureId], references: [id], onDelete: Restrict)
+  traitId        Int?
+  trait          Trait?        @relation(fields: [traitId], references: [id], onDelete: Restrict)
+  used           Int
+}
+
+// ----------------------------------------------------------------------------
+// Inventaire et argent
+// ----------------------------------------------------------------------------
+
+// Objet du catalogue (equipmentId) ou objet libre (name) : objet magique,
+// butin… L'équipement de départ choisi est recopié ici à la création, puisque
+// le joueur peut ensuite le vendre ou le perdre.
+model CharacterItem {
+  id          Int        @id @default(autoincrement())
+  characterId Int
+  character   Character  @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  equipmentId Int?
+  equipment   Equipment? @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+  name        String? // objet libre, ou nom personnalisé d'un objet du catalogue
+  description String?    @db.Text
+  quantity    Int        @default(1)
+  equipped    Boolean    @default(false)
+  attuned     Boolean    @default(false)
+  position    Int        @default(0)
+
+  @@index([characterId])
+}
+
+model CharacterCurrency {
+  id          Int       @id @default(autoincrement())
+  characterId Int
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  currency    Currency
+  amount      Int
+
+  @@unique([characterId, currency])
+}
+
+// ----------------------------------------------------------------------------
+// Personnalité et états
+// ----------------------------------------------------------------------------
+
+// Trait de personnalité, idéal, lien ou défaut : une entrée de la table de
+// l'historique, ou un texte écrit par le joueur. Exactement l'un des deux (CHECK).
+model CharacterPersonality {
+  id          Int                          @id @default(autoincrement())
+  characterId Int
+  character   Character                    @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  kind        PersonalityKind
+  optionId    Int?
+  option      BackgroundPersonalityOption? @relation(fields: [optionId], references: [id], onDelete: Restrict)
+  customText  String?                      @db.Text
+}
+
+model CharacterCondition {
+  id          Int       @id @default(autoincrement())
+  characterId Int
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  conditionId Int
+  condition   Condition @relation(fields: [conditionId], references: [id], onDelete: Restrict)
+
+  @@unique([characterId, conditionId])
+}

@@ -33,6 +33,9 @@ model Race {
   subraces     Subrace[]
   choices      Choice[] // langue au choix, bonus au choix (demi-elfe)
 
+  // Personnages qui l'utilisent
+  characters Character[]
+
   @@unique([editionId, index])
 }
 
@@ -107,6 +110,9 @@ model Subrace {
   traits       SubraceTrait[]
   choices      Choice[]
 
+  // Personnages qui l'utilisent
+  characters Character[]
+
   @@unique([editionId, index])
 }
 
@@ -176,6 +182,9 @@ model Trait {
   proficiencies TraitProficiency[]
   choices       Choice[] // maîtrise au choix, langue, tour de magie, sous-trait
   choiceItems   ChoiceOptionItem[] @relation("ChoiceItemTrait")
+
+  // Personnages qui l'utilisent
+  characterUsage CharacterFeatureUsage[]
 
   @@unique([editionId, index])
 }

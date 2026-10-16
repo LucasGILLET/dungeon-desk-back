@@ -1,10 +1,9 @@
-import { characterCreateInputSchema, characterDataSchema, characterResourceSchema, characterSchema } from './character';
+import { characterCreateInputSchema, characterLevelSchema, characterSchema } from './character';
 import { messageResponseSchema } from './common';
 import { userSchema } from './user';
 
 export const swaggerSchemas = {
-  CharacterResource: characterResourceSchema,
-  CharacterData: characterDataSchema,
+  CharacterLevel: characterLevelSchema,
   CharacterCreateInput: characterCreateInputSchema,
   Character: characterSchema,
   MessageResponse: messageResponseSchema,

@@ -2,7 +2,7 @@
 // sous-classes et capacités. Une transaction par classe.
 import { CasterType, ChoiceKind, ClassColumnValueType, ClassFeaturePrerequisiteType, PrismaClient } from '@prisma/client';
 import { Json, LOCALES, LocaleCode, loadMerged, loadSrd, log, MergedFile, readJson, Refs, replaceTranslations, SrdFile, text, translationsFor, TX_OPTIONS, Tx } from '../context';
-import { ChoiceImporter } from './choices';
+import { ChoiceImporter, ChoiceSpec } from './choices';
 
 const CASTER_TYPES: Record<string, CasterType> = {
   bard: 'FULL', cleric: 'FULL', druid: 'FULL', sorcerer: 'FULL', wizard: 'FULL',
@@ -101,8 +101,8 @@ export class ClassImporter {
       })));
 
     // Les enfants sont remplacés en bloc (les capacités et sous-classes, référencées
-    // ailleurs, sont mises à jour par index plus bas)
-    await tx.choice.deleteMany({ where: { classId } });
+    // ailleurs, sont mises à jour par index plus bas ; les choix, référencés par
+    // les personnages, sont mis à jour en place)
     await tx.classPrimaryAbility.deleteMany({ where: { classId } });
     await tx.classSavingThrow.deleteMany({ where: { classId } });
     await tx.classProficiency.deleteMany({ where: { classId } });
@@ -137,13 +137,10 @@ export class ClassImporter {
       ['STARTING_EQUIPMENT', en.starting_equipment_options, (r) => r.starting_equipment_options],
       ['MULTICLASS_PROFICIENCY', en.multi_classing.proficiency_choices ?? [], (r) => r.multi_classing?.proficiency_choices],
     ];
-    let choiceCount = 0;
-    for (const [kind, list, pick] of sets) {
-      for (const [i, set] of list.entries()) {
-        await this.choices.create(tx, { classId }, kind, set, localized(classes, en.index, (r) => pick(r)?.[i]));
-        choiceCount++;
-      }
-    }
+    const classChoices: ChoiceSpec[] = sets.flatMap(([kind, list, pick]) =>
+      list.map((set, i) => ({ kind, set, localized: localized(classes, en.index, (r) => pick(r)?.[i]) })));
+    await this.choices.sync(tx, { classId }, classChoices);
+    const choiceCount = classChoices.length;
 
     // --- Multiclassage : prérequis (ET entre groupes, OU dans un groupe) ---
     const mc = en.multi_classing;
@@ -227,7 +224,7 @@ export class ClassImporter {
       subclassIds.set(sub.index, row.id);
       await replaceTranslations(tx, 'subclassTranslation', 'subclassId', row.id,
         translationsFor(subclasses, sub.index, (r) => ({ name: r.name, description: text(r.desc) })));
-      await tx.choice.deleteMany({ where: { subclassId: row.id } });
+      await this.choices.sync(tx, { subclassId: row.id }, []);
       await tx.subclassSpell.deleteMany({ where: { subclassId: row.id } });
       // Colonnes propres à la sous-classe (sauf si la classe a déjà la même clé)
       const subLevels = levels.list.filter((l: Json) => l.subclass?.index === sub.index && l.subclass_specific);
@@ -261,7 +258,6 @@ export class ClassImporter {
       const id = featureIds.get(f.index)!;
       await tx.classFeature.update({ where: { id }, data: { parentId: f.parent ? featureIds.get(f.parent.index) ?? null : null } });
       await tx.classFeaturePrerequisite.deleteMany({ where: { classFeatureId: id } });
-      await tx.choice.deleteMany({ where: { classFeatureId: id } });
       for (const p of f.prerequisites) {
         const [, index] = (p.feature ?? p.spell ?? '').split('/').slice(-2);
         await tx.classFeaturePrerequisite.create({
@@ -298,20 +294,18 @@ export class ClassImporter {
   }
 
   private async featureChoices(tx: Tx, classFeatureId: number, f: Json, other: Partial<Record<LocaleCode, Json>>): Promise<number> {
-    const specific = f.feature_specific;
-    if (!specific) return 0;
+    const specific = f.feature_specific ?? {};
+    const specs: ChoiceSpec[] = [];
     const kinds: [string, ChoiceKind][] = [
       ['subfeature_options', 'SUBFEATURE'],
       ['expertise_options', 'EXPERTISE'],
       ['enemy_type_options', 'FAVORED_ENEMY'],
       ['terrain_type_options', 'FAVORED_TERRAIN'],
     ];
-    let count = 0;
     for (const [key, kind] of kinds) {
       if (!specific[key]) continue;
       const sub = Object.fromEntries(Object.entries(other).map(([l, v]) => [l, v?.[key]]));
-      await this.choices.create(tx, { classFeatureId }, kind, specific[key], sub);
-      count++;
+      specs.push({ kind, set: specific[key], localized: sub });
     }
     // Manifestations occultes : simple liste de capacités enfants. Le nombre à
     // choisir dépend du niveau (colonne invocations_known) : choose = 0.
@@ -321,10 +315,10 @@ export class ClassImporter {
         choose: 0,
         from: { option_set_type: 'options_array', options: specific.invocations.map((item: Json) => ({ option_type: 'reference', item })) },
       };
-      await this.choices.create(tx, { classFeatureId }, 'SUBFEATURE', set, {});
-      count++;
+      specs.push({ kind: 'SUBFEATURE', set, localized: {} });
     }
-    return count;
+    await this.choices.sync(tx, { classFeatureId }, specs);
+    return specs.length;
   }
 
   // Crée les colonnes de table de classe à partir des clés rencontrées dans les niveaux.

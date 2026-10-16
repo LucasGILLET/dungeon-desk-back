@@ -80,6 +80,10 @@ model Equipment {
   classStartingEquipments      ClassStartingEquipment[]
   backgroundStartingEquipments BackgroundStartingEquipment[]
 
+  // Personnages qui l'utilisent
+  characterChoices CharacterChoice[]
+  characterItems   CharacterItem[]
+
   @@unique([editionId, index])
 }
 
