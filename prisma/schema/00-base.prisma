@@ -10,7 +10,9 @@
 // Conventions appliquées dans tous les fichiers :
 //
 //  1. Clés : `id` autoincrémenté = clé technique ; `index` (slug anglais,
-//     ex. "wizard") = clé métier stable, neutre en langue.
+//     ex. "wizard") = clé métier stable, neutre en langue. Toutes les tables,
+//     y compris traductions et liaisons, ont une clé primaire `id` simple
+//     (exigé par Directus) ; l'ancienne clé composée devient un @@unique.
 //
 //  2. Éditions : tout contenu de jeu porte `editionId`, avec l'unicité
 //     @@unique([editionId, index]). Le magicien 2014 et le magicien 2024 sont
@@ -120,6 +122,7 @@ model Edition {
 }
 
 model EditionTranslation {
+  id          Int     @id @default(autoincrement())
   editionId   Int
   localeCode  String
   name        String // "D&D 5e (2014)", "D&D 5e révisé (2024)"
@@ -128,5 +131,5 @@ model EditionTranslation {
   edition     Edition @relation(fields: [editionId], references: [id], onDelete: Cascade)
   locale      Locale  @relation(fields: [localeCode], references: [code])
 
-  @@id([editionId, localeCode])
+  @@unique([editionId, localeCode])
 }

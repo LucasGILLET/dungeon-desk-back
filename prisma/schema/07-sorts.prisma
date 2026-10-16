@@ -111,6 +111,7 @@ model Spell {
 }
 
 model SpellTranslation {
+  id              Int     @id @default(autoincrement())
   spellId         Int
   localeCode      String
   name            String // "Boule de feu"
@@ -122,15 +123,16 @@ model SpellTranslation {
   spell           Spell   @relation(fields: [spellId], references: [id], onDelete: Cascade)
   locale          Locale  @relation(fields: [localeCode], references: [code])
 
-  @@id([spellId, localeCode])
+  @@unique([spellId, localeCode])
 }
 
 // Types de dégâts possibles (plusieurs pour Orbe chromatique)
 model SpellDamageType {
+  id           Int        @id @default(autoincrement())
   spellId      Int
   damageTypeId Int
   spell        Spell      @relation(fields: [spellId], references: [id], onDelete: Cascade)
   damageType   DamageType @relation(fields: [damageTypeId], references: [id])
 
-  @@id([spellId, damageTypeId])
+  @@unique([spellId, damageTypeId])
 }

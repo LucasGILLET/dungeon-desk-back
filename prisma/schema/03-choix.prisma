@@ -66,13 +66,14 @@ model Choice {
 }
 
 model ChoiceTranslation {
+  id          Int    @id @default(autoincrement())
   choiceId    Int
   localeCode  String
   description String // "Choisissez deux compétences parmi Arcanes, Histoire…"
   choice      Choice @relation(fields: [choiceId], references: [id], onDelete: Cascade)
   locale      Locale @relation(fields: [localeCode], references: [code])
 
-  @@id([choiceId, localeCode])
+  @@unique([choiceId, localeCode])
 }
 
 model ChoiceOption {

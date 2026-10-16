@@ -37,6 +37,7 @@ model Background {
 }
 
 model BackgroundTranslation {
+  id Int @id @default(autoincrement())
   backgroundId       Int
   localeCode         String
   name               String // "Acolyte"
@@ -47,37 +48,40 @@ model BackgroundTranslation {
   background         Background @relation(fields: [backgroundId], references: [id], onDelete: Cascade)
   locale             Locale     @relation(fields: [localeCode], references: [code])
 
-  @@id([backgroundId, localeCode])
+  @@unique([backgroundId, localeCode])
 }
 
 model BackgroundProficiency {
+  id Int @id @default(autoincrement())
   backgroundId  Int
   proficiencyId Int
   background    Background  @relation(fields: [backgroundId], references: [id], onDelete: Cascade)
   proficiency   Proficiency @relation(fields: [proficiencyId], references: [id])
 
-  @@id([backgroundId, proficiencyId])
+  @@unique([backgroundId, proficiencyId])
 }
 
 // Caractéristiques augmentables (2024) : la règle +2/+1 ou +1/+1/+1 est une
 // règle d'édition, appliquée par le code
 model BackgroundAbilityScore {
+  id Int @id @default(autoincrement())
   backgroundId   Int
   abilityScoreId Int
   background     Background   @relation(fields: [backgroundId], references: [id], onDelete: Cascade)
   abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id])
 
-  @@id([backgroundId, abilityScoreId])
+  @@unique([backgroundId, abilityScoreId])
 }
 
 model BackgroundStartingEquipment {
+  id Int @id @default(autoincrement())
   backgroundId Int
   equipmentId  Int
   quantity     Int        @default(1)
   background   Background @relation(fields: [backgroundId], references: [id], onDelete: Cascade)
   equipment    Equipment  @relation(fields: [equipmentId], references: [id])
 
-  @@id([backgroundId, equipmentId])
+  @@unique([backgroundId, equipmentId])
 }
 
 // Tables de personnalité (2014). Le nombre à choisir (2 traits, 1 idéal,
@@ -101,22 +105,24 @@ model BackgroundPersonalityOption {
 }
 
 model PersonalityOptionTranslation {
+  id Int @id @default(autoincrement())
   optionId   Int
   localeCode String
   text       String                      @db.Text
   option     BackgroundPersonalityOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
   locale     Locale                      @relation(fields: [localeCode], references: [code])
 
-  @@id([optionId, localeCode])
+  @@unique([optionId, localeCode])
 }
 
 model PersonalityOptionAlignment {
+  id Int @id @default(autoincrement())
   optionId    Int
   alignmentId Int
   option      BackgroundPersonalityOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
   alignment   Alignment                   @relation(fields: [alignmentId], references: [id])
 
-  @@id([optionId, alignmentId])
+  @@unique([optionId, alignmentId])
 }
 
 // ----------------------------------------------------------------------------
@@ -157,6 +163,7 @@ model Feat {
 }
 
 model FeatTranslation {
+  id Int @id @default(autoincrement())
   featId      Int
   localeCode  String
   name        String // "Lutteur"
@@ -164,7 +171,7 @@ model FeatTranslation {
   feat        Feat   @relation(fields: [featId], references: [id], onDelete: Cascade)
   locale      Locale @relation(fields: [localeCode], references: [code])
 
-  @@id([featId, localeCode])
+  @@unique([featId, localeCode])
 }
 
 enum FeatPrerequisiteType {

@@ -43,6 +43,7 @@ model Class {
 }
 
 model ClassTranslation {
+  id            Int     @id @default(autoincrement())
   classId       Int
   localeCode    String
   name          String // "Magicien"
@@ -53,48 +54,52 @@ model ClassTranslation {
   class         Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
   locale        Locale  @relation(fields: [localeCode], references: [code])
 
-  @@id([classId, localeCode])
+  @@unique([classId, localeCode])
 }
 
 // Caractéristique principale (2024 l'affiche en tête de classe ; en 2014 elle
 // sert de repère pour l'interface)
 model ClassPrimaryAbility {
+  id             Int          @id @default(autoincrement())
   classId        Int
   abilityScoreId Int
   class          Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
   abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id])
 
-  @@id([classId, abilityScoreId])
+  @@unique([classId, abilityScoreId])
 }
 
 model ClassSavingThrow {
+  id             Int          @id @default(autoincrement())
   classId        Int
   abilityScoreId Int
   class          Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
   abilityScore   AbilityScore @relation("ClassSavingThrows", fields: [abilityScoreId], references: [id])
 
-  @@id([classId, abilityScoreId])
+  @@unique([classId, abilityScoreId])
 }
 
 // Maîtrises acquises d'office
 model ClassProficiency {
+  id            Int         @id @default(autoincrement())
   classId       Int
   proficiencyId Int
   class         Class       @relation(fields: [classId], references: [id], onDelete: Cascade)
   proficiency   Proficiency @relation(fields: [proficiencyId], references: [id])
 
-  @@id([classId, proficiencyId])
+  @@unique([classId, proficiencyId])
 }
 
 // Équipement de départ fixe ("un grimoire")
 model ClassStartingEquipment {
+  id          Int       @id @default(autoincrement())
   classId     Int
   equipmentId Int
   quantity    Int       @default(1)
   class       Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
   equipment   Equipment @relation(fields: [equipmentId], references: [id])
 
-  @@id([classId, equipmentId])
+  @@unique([classId, equipmentId])
 }
 
 // ----------------------------------------------------------------------------
@@ -123,12 +128,13 @@ model ClassLevel {
 
 // Une ligne par niveau de sort > 0 ; pour l'occultiste, emplacements de pacte
 model ClassLevelSpellSlot {
+  id           Int        @id @default(autoincrement())
   classLevelId Int
   spellLevel   Int // 1..9
   slots        Int
   classLevel   ClassLevel @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
 
-  @@id([classLevelId, spellLevel])
+  @@unique([classLevelId, spellLevel])
 }
 
 // Colonnes spécifiques de la table de classe. Remplace l'objet libre
@@ -159,13 +165,14 @@ model ClassTableColumn {
 }
 
 model ClassTableColumnTranslation {
+  id         Int              @id @default(autoincrement())
   columnId   Int
   localeCode String
   label      String // "Rages"
   column     ClassTableColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
   locale     Locale           @relation(fields: [localeCode], references: [code])
 
-  @@id([columnId, localeCode])
+  @@unique([columnId, localeCode])
 }
 
 // Une seule valeur remplie selon ClassTableColumn.valueType (CHECK)
@@ -218,6 +225,7 @@ model SpellcastingSection {
 }
 
 model SpellcastingSectionTranslation {
+  id          Int                 @id @default(autoincrement())
   sectionId   Int
   localeCode  String
   title       String // "Tours de magie"
@@ -225,17 +233,18 @@ model SpellcastingSectionTranslation {
   section     SpellcastingSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   locale      Locale              @relation(fields: [localeCode], references: [code])
 
-  @@id([sectionId, localeCode])
+  @@unique([sectionId, localeCode])
 }
 
 // Liste de sorts de la classe
 model ClassSpell {
+  id      Int   @id @default(autoincrement())
   classId Int
   spellId Int
   class   Class @relation(fields: [classId], references: [id], onDelete: Cascade)
   spell   Spell @relation(fields: [spellId], references: [id], onDelete: Cascade)
 
-  @@id([classId, spellId])
+  @@unique([classId, spellId])
 }
 
 // ----------------------------------------------------------------------------
@@ -256,12 +265,13 @@ model MulticlassRequirement {
 }
 
 model ClassMulticlassProficiency {
+  id            Int         @id @default(autoincrement())
   classId       Int
   proficiencyId Int
   class         Class       @relation(fields: [classId], references: [id], onDelete: Cascade)
   proficiency   Proficiency @relation("MulticlassProficiencies", fields: [proficiencyId], references: [id])
 
-  @@id([classId, proficiencyId])
+  @@unique([classId, proficiencyId])
 }
 
 // ----------------------------------------------------------------------------
@@ -294,6 +304,7 @@ model Subclass {
 }
 
 model SubclassTranslation {
+  id          Int      @id @default(autoincrement())
   subclassId  Int
   localeCode  String
   name        String // "École d'évocation"
@@ -301,7 +312,7 @@ model SubclassTranslation {
   subclass    Subclass @relation(fields: [subclassId], references: [id], onDelete: Cascade)
   locale      Locale   @relation(fields: [localeCode], references: [code])
 
-  @@id([subclassId, localeCode])
+  @@unique([subclassId, localeCode])
 }
 
 // Sorts toujours préparés, obtenus à un niveau de classe donné. Pour le Cercle
@@ -358,6 +369,7 @@ model ClassFeature {
 }
 
 model ClassFeatureTranslation {
+  id             Int          @id @default(autoincrement())
   classFeatureId Int
   localeCode     String
   name           String // "Restauration arcanique"
@@ -365,7 +377,7 @@ model ClassFeatureTranslation {
   classFeature   ClassFeature @relation(fields: [classFeatureId], references: [id], onDelete: Cascade)
   locale         Locale       @relation(fields: [localeCode], references: [code])
 
-  @@id([classFeatureId, localeCode])
+  @@unique([classFeatureId, localeCode])
 }
 
 enum ClassFeaturePrerequisiteType {

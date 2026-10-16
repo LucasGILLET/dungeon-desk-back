@@ -90,12 +90,13 @@ CREATE TABLE "Edition" (
 
 -- CreateTable
 CREATE TABLE "EditionTranslation" (
+    "id" SERIAL NOT NULL,
     "editionId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "attribution" TEXT NOT NULL,
 
-    CONSTRAINT "EditionTranslation_pkey" PRIMARY KEY ("editionId","localeCode")
+    CONSTRAINT "EditionTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -109,13 +110,14 @@ CREATE TABLE "AbilityScore" (
 
 -- CreateTable
 CREATE TABLE "AbilityScoreTranslation" (
+    "id" SERIAL NOT NULL,
     "abilityScoreId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "abbreviation" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
 
-    CONSTRAINT "AbilityScoreTranslation_pkey" PRIMARY KEY ("abilityScoreId","localeCode")
+    CONSTRAINT "AbilityScoreTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -129,12 +131,13 @@ CREATE TABLE "Skill" (
 
 -- CreateTable
 CREATE TABLE "SkillTranslation" (
+    "id" SERIAL NOT NULL,
     "skillId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
 
-    CONSTRAINT "SkillTranslation_pkey" PRIMARY KEY ("skillId","localeCode")
+    CONSTRAINT "SkillTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -149,13 +152,14 @@ CREATE TABLE "Alignment" (
 
 -- CreateTable
 CREATE TABLE "AlignmentTranslation" (
+    "id" SERIAL NOT NULL,
     "alignmentId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "abbreviation" TEXT NOT NULL,
     "description" TEXT,
 
-    CONSTRAINT "AlignmentTranslation_pkey" PRIMARY KEY ("alignmentId","localeCode")
+    CONSTRAINT "AlignmentTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -168,12 +172,13 @@ CREATE TABLE "DamageType" (
 
 -- CreateTable
 CREATE TABLE "DamageTypeTranslation" (
+    "id" SERIAL NOT NULL,
     "damageTypeId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
 
-    CONSTRAINT "DamageTypeTranslation_pkey" PRIMARY KEY ("damageTypeId","localeCode")
+    CONSTRAINT "DamageTypeTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -186,12 +191,13 @@ CREATE TABLE "MagicSchool" (
 
 -- CreateTable
 CREATE TABLE "MagicSchoolTranslation" (
+    "id" SERIAL NOT NULL,
     "magicSchoolId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
 
-    CONSTRAINT "MagicSchoolTranslation_pkey" PRIMARY KEY ("magicSchoolId","localeCode")
+    CONSTRAINT "MagicSchoolTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -204,12 +210,13 @@ CREATE TABLE "CreatureType" (
 
 -- CreateTable
 CREATE TABLE "CreatureTypeTranslation" (
+    "id" SERIAL NOT NULL,
     "creatureTypeId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "pluralName" TEXT NOT NULL,
 
-    CONSTRAINT "CreatureTypeTranslation_pkey" PRIMARY KEY ("creatureTypeId","localeCode")
+    CONSTRAINT "CreatureTypeTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -222,11 +229,12 @@ CREATE TABLE "Terrain" (
 
 -- CreateTable
 CREATE TABLE "TerrainTranslation" (
+    "id" SERIAL NOT NULL,
     "terrainId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
 
-    CONSTRAINT "TerrainTranslation_pkey" PRIMARY KEY ("terrainId","localeCode")
+    CONSTRAINT "TerrainTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -240,12 +248,13 @@ CREATE TABLE "Condition" (
 
 -- CreateTable
 CREATE TABLE "ConditionTranslation" (
+    "id" SERIAL NOT NULL,
     "conditionId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
 
-    CONSTRAINT "ConditionTranslation_pkey" PRIMARY KEY ("conditionId","localeCode")
+    CONSTRAINT "ConditionTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -265,13 +274,14 @@ CREATE TABLE "Language" (
 
 -- CreateTable
 CREATE TABLE "LanguageTranslation" (
+    "id" SERIAL NOT NULL,
     "languageId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "typicalSpeakers" TEXT,
     "description" TEXT,
 
-    CONSTRAINT "LanguageTranslation_pkey" PRIMARY KEY ("languageId","localeCode")
+    CONSTRAINT "LanguageTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -290,11 +300,12 @@ CREATE TABLE "Proficiency" (
 
 -- CreateTable
 CREATE TABLE "ProficiencyTranslation" (
+    "id" SERIAL NOT NULL,
     "proficiencyId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
 
-    CONSTRAINT "ProficiencyTranslation_pkey" PRIMARY KEY ("proficiencyId","localeCode")
+    CONSTRAINT "ProficiencyTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -309,11 +320,12 @@ CREATE TABLE "EquipmentCategory" (
 
 -- CreateTable
 CREATE TABLE "EquipmentCategoryTranslation" (
+    "id" SERIAL NOT NULL,
     "equipmentCategoryId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
 
-    CONSTRAINT "EquipmentCategoryTranslation_pkey" PRIMARY KEY ("equipmentCategoryId","localeCode")
+    CONSTRAINT "EquipmentCategoryTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -337,29 +349,32 @@ CREATE TABLE "Equipment" (
 
 -- CreateTable
 CREATE TABLE "EquipmentTranslation" (
+    "id" SERIAL NOT NULL,
     "equipmentId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
 
-    CONSTRAINT "EquipmentTranslation_pkey" PRIMARY KEY ("equipmentId","localeCode")
+    CONSTRAINT "EquipmentTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "EquipmentCategoryItem" (
+    "id" SERIAL NOT NULL,
     "equipmentId" INTEGER NOT NULL,
     "categoryId" INTEGER NOT NULL,
 
-    CONSTRAINT "EquipmentCategoryItem_pkey" PRIMARY KEY ("equipmentId","categoryId")
+    CONSTRAINT "EquipmentCategoryItem_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "PackContent" (
+    "id" SERIAL NOT NULL,
     "packId" INTEGER NOT NULL,
     "itemId" INTEGER NOT NULL,
     "quantity" INTEGER NOT NULL DEFAULT 1,
 
-    CONSTRAINT "PackContent_pkey" PRIMARY KEY ("packId","itemId")
+    CONSTRAINT "PackContent_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -387,20 +402,22 @@ CREATE TABLE "WeaponProperty" (
 
 -- CreateTable
 CREATE TABLE "WeaponPropertyTranslation" (
+    "id" SERIAL NOT NULL,
     "weaponPropertyId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
 
-    CONSTRAINT "WeaponPropertyTranslation_pkey" PRIMARY KEY ("weaponPropertyId","localeCode")
+    CONSTRAINT "WeaponPropertyTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "WeaponStatsProperty" (
+    "id" SERIAL NOT NULL,
     "weaponId" INTEGER NOT NULL,
     "propertyId" INTEGER NOT NULL,
 
-    CONSTRAINT "WeaponStatsProperty_pkey" PRIMARY KEY ("weaponId","propertyId")
+    CONSTRAINT "WeaponStatsProperty_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -443,11 +460,12 @@ CREATE TABLE "Choice" (
 
 -- CreateTable
 CREATE TABLE "ChoiceTranslation" (
+    "id" SERIAL NOT NULL,
     "choiceId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "description" TEXT NOT NULL,
 
-    CONSTRAINT "ChoiceTranslation_pkey" PRIMARY KEY ("choiceId","localeCode")
+    CONSTRAINT "ChoiceTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -491,46 +509,51 @@ CREATE TABLE "Class" (
 
 -- CreateTable
 CREATE TABLE "ClassTranslation" (
+    "id" SERIAL NOT NULL,
     "classId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
     "subclassLabel" TEXT NOT NULL,
 
-    CONSTRAINT "ClassTranslation_pkey" PRIMARY KEY ("classId","localeCode")
+    CONSTRAINT "ClassTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "ClassPrimaryAbility" (
+    "id" SERIAL NOT NULL,
     "classId" INTEGER NOT NULL,
     "abilityScoreId" INTEGER NOT NULL,
 
-    CONSTRAINT "ClassPrimaryAbility_pkey" PRIMARY KEY ("classId","abilityScoreId")
+    CONSTRAINT "ClassPrimaryAbility_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "ClassSavingThrow" (
+    "id" SERIAL NOT NULL,
     "classId" INTEGER NOT NULL,
     "abilityScoreId" INTEGER NOT NULL,
 
-    CONSTRAINT "ClassSavingThrow_pkey" PRIMARY KEY ("classId","abilityScoreId")
+    CONSTRAINT "ClassSavingThrow_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "ClassProficiency" (
+    "id" SERIAL NOT NULL,
     "classId" INTEGER NOT NULL,
     "proficiencyId" INTEGER NOT NULL,
 
-    CONSTRAINT "ClassProficiency_pkey" PRIMARY KEY ("classId","proficiencyId")
+    CONSTRAINT "ClassProficiency_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "ClassStartingEquipment" (
+    "id" SERIAL NOT NULL,
     "classId" INTEGER NOT NULL,
     "equipmentId" INTEGER NOT NULL,
     "quantity" INTEGER NOT NULL DEFAULT 1,
 
-    CONSTRAINT "ClassStartingEquipment_pkey" PRIMARY KEY ("classId","equipmentId")
+    CONSTRAINT "ClassStartingEquipment_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -547,11 +570,12 @@ CREATE TABLE "ClassLevel" (
 
 -- CreateTable
 CREATE TABLE "ClassLevelSpellSlot" (
+    "id" SERIAL NOT NULL,
     "classLevelId" INTEGER NOT NULL,
     "spellLevel" INTEGER NOT NULL,
     "slots" INTEGER NOT NULL,
 
-    CONSTRAINT "ClassLevelSpellSlot_pkey" PRIMARY KEY ("classLevelId","spellLevel")
+    CONSTRAINT "ClassLevelSpellSlot_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -568,11 +592,12 @@ CREATE TABLE "ClassTableColumn" (
 
 -- CreateTable
 CREATE TABLE "ClassTableColumnTranslation" (
+    "id" SERIAL NOT NULL,
     "columnId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "label" TEXT NOT NULL,
 
-    CONSTRAINT "ClassTableColumnTranslation_pkey" PRIMARY KEY ("columnId","localeCode")
+    CONSTRAINT "ClassTableColumnTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -610,20 +635,22 @@ CREATE TABLE "SpellcastingSection" (
 
 -- CreateTable
 CREATE TABLE "SpellcastingSectionTranslation" (
+    "id" SERIAL NOT NULL,
     "sectionId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
 
-    CONSTRAINT "SpellcastingSectionTranslation_pkey" PRIMARY KEY ("sectionId","localeCode")
+    CONSTRAINT "SpellcastingSectionTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "ClassSpell" (
+    "id" SERIAL NOT NULL,
     "classId" INTEGER NOT NULL,
     "spellId" INTEGER NOT NULL,
 
-    CONSTRAINT "ClassSpell_pkey" PRIMARY KEY ("classId","spellId")
+    CONSTRAINT "ClassSpell_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -639,10 +666,11 @@ CREATE TABLE "MulticlassRequirement" (
 
 -- CreateTable
 CREATE TABLE "ClassMulticlassProficiency" (
+    "id" SERIAL NOT NULL,
     "classId" INTEGER NOT NULL,
     "proficiencyId" INTEGER NOT NULL,
 
-    CONSTRAINT "ClassMulticlassProficiency_pkey" PRIMARY KEY ("classId","proficiencyId")
+    CONSTRAINT "ClassMulticlassProficiency_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -662,12 +690,13 @@ CREATE TABLE "Subclass" (
 
 -- CreateTable
 CREATE TABLE "SubclassTranslation" (
+    "id" SERIAL NOT NULL,
     "subclassId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
 
-    CONSTRAINT "SubclassTranslation_pkey" PRIMARY KEY ("subclassId","localeCode")
+    CONSTRAINT "SubclassTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -700,12 +729,13 @@ CREATE TABLE "ClassFeature" (
 
 -- CreateTable
 CREATE TABLE "ClassFeatureTranslation" (
+    "id" SERIAL NOT NULL,
     "classFeatureId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
 
-    CONSTRAINT "ClassFeatureTranslation_pkey" PRIMARY KEY ("classFeatureId","localeCode")
+    CONSTRAINT "ClassFeatureTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -757,6 +787,7 @@ CREATE TABLE "Spell" (
 
 -- CreateTable
 CREATE TABLE "SpellTranslation" (
+    "id" SERIAL NOT NULL,
     "spellId" INTEGER NOT NULL,
     "localeCode" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -766,76 +797,164 @@ CREATE TABLE "SpellTranslation" (
     "castingTimeNote" TEXT,
     "rangeNote" TEXT,
 
-    CONSTRAINT "SpellTranslation_pkey" PRIMARY KEY ("spellId","localeCode")
+    CONSTRAINT "SpellTranslation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "SpellDamageType" (
+    "id" SERIAL NOT NULL,
     "spellId" INTEGER NOT NULL,
     "damageTypeId" INTEGER NOT NULL,
 
-    CONSTRAINT "SpellDamageType_pkey" PRIMARY KEY ("spellId","damageTypeId")
+    CONSTRAINT "SpellDamageType_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Edition_code_key" ON "Edition"("code");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "EditionTranslation_editionId_localeCode_key" ON "EditionTranslation"("editionId", "localeCode");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "AbilityScore_index_key" ON "AbilityScore"("index");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AbilityScoreTranslation_abilityScoreId_localeCode_key" ON "AbilityScoreTranslation"("abilityScoreId", "localeCode");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Skill_index_key" ON "Skill"("index");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "SkillTranslation_skillId_localeCode_key" ON "SkillTranslation"("skillId", "localeCode");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Alignment_index_key" ON "Alignment"("index");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AlignmentTranslation_alignmentId_localeCode_key" ON "AlignmentTranslation"("alignmentId", "localeCode");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "DamageType_index_key" ON "DamageType"("index");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "DamageTypeTranslation_damageTypeId_localeCode_key" ON "DamageTypeTranslation"("damageTypeId", "localeCode");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "MagicSchool_index_key" ON "MagicSchool"("index");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "MagicSchoolTranslation_magicSchoolId_localeCode_key" ON "MagicSchoolTranslation"("magicSchoolId", "localeCode");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "CreatureType_index_key" ON "CreatureType"("index");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "CreatureTypeTranslation_creatureTypeId_localeCode_key" ON "CreatureTypeTranslation"("creatureTypeId", "localeCode");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Terrain_index_key" ON "Terrain"("index");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "TerrainTranslation_terrainId_localeCode_key" ON "TerrainTranslation"("terrainId", "localeCode");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Condition_editionId_index_key" ON "Condition"("editionId", "index");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ConditionTranslation_conditionId_localeCode_key" ON "ConditionTranslation"("conditionId", "localeCode");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Language_editionId_index_key" ON "Language"("editionId", "index");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "LanguageTranslation_languageId_localeCode_key" ON "LanguageTranslation"("languageId", "localeCode");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Proficiency_editionId_index_key" ON "Proficiency"("editionId", "index");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ProficiencyTranslation_proficiencyId_localeCode_key" ON "ProficiencyTranslation"("proficiencyId", "localeCode");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "EquipmentCategory_editionId_index_key" ON "EquipmentCategory"("editionId", "index");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "EquipmentCategoryTranslation_equipmentCategoryId_localeCode_key" ON "EquipmentCategoryTranslation"("equipmentCategoryId", "localeCode");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Equipment_editionId_index_key" ON "Equipment"("editionId", "index");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "EquipmentTranslation_equipmentId_localeCode_key" ON "EquipmentTranslation"("equipmentId", "localeCode");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "EquipmentCategoryItem_equipmentId_categoryId_key" ON "EquipmentCategoryItem"("equipmentId", "categoryId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PackContent_packId_itemId_key" ON "PackContent"("packId", "itemId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "WeaponProperty_editionId_index_key" ON "WeaponProperty"("editionId", "index");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "WeaponPropertyTranslation_weaponPropertyId_localeCode_key" ON "WeaponPropertyTranslation"("weaponPropertyId", "localeCode");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "WeaponStatsProperty_weaponId_propertyId_key" ON "WeaponStatsProperty"("weaponId", "propertyId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Choice_parentOptionId_key" ON "Choice"("parentOptionId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ChoiceTranslation_choiceId_localeCode_key" ON "ChoiceTranslation"("choiceId", "localeCode");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Class_editionId_index_key" ON "Class"("editionId", "index");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ClassTranslation_classId_localeCode_key" ON "ClassTranslation"("classId", "localeCode");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ClassPrimaryAbility_classId_abilityScoreId_key" ON "ClassPrimaryAbility"("classId", "abilityScoreId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ClassSavingThrow_classId_abilityScoreId_key" ON "ClassSavingThrow"("classId", "abilityScoreId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ClassProficiency_classId_proficiencyId_key" ON "ClassProficiency"("classId", "proficiencyId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ClassStartingEquipment_classId_equipmentId_key" ON "ClassStartingEquipment"("classId", "equipmentId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ClassLevel_classId_level_key" ON "ClassLevel"("classId", "level");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ClassLevelSpellSlot_classLevelId_spellLevel_key" ON "ClassLevelSpellSlot"("classLevelId", "spellLevel");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "ClassTableColumn_classId_key_key" ON "ClassTableColumn"("classId", "key");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ClassTableColumnTranslation_columnId_localeCode_key" ON "ClassTableColumnTranslation"("columnId", "localeCode");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ClassLevelValue_classLevelId_columnId_key" ON "ClassLevelValue"("classLevelId", "columnId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "SpellcastingSectionTranslation_sectionId_localeCode_key" ON "SpellcastingSectionTranslation"("sectionId", "localeCode");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ClassSpell_classId_spellId_key" ON "ClassSpell"("classId", "spellId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ClassMulticlassProficiency_classId_proficiencyId_key" ON "ClassMulticlassProficiency"("classId", "proficiencyId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Subclass_editionId_index_key" ON "Subclass"("editionId", "index");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "SubclassTranslation_subclassId_localeCode_key" ON "SubclassTranslation"("subclassId", "localeCode");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "SubclassSpell_subclassId_spellId_requiredFeatureId_key" ON "SubclassSpell"("subclassId", "spellId", "requiredFeatureId");
@@ -847,10 +966,19 @@ CREATE INDEX "ClassFeature_classId_level_idx" ON "ClassFeature"("classId", "leve
 CREATE UNIQUE INDEX "ClassFeature_editionId_index_key" ON "ClassFeature"("editionId", "index");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ClassFeatureTranslation_classFeatureId_localeCode_key" ON "ClassFeatureTranslation"("classFeatureId", "localeCode");
+
+-- CreateIndex
 CREATE INDEX "Spell_editionId_level_idx" ON "Spell"("editionId", "level");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Spell_editionId_index_key" ON "Spell"("editionId", "index");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "SpellTranslation_spellId_localeCode_key" ON "SpellTranslation"("spellId", "localeCode");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "SpellDamageType_spellId_damageTypeId_key" ON "SpellDamageType"("spellId", "damageTypeId");
 
 -- AddForeignKey
 ALTER TABLE "EditionTranslation" ADD CONSTRAINT "EditionTranslation_editionId_fkey" FOREIGN KEY ("editionId") REFERENCES "Edition"("id") ON DELETE CASCADE ON UPDATE CASCADE;

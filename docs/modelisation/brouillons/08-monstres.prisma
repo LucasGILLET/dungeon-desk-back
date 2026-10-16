@@ -79,6 +79,7 @@ model Monster {
 }
 
 model MonsterTranslation {
+  id Int @id @default(autoincrement())
   monsterId     Int
   localeCode    String
   name          String // "Aboleth"
@@ -88,25 +89,27 @@ model MonsterTranslation {
   monster       Monster @relation(fields: [monsterId], references: [id], onDelete: Cascade)
   locale        Locale  @relation(fields: [localeCode], references: [code])
 
-  @@id([monsterId, localeCode])
+  @@unique([monsterId, localeCode])
 }
 
 model MonsterSubtype {
+  id Int @id @default(autoincrement())
   monsterId         Int
   creatureSubtypeId Int
   monster           Monster         @relation(fields: [monsterId], references: [id], onDelete: Cascade)
   creatureSubtype   CreatureSubtype @relation(fields: [creatureSubtypeId], references: [id])
 
-  @@id([monsterId, creatureSubtypeId])
+  @@unique([monsterId, creatureSubtypeId])
 }
 
 model MonsterAlignment {
+  id Int @id @default(autoincrement())
   monsterId   Int
   alignmentId Int
   monster     Monster   @relation(fields: [monsterId], references: [id], onDelete: Cascade)
   alignment   Alignment @relation(fields: [alignmentId], references: [id])
 
-  @@id([monsterId, alignmentId])
+  @@unique([monsterId, alignmentId])
 }
 
 // ----------------------------------------------------------------------------
@@ -138,32 +141,35 @@ model MonsterArmorClass {
 }
 
 model MonsterArmorClassEquipment {
+  id Int @id @default(autoincrement())
   armorClassId Int
   equipmentId  Int
   armorClass   MonsterArmorClass @relation(fields: [armorClassId], references: [id], onDelete: Cascade)
   equipment    Equipment         @relation(fields: [equipmentId], references: [id])
 
-  @@id([armorClassId, equipmentId])
+  @@unique([armorClassId, equipmentId])
 }
 
 model MonsterSavingThrow {
+  id Int @id @default(autoincrement())
   monsterId      Int
   abilityScoreId Int
   bonus          Int
   monster        Monster      @relation(fields: [monsterId], references: [id], onDelete: Cascade)
   abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id])
 
-  @@id([monsterId, abilityScoreId])
+  @@unique([monsterId, abilityScoreId])
 }
 
 model MonsterSkill {
+  id Int @id @default(autoincrement())
   monsterId Int
   skillId   Int
   bonus     Int
   monster   Monster @relation(fields: [monsterId], references: [id], onDelete: Cascade)
   skill     Skill   @relation(fields: [skillId], references: [id])
 
-  @@id([monsterId, skillId])
+  @@unique([monsterId, skillId])
 }
 
 enum DamageModifierKind {
@@ -188,32 +194,35 @@ model MonsterDamageModifier {
 }
 
 model MonsterDamageModifierTranslation {
+  id Int @id @default(autoincrement())
   damageModifierId Int
   localeCode       String
   note             String // "dégâts des sorts", "(grâce à peau de pierre)"
   damageModifier   MonsterDamageModifier @relation(fields: [damageModifierId], references: [id], onDelete: Cascade)
   locale           Locale                @relation(fields: [localeCode], references: [code])
 
-  @@id([damageModifierId, localeCode])
+  @@unique([damageModifierId, localeCode])
 }
 
 model MonsterConditionImmunity {
+  id Int @id @default(autoincrement())
   monsterId   Int
   conditionId Int
   monster     Monster   @relation(fields: [monsterId], references: [id], onDelete: Cascade)
   condition   Condition @relation(fields: [conditionId], references: [id])
 
-  @@id([monsterId, conditionId])
+  @@unique([monsterId, conditionId])
 }
 
 model MonsterLanguage {
+  id Int @id @default(autoincrement())
   monsterId      Int
   languageId     Int
   understandOnly Boolean  @default(false) // "comprend le commun mais ne peut pas parler"
   monster        Monster  @relation(fields: [monsterId], references: [id], onDelete: Cascade)
   language       Language @relation(fields: [languageId], references: [id])
 
-  @@id([monsterId, languageId])
+  @@unique([monsterId, languageId])
 }
 
 // ----------------------------------------------------------------------------
@@ -267,6 +276,7 @@ model MonsterAction {
 }
 
 model MonsterActionTranslation {
+  id Int @id @default(autoincrement())
   actionId    Int
   localeCode  String
   name        String // "Tentacule"
@@ -274,7 +284,7 @@ model MonsterActionTranslation {
   action      MonsterAction @relation(fields: [actionId], references: [id], onDelete: Cascade)
   locale      Locale        @relation(fields: [localeCode], references: [code])
 
-  @@id([actionId, localeCode])
+  @@unique([actionId, localeCode])
 }
 
 model MonsterActionDamage {
@@ -322,6 +332,7 @@ model MonsterSpellcasting {
 }
 
 model MonsterSpell {
+  id Int @id @default(autoincrement())
   spellcastingId Int
   spellId        Int
   // JSONB Usage ; null = emplacements ou à volonté selon slots
@@ -329,15 +340,16 @@ model MonsterSpell {
   spellcasting   MonsterSpellcasting @relation(fields: [spellcastingId], references: [id], onDelete: Cascade)
   spell          Spell               @relation(fields: [spellId], references: [id])
 
-  @@id([spellcastingId, spellId])
+  @@unique([spellcastingId, spellId])
 }
 
 // Métamorphes : le loup-garou a une forme hybride et une forme de loup
 model MonsterForm {
+  id Int @id @default(autoincrement())
   monsterId     Int
   formMonsterId Int
   monster       Monster @relation("MonsterForms", fields: [monsterId], references: [id], onDelete: Cascade)
   formMonster   Monster @relation("MonsterFormTarget", fields: [formMonsterId], references: [id], onDelete: Cascade)
 
-  @@id([monsterId, formMonsterId])
+  @@unique([monsterId, formMonsterId])
 }

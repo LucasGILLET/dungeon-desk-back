@@ -26,6 +26,7 @@ model AbilityScore {
 }
 
 model AbilityScoreTranslation {
+  id             Int          @id @default(autoincrement())
   abilityScoreId Int
   localeCode     String
   abbreviation   String // "FOR" / "STR"
@@ -34,7 +35,7 @@ model AbilityScoreTranslation {
   abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id], onDelete: Cascade)
   locale         Locale       @relation(fields: [localeCode], references: [code])
 
-  @@id([abilityScoreId, localeCode])
+  @@unique([abilityScoreId, localeCode])
 }
 
 model Skill {
@@ -48,6 +49,7 @@ model Skill {
 }
 
 model SkillTranslation {
+  id          Int     @id @default(autoincrement())
   skillId     Int
   localeCode  String
   name        String // "Arcanes"
@@ -55,7 +57,7 @@ model SkillTranslation {
   skill       Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
   locale      Locale  @relation(fields: [localeCode], references: [code])
 
-  @@id([skillId, localeCode])
+  @@unique([skillId, localeCode])
 }
 
 enum AlignmentEthic {
@@ -81,6 +83,7 @@ model Alignment {
 }
 
 model AlignmentTranslation {
+  id           Int       @id @default(autoincrement())
   alignmentId  Int
   localeCode   String
   name         String // "Loyal bon"
@@ -89,7 +92,7 @@ model AlignmentTranslation {
   alignment    Alignment @relation(fields: [alignmentId], references: [id], onDelete: Cascade)
   locale       Locale    @relation(fields: [localeCode], references: [code])
 
-  @@id([alignmentId, localeCode])
+  @@unique([alignmentId, localeCode])
 }
 
 model DamageType {
@@ -102,6 +105,7 @@ model DamageType {
 }
 
 model DamageTypeTranslation {
+  id           Int        @id @default(autoincrement())
   damageTypeId Int
   localeCode   String
   name         String // "Feu"
@@ -109,7 +113,7 @@ model DamageTypeTranslation {
   damageType   DamageType @relation(fields: [damageTypeId], references: [id], onDelete: Cascade)
   locale       Locale     @relation(fields: [localeCode], references: [code])
 
-  @@id([damageTypeId, localeCode])
+  @@unique([damageTypeId, localeCode])
 }
 
 model MagicSchool {
@@ -121,6 +125,7 @@ model MagicSchool {
 }
 
 model MagicSchoolTranslation {
+  id            Int         @id @default(autoincrement())
   magicSchoolId Int
   localeCode    String
   name          String // "Évocation"
@@ -128,7 +133,7 @@ model MagicSchoolTranslation {
   magicSchool   MagicSchool @relation(fields: [magicSchoolId], references: [id], onDelete: Cascade)
   locale        Locale      @relation(fields: [localeCode], references: [code])
 
-  @@id([magicSchoolId, localeCode])
+  @@unique([magicSchoolId, localeCode])
 }
 
 model CreatureType {
@@ -140,6 +145,7 @@ model CreatureType {
 }
 
 model CreatureTypeTranslation {
+  id             Int          @id @default(autoincrement())
   creatureTypeId Int
   localeCode     String
   name           String // "Dragon", "Mort-vivant"
@@ -147,7 +153,7 @@ model CreatureTypeTranslation {
   creatureType   CreatureType @relation(fields: [creatureTypeId], references: [id], onDelete: Cascade)
   locale         Locale       @relation(fields: [localeCode], references: [code])
 
-  @@id([creatureTypeId, localeCode])
+  @@unique([creatureTypeId, localeCode])
 }
 
 // Terrains de prédilection (rôdeur 2014), auparavant de simples chaînes
@@ -160,13 +166,14 @@ model Terrain {
 }
 
 model TerrainTranslation {
+  id         Int     @id @default(autoincrement())
   terrainId  Int
   localeCode String
   name       String // "Arctique"
   terrain    Terrain @relation(fields: [terrainId], references: [id], onDelete: Cascade)
   locale     Locale  @relation(fields: [localeCode], references: [code])
 
-  @@id([terrainId, localeCode])
+  @@unique([terrainId, localeCode])
 }
 
 // --- Rattachés à une édition ------------------------------------------------
@@ -183,6 +190,7 @@ model Condition {
 }
 
 model ConditionTranslation {
+  id          Int       @id @default(autoincrement())
   conditionId Int
   localeCode  String
   name        String // "Aveuglé"
@@ -190,7 +198,7 @@ model ConditionTranslation {
   condition   Condition @relation(fields: [conditionId], references: [id], onDelete: Cascade)
   locale      Locale    @relation(fields: [localeCode], references: [code])
 
-  @@id([conditionId, localeCode])
+  @@unique([conditionId, localeCode])
 }
 
 enum LanguageRarity {
@@ -223,6 +231,7 @@ model Language {
 }
 
 model LanguageTranslation {
+  id              Int      @id @default(autoincrement())
   languageId      Int
   localeCode      String
   name            String // "Nain"
@@ -231,7 +240,7 @@ model LanguageTranslation {
   language        Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
   locale          Locale   @relation(fields: [localeCode], references: [code])
 
-  @@id([languageId, localeCode])
+  @@unique([languageId, localeCode])
 }
 
 enum ProficiencyType {
@@ -275,11 +284,12 @@ model Proficiency {
 }
 
 model ProficiencyTranslation {
+  id            Int         @id @default(autoincrement())
   proficiencyId Int
   localeCode    String
   name          String // "Armures légères"
   proficiency   Proficiency @relation(fields: [proficiencyId], references: [id], onDelete: Cascade)
   locale        Locale      @relation(fields: [localeCode], references: [code])
 
-  @@id([proficiencyId, localeCode])
+  @@unique([proficiencyId, localeCode])
 }

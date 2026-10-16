@@ -27,13 +27,14 @@ model EquipmentCategory {
 }
 
 model EquipmentCategoryTranslation {
+  id                  Int               @id @default(autoincrement())
   equipmentCategoryId Int
   localeCode          String
   name                String // "Armes courantes de corps à corps"
   equipmentCategory   EquipmentCategory @relation(fields: [equipmentCategoryId], references: [id], onDelete: Cascade)
   locale              Locale            @relation(fields: [localeCode], references: [code])
 
-  @@id([equipmentCategoryId, localeCode])
+  @@unique([equipmentCategoryId, localeCode])
 }
 
 enum EquipmentKind {
@@ -82,6 +83,7 @@ model Equipment {
 }
 
 model EquipmentTranslation {
+  id          Int       @id @default(autoincrement())
   equipmentId Int
   localeCode  String
   name        String // "Épée longue"
@@ -89,26 +91,28 @@ model EquipmentTranslation {
   equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
   locale      Locale    @relation(fields: [localeCode], references: [code])
 
-  @@id([equipmentId, localeCode])
+  @@unique([equipmentId, localeCode])
 }
 
 model EquipmentCategoryItem {
+  id          Int               @id @default(autoincrement())
   equipmentId Int
   categoryId  Int
   equipment   Equipment         @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
   category    EquipmentCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
-  @@id([equipmentId, categoryId])
+  @@unique([equipmentId, categoryId])
 }
 
 model PackContent {
+  id       Int       @id @default(autoincrement())
   packId   Int
   itemId   Int
   quantity Int       @default(1)
   pack     Equipment @relation("PackContents", fields: [packId], references: [id], onDelete: Cascade)
   item     Equipment @relation("PackItem", fields: [itemId], references: [id])
 
-  @@id([packId, itemId])
+  @@unique([packId, itemId])
 }
 
 // --- Armes -------------------------------------------------------------------
@@ -152,6 +156,7 @@ model WeaponProperty {
 }
 
 model WeaponPropertyTranslation {
+  id               Int            @id @default(autoincrement())
   weaponPropertyId Int
   localeCode       String
   name             String // "Finesse"
@@ -159,16 +164,17 @@ model WeaponPropertyTranslation {
   weaponProperty   WeaponProperty @relation(fields: [weaponPropertyId], references: [id], onDelete: Cascade)
   locale           Locale         @relation(fields: [localeCode], references: [code])
 
-  @@id([weaponPropertyId, localeCode])
+  @@unique([weaponPropertyId, localeCode])
 }
 
 model WeaponStatsProperty {
+  id         Int            @id @default(autoincrement())
   weaponId   Int
   propertyId Int
   weapon     WeaponStats    @relation(fields: [weaponId], references: [equipmentId], onDelete: Cascade)
   property   WeaponProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
-  @@id([weaponId, propertyId])
+  @@unique([weaponId, propertyId])
 }
 
 // --- Armures ----------------------------------------------------------------

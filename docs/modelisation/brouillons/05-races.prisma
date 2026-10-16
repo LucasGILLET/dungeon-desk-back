@@ -38,6 +38,7 @@ model Race {
 }
 
 model RaceTranslation {
+  id Int @id @default(autoincrement())
   raceId        Int
   localeCode    String
   name          String // "Nain"
@@ -49,36 +50,39 @@ model RaceTranslation {
   race          Race    @relation(fields: [raceId], references: [id], onDelete: Cascade)
   locale        Locale  @relation(fields: [localeCode], references: [code])
 
-  @@id([raceId, localeCode])
+  @@unique([raceId, localeCode])
 }
 
 // Bonus fixes (2014) : nain +2 CON
 model RaceAbilityBonus {
+  id Int @id @default(autoincrement())
   raceId         Int
   abilityScoreId Int
   bonus          Int
   race           Race         @relation(fields: [raceId], references: [id], onDelete: Cascade)
   abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id])
 
-  @@id([raceId, abilityScoreId])
+  @@unique([raceId, abilityScoreId])
 }
 
 model RaceLanguage {
+  id Int @id @default(autoincrement())
   raceId     Int
   languageId Int
   race       Race     @relation(fields: [raceId], references: [id], onDelete: Cascade)
   language   Language @relation(fields: [languageId], references: [id])
 
-  @@id([raceId, languageId])
+  @@unique([raceId, languageId])
 }
 
 model RaceTrait {
+  id Int @id @default(autoincrement())
   raceId  Int
   traitId Int
   race    Race  @relation(fields: [raceId], references: [id], onDelete: Cascade)
   trait   Trait @relation(fields: [traitId], references: [id], onDelete: Cascade)
 
-  @@id([raceId, traitId])
+  @@unique([raceId, traitId])
 }
 
 // ----------------------------------------------------------------------------
@@ -108,6 +112,7 @@ model Subrace {
 }
 
 model SubraceTranslation {
+  id Int @id @default(autoincrement())
   subraceId   Int
   localeCode  String
   name        String // "Nain des collines"
@@ -115,26 +120,28 @@ model SubraceTranslation {
   subrace     Subrace @relation(fields: [subraceId], references: [id], onDelete: Cascade)
   locale      Locale  @relation(fields: [localeCode], references: [code])
 
-  @@id([subraceId, localeCode])
+  @@unique([subraceId, localeCode])
 }
 
 model SubraceAbilityBonus {
+  id Int @id @default(autoincrement())
   subraceId      Int
   abilityScoreId Int
   bonus          Int
   subrace        Subrace      @relation(fields: [subraceId], references: [id], onDelete: Cascade)
   abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id])
 
-  @@id([subraceId, abilityScoreId])
+  @@unique([subraceId, abilityScoreId])
 }
 
 model SubraceTrait {
+  id Int @id @default(autoincrement())
   subraceId Int
   traitId   Int
   subrace   Subrace @relation(fields: [subraceId], references: [id], onDelete: Cascade)
   trait     Trait   @relation(fields: [traitId], references: [id], onDelete: Cascade)
 
-  @@id([subraceId, traitId])
+  @@unique([subraceId, traitId])
 }
 
 // ----------------------------------------------------------------------------
@@ -181,6 +188,7 @@ model Trait {
 }
 
 model TraitTranslation {
+  id Int @id @default(autoincrement())
   traitId     Int
   localeCode  String
   name        String // "Vision dans le noir"
@@ -188,21 +196,23 @@ model TraitTranslation {
   trait       Trait  @relation(fields: [traitId], references: [id], onDelete: Cascade)
   locale      Locale @relation(fields: [localeCode], references: [code])
 
-  @@id([traitId, localeCode])
+  @@unique([traitId, localeCode])
 }
 
 model TraitProficiency {
+  id Int @id @default(autoincrement())
   traitId       Int
   proficiencyId Int
   trait         Trait       @relation(fields: [traitId], references: [id], onDelete: Cascade)
   proficiency   Proficiency @relation(fields: [proficiencyId], references: [id])
 
-  @@id([traitId, proficiencyId])
+  @@unique([traitId, proficiencyId])
 }
 
 // Sorts innés : Magie drow (lumières dansantes niv. 1, lueurs féeriques
 // niv. 3, ténèbres niv. 5), Héritage infernal du tieffelin…
 model TraitSpell {
+  id Int @id @default(autoincrement())
   traitId           Int
   spellId           Int
   minCharacterLevel Int   @default(1)
@@ -211,5 +221,5 @@ model TraitSpell {
   trait             Trait @relation(fields: [traitId], references: [id], onDelete: Cascade)
   spell             Spell @relation(fields: [spellId], references: [id], onDelete: Cascade)
 
-  @@id([traitId, spellId])
+  @@unique([traitId, spellId])
 }
