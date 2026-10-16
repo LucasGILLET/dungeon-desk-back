@@ -199,7 +199,7 @@ async function configureRelations(): Promise<number> {
       await upsertAlias(parent.name, field.name, {
         special: ['o2m'], interface: 'list-o2m', options: { template, enableLink: true },
         display: 'related-values', display_options: { template },
-        translations: label(parent.name, field.name) ? fr(label(parent.name, field.name)!) : null,
+        translations: fr(label(parent.name, field.name) ?? COLLECTIONS[child.name]?.[1] ?? field.name),
       });
       count++;
     }
@@ -217,13 +217,36 @@ async function o2m(parent: string, alias: string, child: string, fk: string, tem
   });
 }
 
-async function m2m(parent: string, alias: string, junction: string, fkParent: string, fkOther: string, template: string, otherAlias: string | null = null): Promise<void> {
+// Nom Prisma de la liste inverse d'une clé étrangère : ClassStartingEquipment.equipmentId
+// → Equipment.classStartingEquipments (la liste générée par configureRelations)
+function backRelation(child: string, fk: string): string | null {
+  const relation = byName.get(child)!.fields.find((f) => f.kind === 'object' && f.relationFromFields?.includes(fk));
+  const parent = relation && byName.get(relation.type);
+  return parent?.fields.find((f) => f.kind === 'object' && f.isList && f.relationName === relation!.relationName)?.name ?? null;
+}
+
+// Gabarit d'un modèle vu à travers une table de liaison : {{index}} → {{classId.index}}
+const through = (template: string, fk: string) => template.replace(/\{\{/g, `{{${fk}.`);
+
+async function m2m(parent: string, alias: string, junction: string, fkParent: string, fkOther: string, template: string, otherAlias?: string): Promise<void> {
+  // L'autre côté (Equipment.classStartingEquipments…) garde sa liste, elle aussi en n-n :
+  // une liste 1-n sur une relation déclarée n-n est refusée par Directus
+  const other = byName.get(junction)!.fields.find((f) => f.kind === 'object' && f.relationFromFields?.includes(fkOther))!.type;
+  const otherField = otherAlias ?? backRelation(junction, fkOther);
   await api('PATCH', `/relations/${junction}/${fkParent}`, { meta: { one_field: alias, junction_field: fkOther } });
-  await api('PATCH', `/relations/${junction}/${fkOther}`, { meta: { one_field: otherAlias, junction_field: fkParent } });
+  await api('PATCH', `/relations/${junction}/${fkOther}`, { meta: { one_field: otherField, junction_field: fkParent } });
   await upsertAlias(parent, alias, {
     special: ['m2m'], interface: 'list-m2m', options: { template, enableLink: true },
     display: 'related-values', display_options: { template }, translations: fr(label(parent, alias) ?? alias),
   });
+  if (otherField) {
+    const otherTemplate = through(displayTemplate(byName.get(parent)!) ?? '{{id}}', fkParent);
+    await upsertAlias(other, otherField, {
+      special: ['m2m'], interface: 'list-m2m', options: { template: otherTemplate, enableLink: true },
+      display: 'related-values', display_options: { template: otherTemplate },
+      translations: fr(label(other, otherField) ?? `${COLLECTIONS[parent]?.[1] ?? parent} (${(label(parent, alias) ?? alias).toLowerCase()})`),
+    });
+  }
 }
 
 // Groupes repliables : chaque groupe est un champ alias ; ses membres pointent vers lui
