@@ -8,12 +8,21 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// Rôle dans le back-office des données de jeu
+enum UserRole {
+  USER // joueur : aucun accès au back-office
+  TRANSLATOR // modifie uniquement les traductions
+  EDITOR // modifie le contenu et les traductions
+  ADMIN
+}
+
 model User {
   id                    Int            @id @default(autoincrement())
   username              String?        @unique
   email                 String         @unique
   password              String?
   auth0Id               String?        @unique
+  role                  UserRole       @default(USER)
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
   npcs                  Npc[]

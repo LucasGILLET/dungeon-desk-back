@@ -12,6 +12,7 @@ import authRoutes from './routes/authRoutes';
 import npcRoutes from './routes/npcRoutes';
 import characterRoutes from './routes/characterRoutes';
 import srdRoutes from './routes/srdRoutes';
+import adminRoutes from './routes/adminRoutes';
 import prisma from './prismaClient';
 import { logger } from './utils/logger';
 import { httpRequestDurationSeconds, register } from './utils/monitoring';
@@ -91,6 +92,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/npcs', npcRoutes);
 app.use('/api/characters', characterRoutes);
 app.use('/api/srd', srdRoutes);
+app.use('/api/admin', adminRoutes);
 
 
 // Basic health check route
