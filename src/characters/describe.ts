@@ -227,3 +227,78 @@ export async function describeProficiencies(db: Db, ctx: RulesContext, input: Ch
   for (const l of poolLanguages) addLanguage(l);
   return result;
 }
+
+export interface Resources {
+  hitDice: { class: string; die: number; total: number; used: number }[];
+  // Emplacements de sorts par niveau de sort (index 0 = niveau 1), multiclassage compris
+  spellSlots: number[];
+  // Emplacements de pacte de l'occultiste
+  pactSlots: { level: number; count: number } | null;
+  spellcasting: { class: string; ability: string; saveDC: number; attackBonus: number }[];
+}
+
+const CASTER_WEIGHT: Record<string, (level: number) => number> = {
+  FULL: (l) => l,
+  HALF: (l) => Math.floor(l / 2),
+  THIRD: (l) => Math.floor(l / 3),
+};
+
+// Dés de vie, emplacements de sorts et caractéristiques d'incantation. Règle
+// de multiclassage : niveau de lanceur = niveaux complets + moitié (demi-
+// lanceurs) + tiers (sous-classes), lu dans la table d'un lanceur complet.
+export async function describeResources(
+  db: Db, ctx: RulesContext, input: CharacterInput, sheet: { proficiencyBonus: number; abilityScores: Record<string, { modifier: number }> },
+): Promise<Resources> {
+  const owned = input.classes
+    .map((c) => ({ input: c, rule: ctx.classes.get(c.class) }))
+    .filter((c): c is { input: CharacterInput['classes'][number]; rule: NonNullable<typeof c.rule> } => !!c.rule);
+  const hitDice = owned.map(({ input: c, rule }) => ({ class: c.class, die: rule.hitDie, total: c.levels.length, used: c.hitDiceUsed }));
+
+  const classIds = owned.map((c) => c.rule.id);
+  const [spellcasting, subclasses] = await Promise.all([
+    db.classSpellcasting.findMany({ where: { classId: { in: classIds } }, select: { classId: true, casterType: true, abilityScore: { select: { index: true } } } }),
+    db.subclass.findMany({ where: { index: { in: owned.map((c) => c.input.subclass).filter((s): s is string => !!s) }, editionId: ctx.edition?.id, casterType: { not: null } }, select: { index: true, classId: true, casterType: true } }),
+  ]);
+
+  // Lanceurs (hors pacte), avec leur poids dans le niveau de lanceur
+  const casters = owned.flatMap(({ input: c, rule }) => {
+    const own = spellcasting.find((s) => s.classId === rule.id);
+    const sub = subclasses.find((s) => s.classId === rule.id && s.index === c.subclass);
+    const type = own?.casterType ?? sub?.casterType;
+    return type && type !== 'PACT' ? [{ classId: rule.id, level: c.levels.length, type }] : [];
+  });
+
+  let spellSlots: number[] = [];
+  if (casters.length) {
+    const single = casters.length === 1 && casters[0]!.type !== 'THIRD';
+    const casterLevel = single ? casters[0]!.level : casters.reduce((sum, c) => sum + CASTER_WEIGHT[c.type]!(c.level), 0);
+    const tableClassId = single
+      ? casters[0]!.classId
+      : (await db.classSpellcasting.findFirst({ where: { casterType: 'FULL', class: { editionId: ctx.edition?.id } }, select: { classId: true } }))?.classId;
+    if (tableClassId && casterLevel > 0) {
+      const level = await db.classLevel.findUnique({ where: { classId_level: { classId: tableClassId, level: casterLevel } }, include: { spellSlots: true } });
+      spellSlots = Array.from({ length: 9 }, (_, i) => level?.spellSlots.find((s) => s.spellLevel === i + 1)?.slots ?? 0);
+      while (spellSlots.length && spellSlots[spellSlots.length - 1] === 0) spellSlots.pop();
+    }
+  }
+
+  let pactSlots: Resources['pactSlots'] = null;
+  const pact = owned.find(({ rule }) => spellcasting.find((s) => s.classId === rule.id)?.casterType === 'PACT');
+  if (pact) {
+    const level = await db.classLevel.findUnique({ where: { classId_level: { classId: pact.rule.id, level: pact.input.levels.length } }, include: { spellSlots: true } });
+    const slots = (level?.spellSlots ?? []).filter((s) => s.slots > 0);
+    if (slots.length) {
+      const top = slots.reduce((a, b) => (b.spellLevel > a.spellLevel ? b : a));
+      pactSlots = { level: top.spellLevel, count: top.slots };
+    }
+  }
+
+  const spellcastingInfo = owned.flatMap(({ input: c, rule }) => {
+    const own = spellcasting.find((s) => s.classId === rule.id);
+    if (!own) return [];
+    const mod = sheet.abilityScores[own.abilityScore.index]?.modifier ?? 0;
+    return [{ class: c.class, ability: own.abilityScore.index, saveDC: 8 + sheet.proficiencyBonus + mod, attackBonus: sheet.proficiencyBonus + mod }];
+  });
+
+  return { hitDice, spellSlots, pactSlots, spellcasting: spellcastingInfo };
+}

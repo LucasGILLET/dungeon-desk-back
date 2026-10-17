@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getClasses, getClassByIndex } from '../controllers/srdController';
-import { getBackgrounds, getRaces, getSpells } from '../controllers/srdContentController';
+import { getBackgrounds, getConditions, getEquipment, getFeats, getRaces, getSpells } from '../controllers/srdContentController';
 
 const router = Router();
 
@@ -113,5 +113,50 @@ router.get('/:edition/backgrounds', getBackgrounds);
  *       200: { description: Spells }
  */
 router.get('/:edition/spells', getSpells);
+
+/**
+ * @swagger
+ * /srd/{edition}/conditions:
+ *   get:
+ *     summary: Conditions (translated)
+ *     operationId: getSrdConditions
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: Conditions }
+ */
+router.get('/:edition/conditions', getConditions);
+
+/**
+ * @swagger
+ * /srd/{edition}/equipment:
+ *   get:
+ *     summary: Equipment catalogue, without detailed stats (translated)
+ *     operationId: getSrdEquipment
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: Equipment }
+ */
+router.get('/:edition/equipment', getEquipment);
+
+/**
+ * @swagger
+ * /srd/{edition}/feats:
+ *   get:
+ *     summary: Feats with their ability prerequisites (translated)
+ *     operationId: getSrdFeats
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: Feats }
+ */
+router.get('/:edition/feats', getFeats);
 
 export default router;

@@ -180,3 +180,69 @@ export const getSpells = async (req: Request, res: Response) => {
     fail(res, 'spells', error);
   }
 };
+
+// --- Référentiels utiles à la fiche de personnage --------------------------------------
+
+export const getConditions = async (req: Request, res: Response) => {
+  try {
+    const ctx = await resolveLang(req);
+    const rows = await prisma.condition.findMany({ where: editionWhere(req), orderBy: { index: 'asc' }, include: { translations: t } });
+    setCache(res);
+    res.json(rows.map((c) => {
+      const ct = pick(c.translations, ctx);
+      return { index: c.index, name: ct.name, description: ct.description };
+    }));
+  } catch (error) {
+    fail(res, 'conditions', error);
+  }
+};
+
+// Catalogue d'équipement (ajout à l'inventaire) : sans statistiques détaillées
+export const getEquipment = async (req: Request, res: Response) => {
+  try {
+    const ctx = await resolveLang(req);
+    const rows = await prisma.equipment.findMany({
+      where: editionWhere(req),
+      orderBy: { index: 'asc' },
+      include: { translations: t, weapon: { select: { damageDice: true } }, armor: { select: { baseArmorClass: true } } },
+    });
+    setCache(res);
+    res.json(rows.map((e) => ({
+      index: e.index,
+      name: pick(e.translations, ctx).name,
+      kind: e.kind,
+      source: e.source,
+      cost: e.costAmount != null ? { amount: e.costAmount, currency: e.costCurrency } : null,
+      weightLb: e.weightLb != null ? Number(e.weightLb) : null,
+      damage: e.weapon?.damageDice ?? null,
+      armorClass: e.armor?.baseArmorClass ?? null,
+    })));
+  } catch (error) {
+    fail(res, 'equipment', error);
+  }
+};
+
+export const getFeats = async (req: Request, res: Response) => {
+  try {
+    const ctx = await resolveLang(req);
+    const ref = refOf(ctx);
+    const rows = await prisma.feat.findMany({
+      where: editionWhere(req),
+      orderBy: { index: 'asc' },
+      include: { translations: t, prerequisites: { include: { abilityScore: named } } },
+    });
+    setCache(res);
+    res.json(rows.map((f) => {
+      const ft = pick(f.translations, ctx);
+      return {
+        index: f.index,
+        name: ft.name,
+        description: ft.description,
+        source: f.source,
+        prerequisites: f.prerequisites.map((p) => ({ ability: ref(p.abilityScore), minimumScore: p.minimumScore, alternativeGroup: p.alternativeGroup })),
+      };
+    }));
+  } catch (error) {
+    fail(res, 'feats', error);
+  }
+};

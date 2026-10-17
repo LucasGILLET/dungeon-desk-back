@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { ZodError } from 'zod';
 import prisma from '../prismaClient';
 import { loadRulesContext } from '../characters/context';
-import { describeChoices, describeProficiencies } from '../characters/describe';
+import { describeChoices, describeProficiencies, describeResources } from '../characters/describe';
 import { CharacterInput, CharacterInputSchema } from '../characters/input';
 import { analyse, Issue } from '../characters/rules';
 import { CHARACTER_INCLUDE, createCharacter as insertCharacter, displayNames, findCharacter, replaceCharacter, StoredCharacter, toInput } from '../characters/store';
@@ -43,7 +43,11 @@ async function sheet(req: Request, character: StoredCharacter) {
         id: character.id,
         ...input,
         names: displayNames(character, lang),
-        sheet: analysis.sheet && { ...analysis.sheet, ...(await describeProficiencies(prisma, ctx, input, lang)) },
+        sheet: analysis.sheet && {
+            ...analysis.sheet,
+            ...(await describeProficiencies(prisma, ctx, input, lang)),
+            ...(await describeResources(prisma, ctx, input, analysis.sheet)),
+        },
         warnings: analysis.errors,
         createdAt: character.createdAt,
         updatedAt: character.updatedAt,
@@ -64,7 +68,8 @@ export const previewCharacter = async (req: Request, res: Response) => {
         const lang = await resolveLang(req);
         const described = await describeChoices(prisma, ctx, parsed.data, analysis.availableChoices, lang);
         const known = await describeProficiencies(prisma, ctx, parsed.data, lang);
-        res.json({ valid: !!analysis.plan, errors: analysis.errors, sheet: analysis.sheet && { ...analysis.sheet, ...known }, ...described });
+        const resources = analysis.sheet ? await describeResources(prisma, ctx, parsed.data, analysis.sheet) : {};
+        res.json({ valid: !!analysis.plan, errors: analysis.errors, sheet: analysis.sheet && { ...analysis.sheet, ...known, ...resources }, ...described });
     } catch (error) {
         logger.error(`Error previewing character: ${error instanceof Error ? error.message : error}`);
         res.status(500).json({ message: 'Error previewing character' });
