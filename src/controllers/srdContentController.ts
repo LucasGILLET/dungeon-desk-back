@@ -246,3 +246,16 @@ export const getFeats = async (req: Request, res: Response) => {
     fail(res, 'feats', error);
   }
 };
+
+// Compétences et leur caractéristique (Arcanes → INT), pour la fiche
+export const getSkills = async (req: Request, res: Response) => {
+  try {
+    const ctx = await resolveLang(req);
+    const ref = refOf(ctx);
+    const rows = await prisma.skill.findMany({ orderBy: { index: 'asc' }, include: { translations: t, abilityScore: named } });
+    setCache(res);
+    res.json(rows.map((s) => ({ index: s.index, name: pick(s.translations, ctx).name, ability: ref(s.abilityScore) })));
+  } catch (error) {
+    fail(res, 'skills', error);
+  }
+};

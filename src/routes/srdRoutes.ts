@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getClasses, getClassByIndex } from '../controllers/srdController';
-import { getBackgrounds, getConditions, getEquipment, getFeats, getRaces, getSpells } from '../controllers/srdContentController';
+import { getBackgrounds, getConditions, getEquipment, getFeats, getRaces, getSkills, getSpells } from '../controllers/srdContentController';
 
 const router = Router();
 
@@ -158,5 +158,20 @@ router.get('/:edition/equipment', getEquipment);
  *       200: { description: Feats }
  */
 router.get('/:edition/feats', getFeats);
+
+/**
+ * @swagger
+ * /srd/{edition}/skills:
+ *   get:
+ *     summary: Skills with their ability score (translated)
+ *     operationId: getSrdSkills
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: Skills }
+ */
+router.get('/:edition/skills', getSkills);
 
 export default router;
