@@ -41,7 +41,7 @@ Prisma ne sait pas exprimer les contraintes `CHECK`. Elles sont ajoutées à la 
 
 ## 4. Seed
 
-- **Données sources** : `prisma/data/<édition>/<langue>/` pour le SRD et `prisma/data/<édition>/custom/` pour les compléments absents du SRD (libellés des colonnes de table de classe, types de créatures, terrains). Les fichiers SRD sont des copies de ceux du front, qui continue d'utiliser les siens jusqu'à la bascule (étape 8).
+- **Données sources** : `prisma/data/<édition>/<langue>/` pour le SRD et `prisma/data/<édition>/custom/` pour les compléments absents du SRD (libellés des colonnes de table de classe, types de créatures, terrains). Ce sont désormais les seules copies : le front lit tout depuis l'API (il n'a plus de fichiers JSON).
 - **Idempotence** : chaque import fait un upsert sur la clé métier (`[editionId, index]`, ou `index` pour les référentiels partagés). Relancer le seed met les données à jour sans créer de doublons.
 - **Tables enfants** (niveaux, colonnes, liaisons) : elles sont remplacées en bloc à chaque import de leur parent (suppression puis recréation), dans une transaction par entité.
 - **Lignes référencées par les personnages** : les choix, leurs options et les entrées des tables de personnalité sont mis à jour en place pour garder leurs `id` : un choix reprend le premier choix existant de même type chez son propriétaire (les options, par position). Seules les lignes en trop sont supprimées, ce qui échoue (`Restrict`) si un personnage les a choisies : le seed ne casse jamais un personnage en silence.
@@ -55,6 +55,9 @@ Prisma ne sait pas exprimer les contraintes `CHECK`. Elles sont ajoutées à la 
 GET /api/srd/editions
 GET /api/srd/:edition/classes?lang=fr
 GET /api/srd/:edition/classes/:index?lang=fr
+GET /api/srd/:edition/races?lang=fr        sous-races et traits compris
+GET /api/srd/:edition/backgrounds?lang=fr  tables de personnalité comprises
+GET /api/srd/:edition/spells?lang=fr       champs structurés, distances en pieds
 ```
 
 - `:edition` est le code de l'édition (`2014`, `2024`).
