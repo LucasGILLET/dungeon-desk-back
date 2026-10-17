@@ -68,8 +68,14 @@ export const getClassByIndex = async (req: Request, res: Response) => {
             sections: { orderBy: { position: 'asc' }, include: { translations: t } },
           },
         },
-        subclasses: { include: { translations: t } },
-        features: { orderBy: [{ level: 'asc' }, { id: 'asc' }], include: { translations: t, subclass: true } },
+        subclasses: {
+          orderBy: { id: 'asc' },
+          include: {
+            translations: t,
+            spells: { orderBy: [{ requiredClassLevel: 'asc' }, { id: 'asc' }], include: { spell: { select: { index: true, level: true, translations: t } } } },
+          },
+        },
+        features: { orderBy: [{ level: 'asc' }, { id: 'asc' }], include: { translations: t, subclass: true, parent: { select: { index: true } } } },
         _count: { select: { spells: true } },
       },
     });
@@ -136,10 +142,20 @@ export const getClassByIndex = async (req: Request, res: Response) => {
         }),
         spellCount: cls._count.spells,
       },
-      subclasses: cls.subclasses.map((s) => ref(s.index, s.translations)),
+      subclasses: cls.subclasses.map((s) => {
+        const st = pick(s.translations, ctx);
+        return {
+          index: s.index,
+          name: st.name,
+          source: s.source,
+          description: st.description,
+          // Sorts de domaine, de serment… (toujours préparés)
+          spells: s.spells.map((sp) => ({ ...ref(sp.spell.index, sp.spell.translations), level: sp.spell.level, requiredClassLevel: sp.requiredClassLevel })),
+        };
+      }),
       features: cls.features.map((f) => {
         const ft = pick(f.translations, ctx);
-        return { index: f.index, level: f.level, subclass: f.subclass?.index ?? null, name: ft.name, description: ft.description };
+        return { index: f.index, level: f.level, subclass: f.subclass?.index ?? null, parent: f.parent?.index ?? null, name: ft.name, description: ft.description };
       }),
     });
   } catch (error) {

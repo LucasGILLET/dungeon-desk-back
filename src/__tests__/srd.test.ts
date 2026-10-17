@@ -8,6 +8,9 @@ vi.mock('../prismaClient', () => ({
   default: {
     locale: { findMany: vi.fn() },
     class: { findMany: vi.fn(), findFirst: vi.fn() },
+    race: { findMany: vi.fn() },
+    background: { findMany: vi.fn() },
+    spell: { findMany: vi.fn() },
   },
 }));
 
@@ -79,7 +82,12 @@ const wizard = {
     abilityScore: { index: 'int', translations: tr({ name: 'Intelligence' }, { name: 'Intelligence' }) },
     sections: [{ translations: tr({ title: 'Cantrips', description: 'At 1st level…' }) }],
   },
-  subclasses: [{ index: 'evocation', translations: tr({ name: 'School of Evocation' }, { name: "École d'évocation" }) }],
+  subclasses: [{
+    index: 'evocation',
+    source: 'SRD',
+    translations: tr({ name: 'School of Evocation', description: 'Evokers…' }, { name: "École d'évocation", description: 'Les évocateurs…' }),
+    spells: [{ requiredClassLevel: 3, spell: { index: 'fireball', level: 3, translations: tr({ name: 'Fireball' }, { name: 'Boule de feu' }) } }],
+  }],
   features: [
     { index: 'arcane-recovery', level: 1, subclass: null, translations: tr({ name: 'Arcane Recovery', description: 'You have learned…' }, { name: 'Restauration arcanique', description: 'Vous avez appris…' }) },
     { index: 'sculpt-spells', level: 2, subclass: { index: 'evocation' }, translations: tr({ name: 'Sculpt Spells', description: 'Beginning at 2nd level…' }, { name: 'Façonneur de sorts', description: 'À partir du niveau 2…' }) },
@@ -186,11 +194,14 @@ describe('SRD Controller', () => {
         savingThrows: [{ index: 'int', name: 'Intelligence' }],
         proficiencies: [{ index: 'daggers', name: 'Dagues' }],
         startingEquipment: [{ index: 'spellbook', name: 'Grimoire', quantity: 1 }],
-        subclasses: [{ index: 'evocation', name: "École d'évocation" }],
+        subclasses: [{
+          index: 'evocation', name: "École d'évocation", source: 'SRD', description: 'Les évocateurs…',
+          spells: [{ index: 'fireball', name: 'Boule de feu', level: 3, requiredClassLevel: 3 }],
+        }],
       });
       expect(res.body.features).toEqual([
-        { index: 'arcane-recovery', level: 1, subclass: null, name: 'Restauration arcanique', description: 'Vous avez appris…' },
-        { index: 'sculpt-spells', level: 2, subclass: 'evocation', name: 'Façonneur de sorts', description: 'À partir du niveau 2…' },
+        { index: 'arcane-recovery', level: 1, subclass: null, parent: null, name: 'Restauration arcanique', description: 'Vous avez appris…' },
+        { index: 'sculpt-spells', level: 2, subclass: 'evocation', parent: null, name: 'Façonneur de sorts', description: 'À partir du niveau 2…' },
       ]);
       const query = (prisma.class.findFirst as any).mock.calls[0][0];
       expect(query.where).toEqual({ index: 'wizard', edition: { code: '2014' } });
@@ -274,6 +285,73 @@ describe('SRD Controller', () => {
 
       expect(res.status).toBe(500);
       expect(res.body.message).toBe('Server error');
+    });
+  });
+
+  describe('GET /api/srd/:edition/races', () => {
+    it('should return races with translated subraces, traits and bonuses', async () => {
+      const ability = { index: 'dex', translations: tr({ name: 'Dexterity' }, { name: 'Dextérité' }) };
+      const darkvision = { trait: { index: 'darkvision', translations: tr({ name: 'Darkvision', description: 'You see…' }, { name: 'Vision dans le noir', description: 'Vous voyez…' }) } };
+      (prisma.race.findMany as any).mockResolvedValue([{
+        index: 'elf', source: 'SRD', sizes: ['MEDIUM'], speeds: { walk: 30 },
+        translations: tr({ name: 'Elf', ageText: 'old', alignmentText: null, sizeText: null, languageText: null }, { name: 'Elfe', ageText: 'vieux', alignmentText: null, sizeText: null, languageText: null }),
+        abilityBonus: [{ abilityScore: ability, bonus: 2 }],
+        languages: [{ language: { index: 'elvish', translations: tr({ name: 'Elvish' }, { name: 'Elfique' }) } }],
+        traits: [darkvision],
+        subraces: [{ index: 'wood-elf', source: 'HOMEBREW', translations: [{ localeCode: 'fr', name: 'Elfe des bois', description: null }], abilityBonus: [], traits: [] }],
+      }]);
+
+      const res = await request(app).get('/api/srd/2014/races?lang=fr');
+
+      expect(res.status).toBe(200);
+      expect(res.body[0]).toMatchObject({
+        index: 'elf', name: 'Elfe', age: 'vieux', speeds: { walk: 30 },
+        abilityBonuses: [{ index: 'dex', name: 'Dextérité', bonus: 2 }],
+        languages: [{ index: 'elvish', name: 'Elfique' }],
+        traits: [{ index: 'darkvision', name: 'Vision dans le noir', description: 'Vous voyez…' }],
+        subraces: [{ index: 'wood-elf', name: 'Elfe des bois', source: 'HOMEBREW' }],
+      });
+      expect((prisma.race.findMany as any).mock.calls[0][0].where).toEqual({ edition: { code: '2014' } });
+    });
+  });
+
+  describe('GET /api/srd/:edition/backgrounds', () => {
+    it('should return personality entries with their id', async () => {
+      (prisma.background.findMany as any).mockResolvedValue([{
+        index: 'acolyte', source: 'SRD',
+        translations: tr({ name: 'Acolyte', featureName: 'Shelter', featureDescription: '…' }, { name: 'Acolyte', featureName: 'Abri du fidèle', featureDescription: '…' }),
+        proficiencies: [], startingEquipment: [],
+        personalityOptions: [{ id: 70, kind: 'IDEAL', position: 1, translations: tr({ text: 'Tradition.' }, { text: 'Tradition.' }), alignments: [] }],
+      }]);
+
+      const res = await request(app).get('/api/srd/2014/backgrounds?lang=fr');
+
+      expect(res.status).toBe(200);
+      expect(res.body[0]).toMatchObject({ feature: { name: 'Abri du fidèle' }, personality: [{ id: 70, kind: 'IDEAL', text: 'Tradition.' }] });
+    });
+  });
+
+  describe('GET /api/srd/:edition/spells', () => {
+    it('should return structured spell fields', async () => {
+      (prisma.spell.findMany as any).mockResolvedValue([{
+        index: 'fireball', source: 'SRD', level: 3, castingTimeAmount: 1, castingTimeUnit: 'ACTION', ritual: false,
+        rangeType: 'DISTANCE', rangeFt: 150, verbal: true, somatic: true, material: true, materialCostGp: null, materialConsumed: false,
+        durationType: 'INSTANTANEOUS', durationAmount: null, concentration: false, attackType: null, saveSuccess: 'HALF', areaType: 'SPHERE', areaSizeFt: 20,
+        translations: tr({ name: 'Fireball', description: 'A bright streak…', higherLevels: null, materialText: 'bat guano', castingTimeNote: null, rangeNote: null }, { name: 'Boule de feu', description: 'Un éclair…', higherLevels: null, materialText: 'guano', castingTimeNote: null, rangeNote: null }),
+        school: { index: 'evocation', translations: tr({ name: 'Evocation' }, { name: 'Évocation' }) },
+        saveAbility: { index: 'dex', translations: tr({ name: 'Dexterity' }, { name: 'Dextérité' }) },
+        damageTypes: [], classes: [{ class: { index: 'wizard', translations: tr({ name: 'Wizard' }, { name: 'Magicien' }) } }], subclasses: [],
+      }]);
+
+      const res = await request(app).get('/api/srd/2014/spells?lang=fr');
+
+      expect(res.status).toBe(200);
+      expect(res.body[0]).toMatchObject({
+        name: 'Boule de feu', level: 3, school: { name: 'Évocation' },
+        range: { type: 'DISTANCE', feet: 150 }, components: { verbal: true, material: true, materialText: 'guano' },
+        save: { ability: { index: 'dex' }, success: 'HALF' }, area: { type: 'SPHERE', sizeFt: 20 },
+        classes: [{ index: 'wizard', name: 'Magicien' }],
+      });
     });
   });
 });
