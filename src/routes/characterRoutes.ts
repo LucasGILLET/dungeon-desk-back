@@ -1,11 +1,42 @@
 import express from 'express';
-import { createCharacter, getCharacters, getCharacter, deleteCharacter, updateCharacter } from '../controllers/characterController';
+import { createCharacter, getCharacters, getCharacter, deleteCharacter, updateCharacter, previewCharacter } from '../controllers/characterController';
 import { protect } from '../middleware/authMiddleware';
 import { validateIdParam } from '../middleware/validateIdParam';
 
 const router = express.Router();
 
-router.use(protect); // Protect all character routes
+/**
+ * @swagger
+ * /characters/preview:
+ *   post:
+ *     summary: Preview a character without saving it (computed sheet, available choices, starting equipment)
+ *     operationId: previewCharacter
+ *     tags: [Characters]
+ *     security: []
+ *     parameters:
+ *       - in: query
+ *         name: lang
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CharacterCreateInput'
+ *     responses:
+ *       200:
+ *         description: Preview
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CharacterPreview'
+ *       400:
+ *         description: Malformed character
+ */
+router.post('/preview', previewCharacter);
+
+router.use(protect); // Protect all other character routes
 
 /**
  * @swagger
@@ -54,7 +85,7 @@ router.post('/', createCharacter);
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Character'
+ *                 $ref: '#/components/schemas/CharacterSummary'
  */
 router.get('/', getCharacters);
 

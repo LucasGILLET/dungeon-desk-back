@@ -2,7 +2,7 @@
   {
     "index": "str",
     "name": "FOR",
-    "full_name": "Strength",
+    "full_name": "Force",
     "desc": [
       "La Force détermine la puissance physique, l’entrainement sportif et la mesure dans laquelle vous pouvez exercer une force physique brute.",
       "Un jet de Force peut modéliser toute tentative de soulever, pousser, tirer ou casser quelque chose, de faire passer votre corps à travers un espace, ou bien d’appliquer la force brute à une situation. La compétence Athlétisme reflète une aptitude à certains types de jets de Force."
@@ -19,7 +19,7 @@
   {
     "index": "dex",
     "name": "DEX",
-    "full_name": "Dexterity",
+    "full_name": "Dextérité",
     "desc": [
       "La Dextérité détermine l’agilité, les réflexes et l’équilibre.",
       "Un jet de Dextérité peut modéliser toute tentative de se déplacer rapidement ou tranquillement, ou pour éviter de tomber dans un piège. Les compétences Acrobaties, Escamotage et Discrétion reflètent une aptitude à certains types de jets de Dextérité."
@@ -94,7 +94,7 @@
   {
     "index": "wis",
     "name": "SAG",
-    "full_name": "Wisdom",
+    "full_name": "Sagesse",
     "desc": [
       "La Sagesse reflète la façon dont vous êtes à l’écoute du monde autour de vous, ainsi que la perspicacité et l’intuition.",
       "Un jet de Sagesse peut refléter l’effort pour lire le langage du corps, comprendre les sentiments de quelqu’un, noter quelque chose dans l’environnement ou soigner une personne blessée. Les compétences Dressage, Intuition, Médecine, Perception et Survie reflètent une aptitude à certains types de jets de Sagesse."
@@ -131,7 +131,7 @@
   {
     "index": "cha",
     "name": "CHA",
-    "full_name": "Charisma",
+    "full_name": "Charisme",
     "desc": [
       "Le Charisme détermine votre capacité à interagir efficacement avec les autres. Il comprend des facteurs comme la confiance et l’éloquence, et peut représenter une personnalité charmante ou dominante.",
       "Un jet de Charisme peut être nécessaire lorsque vous essayez d’influencer ou de divertir les autres, lorsque vous essayez de faire impression ou de dire un mensonge de manière convaincante, ou lorsque vous êtes au milieu d’une situation sociale difficile. Les compétences de Tromperie, Intimidation, Représentation et Persuasion reflètent une aptitude à certains types de jets de Charisme."

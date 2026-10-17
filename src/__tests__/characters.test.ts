@@ -55,6 +55,26 @@ describe('Character Controller', () => {
     });
   });
 
+  describe('POST /api/characters/preview', () => {
+    it('should reject a malformed character without touching the database', async () => {
+      const res = await request(app).post('/api/characters/preview').send({ name: 'Elandra' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.errors.map((e: { path: string }) => e.path)).toEqual(expect.arrayContaining(['race', 'abilityScores', 'classes']));
+      expect(prisma.edition.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('should report an unknown edition as an error of the preview', async () => {
+      (prisma.edition.findUnique as any).mockResolvedValue(null);
+      (prisma.abilityScore.findMany as any).mockResolvedValue([]);
+
+      const res = await request(app).post('/api/characters/preview').send({ ...body, edition: '1977' });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({ valid: false, errors: [{ path: 'edition' }], choices: [] });
+    });
+  });
+
   describe('PUT /api/characters/:id', () => {
     it('should return 404 for a character of another user', async () => {
       (prisma.character.findFirst as any).mockResolvedValue(null);

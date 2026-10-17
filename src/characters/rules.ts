@@ -136,6 +136,8 @@ export interface Analysis {
   plan: CharacterPlan | null; // null si erreurs
   errors: Issue[];
   sheet: CharacterSheet | null;
+  // Choix accessibles au personnage (répondus ou non), dans l'ordre du contexte
+  availableChoices: number[];
 }
 
 const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
@@ -155,7 +157,7 @@ export function analyse(input: CharacterInput, ctx: RulesContext): Analysis {
   };
 
   if (!ctx.edition) {
-    return { plan: null, errors: [{ path: 'edition', message: `Unknown edition "${input.edition}"` }], sheet: null };
+    return { plan: null, errors: [{ path: 'edition', message: `Unknown edition "${input.edition}"` }], sheet: null, availableChoices: [] };
   }
 
   // --- Race, historique, alignement ---
@@ -352,10 +354,13 @@ export function analyse(input: CharacterInput, ctx: RulesContext): Analysis {
     if (level && classLevel.has(level.classId) && level.classLevel <= classLevel.get(level.classId)!) c.level = level;
   }
   const pendingChoices: CharacterSheet['pending']['choices'] = [];
+  const availableChoices: number[] = [];
   for (const rule of ctx.choices.values()) {
     const given = answersByChoice.get(rule.id) ?? 0;
     if (rule.choose > 0 && given > rule.choose) fail('choices', `Choice ${rule.id} allows ${rule.choose} answer(s), got ${given}`);
-    if (rule.choose > given && access(rule).ok) pendingChoices.push({ choiceId: rule.id, kind: rule.kind, remaining: rule.choose - given });
+    if (rule.choose === 0 || !access(rule).ok) continue;
+    availableChoices.push(rule.id);
+    if (rule.choose > given) pendingChoices.push({ choiceId: rule.id, kind: rule.kind, remaining: rule.choose - given });
   }
 
   // --- Caractéristiques finales (pour le multiclassage et les dons) ---
@@ -488,12 +493,13 @@ export function analyse(input: CharacterInput, ctx: RulesContext): Analysis {
     pending: { subclasses: pendingSubclasses, abilityScoreImprovements: pendingAsi, choices: pendingChoices },
   };
 
-  if (errors.length || !ctx.race) return { plan: null, errors, sheet };
+  if (errors.length || !ctx.race) return { plan: null, errors, sheet, availableChoices };
 
   const s = input.state;
   return {
     errors,
     sheet,
+    availableChoices,
     plan: {
       core: {
         editionId: ctx.edition.id,

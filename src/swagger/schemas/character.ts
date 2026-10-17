@@ -110,6 +110,62 @@ export const characterCreateInputSchema = {
   },
 } as const;
 
+const refName = { type: 'object', required: ['index', 'name'], properties: { index: { type: 'string' }, name: { type: 'string' } } } as const;
+
+export const characterSheetSchema = {
+  type: 'object',
+  description: 'Valeurs calculées (jamais stockées)',
+  required: ['level', 'proficiencyBonus', 'maxHitPoints', 'abilityScores', 'pending', 'proficiencies', 'expertise', 'languages'],
+  properties: {
+    level: { type: 'integer' },
+    proficiencyBonus: { type: 'integer' },
+    maxHitPoints: { type: 'integer' },
+    abilityScores: {
+      type: 'object',
+      additionalProperties: { type: 'object', required: ['base', 'bonus', 'total', 'modifier'], properties: { base: { type: 'integer' }, bonus: { type: 'integer' }, total: { type: 'integer' }, modifier: { type: 'integer' } } },
+    },
+    pending: {
+      type: 'object',
+      description: 'Ce qui reste à choisir',
+      required: ['subclasses', 'abilityScoreImprovements', 'choices'],
+      properties: {
+        subclasses: { type: 'array', items: { type: 'string' } },
+        abilityScoreImprovements: { type: 'array', items: { type: 'object', properties: { class: { type: 'string' }, level: { type: 'integer' } } } },
+        choices: { type: 'array', items: { type: 'object', required: ['choiceId', 'kind', 'remaining'], properties: { choiceId: { type: 'integer' }, kind: { type: 'string' }, remaining: { type: 'integer' } } } },
+      },
+    },
+    proficiencies: { type: 'array', items: { type: 'object', required: ['index', 'name', 'type'], properties: { index: { type: 'string' }, name: { type: 'string' }, type: { type: 'string', example: 'SKILL' } } } },
+    expertise: { type: 'array', items: refName },
+    languages: { type: 'array', items: refName },
+  },
+} as const;
+
+export const characterSummarySchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'integer' },
+    name: { type: 'string' },
+    edition: { type: 'string' },
+    race: { type: 'string' },
+    subrace: { type: 'string', nullable: true },
+    classes: { type: 'array', items: { type: 'object', properties: { class: { type: 'string' }, subclass: { type: 'string', nullable: true }, level: { type: 'integer' } } } },
+    level: { type: 'integer' },
+    names: { $ref: '#/components/schemas/CharacterNames' },
+    updatedAt: { type: 'string', format: 'date-time' },
+  },
+} as const;
+
+export const characterNamesSchema = {
+  type: 'object',
+  description: 'Noms traduits',
+  properties: {
+    race: { type: 'string', nullable: true },
+    subrace: { type: 'string', nullable: true },
+    background: { type: 'string', nullable: true },
+    classes: { type: 'array', items: { type: 'object', properties: { class: { type: 'string', nullable: true }, subclass: { type: 'string', nullable: true }, level: { type: 'integer' } } } },
+  },
+} as const;
+
 export const characterSchema = {
   allOf: [
     { $ref: '#/components/schemas/CharacterCreateInput' },
@@ -117,22 +173,68 @@ export const characterSchema = {
       type: 'object',
       properties: {
         id: { type: 'integer', example: 1 },
-        names: { type: 'object', description: 'Noms traduits de la race, de l\'historique et des classes' },
-        sheet: {
-          type: 'object',
-          description: 'Valeurs calculées (jamais stockées)',
-          properties: {
-            level: { type: 'integer' },
-            proficiencyBonus: { type: 'integer' },
-            maxHitPoints: { type: 'integer' },
-            abilityScores: { type: 'object', additionalProperties: { type: 'object', properties: { base: { type: 'integer' }, bonus: { type: 'integer' }, total: { type: 'integer' }, modifier: { type: 'integer' } } } },
-            pending: { type: 'object', description: 'Ce qui reste à choisir : sous-classes, augmentations de caractéristique, choix' },
-          },
-        },
+        names: { $ref: '#/components/schemas/CharacterNames' },
+        sheet: { $ref: '#/components/schemas/CharacterSheet' },
         warnings: { type: 'array', items: { type: 'object', properties: { path: { type: 'string' }, message: { type: 'string' } } } },
         createdAt: { type: 'string', format: 'date-time' },
         updatedAt: { type: 'string', format: 'date-time' },
       },
     },
   ],
+} as const;
+
+const choiceItemSchema = {
+  type: 'object',
+  properties: {
+    type: { type: 'string', example: 'proficiency' },
+    index: { type: 'string', nullable: true, example: 'skill-arcana' },
+    name: { type: 'string', example: 'Compétence : Arcanes' },
+    quantity: { type: 'integer' },
+    bonus: { type: 'integer', nullable: true },
+    description: { type: 'string', nullable: true },
+  },
+} as const;
+
+export const characterPreviewSchema = {
+  type: 'object',
+  properties: {
+    valid: { type: 'boolean', description: 'Le personnage peut être enregistré tel quel' },
+    errors: { type: 'array', items: { type: 'object', properties: { path: { type: 'string' }, message: { type: 'string' } } } },
+    sheet: { allOf: [{ $ref: '#/components/schemas/CharacterSheet' }], nullable: true },
+    choices: {
+      type: 'array',
+      description: 'Choix accessibles (répondus ou non), dans l\'ordre d\'affichage ; un sous-choix suit l\'option qui l\'ouvre',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'integer' },
+          kind: { type: 'string', example: 'PROFICIENCY' },
+          choose: { type: 'integer' },
+          description: { type: 'string' },
+          source: { type: 'object', properties: { type: { type: 'string', example: 'class' }, index: { type: 'string', nullable: true }, name: { type: 'string', nullable: true } } },
+          parentOptionId: { type: 'integer', nullable: true },
+          options: {
+            type: 'array',
+            items: { type: 'object', properties: { id: { type: 'integer' }, label: { type: 'string' }, nestedChoiceId: { type: 'integer', nullable: true }, items: { type: 'array', items: choiceItemSchema } } },
+          },
+          pool: {
+            type: 'object',
+            nullable: true,
+            properties: {
+              type: { type: 'string', enum: ['ANY_LANGUAGE', 'EQUIPMENT_CATEGORY'] },
+              category: { type: 'object', nullable: true, properties: { index: { type: 'string' }, name: { type: 'string' } } },
+              candidates: { type: 'array', items: { type: 'object', properties: { index: { type: 'string' }, name: { type: 'string' } } } },
+            },
+          },
+        },
+      },
+    },
+    startingEquipment: {
+      type: 'object',
+      properties: {
+        items: { type: 'array', items: { type: 'object', properties: { equipment: { type: 'string', nullable: true }, name: { type: 'string', nullable: true }, quantity: { type: 'integer' } } } },
+        currencies: { type: 'object', additionalProperties: { type: 'integer' } },
+      },
+    },
+  },
 } as const;

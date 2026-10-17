@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ZodError } from 'zod';
 import prisma from '../prismaClient';
 import { loadRulesContext } from '../characters/context';
+import { describeChoices, describeProficiencies } from '../characters/describe';
 import { CharacterInput, CharacterInputSchema } from '../characters/input';
 import { analyse, Issue } from '../characters/rules';
 import { CHARACTER_INCLUDE, createCharacter as insertCharacter, displayNames, findCharacter, replaceCharacter, StoredCharacter, toInput } from '../characters/store';
@@ -35,17 +36,40 @@ async function validate(req: Request, res: Response) {
 // erreurs éventuelles (donnée de jeu modifiée depuis) sont renvoyées en warnings.
 async function sheet(req: Request, character: StoredCharacter) {
     const input: CharacterInput = toInput(character);
-    const analysis = analyse(input, await loadRulesContext(prisma, input));
+    const ctx = await loadRulesContext(prisma, input);
+    const analysis = analyse(input, ctx);
+    const lang = await resolveLang(req);
     return {
         id: character.id,
         ...input,
-        names: displayNames(character, await resolveLang(req)),
-        sheet: analysis.sheet,
+        names: displayNames(character, lang),
+        sheet: analysis.sheet && { ...analysis.sheet, ...(await describeProficiencies(prisma, ctx, input, lang)) },
         warnings: analysis.errors,
         createdAt: character.createdAt,
         updatedAt: character.updatedAt,
     };
 }
+
+// Aperçu sans enregistrement (public, pour le créateur) : fiche calculée, erreurs,
+// choix accessibles décrits et traduits, équipement de départ qui en découle.
+export const previewCharacter = async (req: Request, res: Response) => {
+    try {
+        const parsed = CharacterInputSchema.safeParse(req.body);
+        if (!parsed.success) return res.status(400).json({ message: 'Invalid character data', errors: zodIssues(parsed.error) });
+        const ctx = await loadRulesContext(prisma, parsed.data);
+        const analysis = analyse(parsed.data, ctx);
+        if (!ctx.edition) {
+            return res.json({ valid: false, errors: analysis.errors, sheet: null, choices: [], startingEquipment: { items: [], currencies: {} } });
+        }
+        const lang = await resolveLang(req);
+        const described = await describeChoices(prisma, ctx, parsed.data, analysis.availableChoices, lang);
+        const known = await describeProficiencies(prisma, ctx, parsed.data, lang);
+        res.json({ valid: !!analysis.plan, errors: analysis.errors, sheet: analysis.sheet && { ...analysis.sheet, ...known }, ...described });
+    } catch (error) {
+        logger.error(`Error previewing character: ${error instanceof Error ? error.message : error}`);
+        res.status(500).json({ message: 'Error previewing character' });
+    }
+};
 
 export const createCharacter = async (req: Request, res: Response) => {
     try {

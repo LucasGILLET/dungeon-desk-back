@@ -63,16 +63,18 @@ app.get('/metrics', async (req, res) => {
   }
 });
 
-// Note: Pour les tests, on pourrait vouloir désactiver ou augmenter cette limite
-const limiter = rateLimit({
+// Limite stricte sur l'authentification (force brute), large ailleurs : le
+// créateur de personnage interroge l'API à chaque étape.
+const limit = (max: number) => rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Limite à 50 requêtes par fenêtre par IP
+  max, // requêtes par fenêtre et par IP
   standardHeaders: true, // Retourne les infos de limite dans les headers `RateLimit-*`
   legacyHeaders: false, // Désactive les headers `X-RateLimit-*`
   message: 'Trop de requêtes, veuillez réessayer plus tard.'
 });
 
-app.use(limiter);
+app.use('/api/auth', limit(50));
+app.use(limit(1000));
 
 app.use(cors({
   origin: process.env.FRONTEND_URL,

@@ -70,6 +70,7 @@ GET /api/srd/:edition/classes/:index?lang=fr
 ```
 GET    /api/characters            liste (noms traduits, classes et niveaux)
 GET    /api/characters/:id        fiche complète
+POST   /api/characters/preview    aperçu sans enregistrement (public)
 POST   /api/characters            création
 PUT    /api/characters/:id        modification, montée de niveau, inventaire
 DELETE /api/characters/:id
@@ -79,3 +80,4 @@ DELETE /api/characters/:id
 - **Validation** (`src/characters/rules.ts`) : tout contenu doit exister dans l'édition du personnage ; niveaux continus et ordre de prise cohérent ; sous-classe, augmentations de caractéristique et dons aux bons niveaux ; prérequis de multiclassage et de don ; réponses limitées aux choix accessibles (race, classe de départ ou suivante, niveau de la capacité, option parente choisie) et au nombre `choose` ; sorts de la liste de la classe et d'un niveau lançable. Un personnage invalide est refusé (400, avec le chemin de chaque erreur).
 - **Incomplet n'est pas invalide** : un choix non répondu, une sous-classe ou une augmentation de caractéristique pas encore choisie sont acceptés et listés dans `sheet.pending`. C'est ce qui guide la montée de niveau.
 - **Fiche calculée** (`sheet`) : niveau, bonus de maîtrise, caractéristiques finales et modificateurs, PV maximum. Rien de tout ça n'est stocké. Si une donnée de jeu change et rend un personnage invalide, la fiche le signale dans `warnings` au lieu d'échouer.
+- **Aperçu** (`POST /api/characters/preview`, sans authentification) : le créateur envoie le personnage en cours et reçoit la fiche calculée (maîtrises et langues comprises), les choix accessibles décrits et traduits (source, options avec ce qu'elles donnent, candidats d'une réserve ; un sous-choix suit l'option qui l'ouvre) et l'équipement de départ qui découle des réponses. Le front affiche ces choix sans connaître les règles.
