@@ -91,14 +91,20 @@ export class ChoiceImporter {
   }
 
   // Met les choix d'un propriétaire en conformité avec les option sets donnés.
-  // Les choix et options existants sont réutilisés par position (mêmes id),
-  // car des personnages les référencent ; seuls ceux en trop sont supprimés,
-  // ce qui échoue (Restrict) si un personnage les a choisis.
+  // Les choix et options existants sont réutilisés (mêmes id), car des
+  // personnages les référencent : un choix reprend le premier choix existant
+  // de même type, dans l'ordre (ajouter une langue avant l'équipement ne
+  // transforme pas le choix d'équipement en choix de langue). Seuls ceux en
+  // trop sont supprimés, ce qui échoue (Restrict) si un personnage les a choisis.
   async sync(tx: Tx, owner: ChoiceOwner, specs: ChoiceSpec[]): Promise<number[]> {
-    const existing = await tx.choice.findMany({ where: owner, orderBy: [{ position: 'asc' }, { id: 'asc' }], select: { id: true } });
+    const unused = await tx.choice.findMany({ where: owner, orderBy: [{ position: 'asc' }, { id: 'asc' }], select: { id: true, kind: true } });
     const ids: number[] = [];
-    for (const [position, spec] of specs.entries()) ids.push(await this.write(tx, owner, position, existing[position]?.id, spec));
-    const stale = existing.slice(specs.length).map((c) => c.id);
+    for (const [position, spec] of specs.entries()) {
+      const match = unused.findIndex((c) => c.kind === spec.kind);
+      const existingId = match >= 0 ? unused.splice(match, 1)[0]!.id : undefined;
+      ids.push(await this.write(tx, owner, position, existingId, spec));
+    }
+    const stale = unused.map((c) => c.id);
     if (stale.length) await tx.choice.deleteMany({ where: { id: { in: stale } } });
     return ids;
   }
