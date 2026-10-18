@@ -110,7 +110,10 @@ export const getBackgrounds = async (req: Request, res: Response) => {
         name: bt.name,
         lang: bt.lang,
         source: b.source,
-        feature: bt.featureName ? { name: bt.featureName, description: bt.featureDescription } : null,
+        // Champ par champ : un historique maison a un nom français mais une description anglaise
+        feature: bt.featureName
+          ? { name: bt.featureName, description: bt.featureDescription ?? b.translations.find((x) => x.featureDescription)?.featureDescription ?? null }
+          : null,
         proficiencies: b.proficiencies.map((p) => ref(p.proficiency)),
         startingEquipment: b.startingEquipment.map((e) => ({ ...ref(e.equipment)!, quantity: e.quantity })),
         // Tables de personnalité : id à renvoyer dans CharacterInput.personality

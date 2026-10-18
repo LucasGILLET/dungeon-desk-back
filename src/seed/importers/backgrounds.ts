@@ -3,7 +3,7 @@
 // n'existent pas dans le SRD ("lettre d'un admirateur"…) sont créés comme
 // équipement maison.
 import { PersonalityKind, PrismaClient } from '@prisma/client';
-import { Json, loadMerged, loadSrd, log, MergedFile, parseUrl, Refs, replaceTranslations, text, translationsFor, TX_OPTIONS } from '../context';
+import { Json, loadMerged, loadSrd, log, MergedFile, parseUrl, readJson, Refs, replaceTranslations, text, translationsFor, TX_OPTIONS } from '../context';
 import { ChoiceImporter, ChoiceSpec } from './choices';
 
 // Option set ({ from: { options } }) ou simple liste ([{ string }]) selon la source
@@ -49,6 +49,7 @@ export async function importBackgrounds(prisma: PrismaClient, refs: Refs, editio
   const key = (index: string) => ({ editionId_index: { editionId, index } });
   const choices = new ChoiceImporter(refs);
   const backgrounds = loadMerged(edition, 'Backgrounds', 'custom-backgrounds.json', 'en');
+  const labels: Record<string, { name: string; featureName?: string }> = readJson(`${edition}/custom/background-labels.json`);
 
   const created = await createMissingEquipment(prisma, refs, backgrounds);
   await refs.preload('proficiency', 'equipment', 'equipmentCategory', 'language', 'alignment', 'abilityScore');
@@ -58,8 +59,13 @@ export async function importBackgrounds(prisma: PrismaClient, refs: Refs, editio
     await prisma.$transaction(async (tx) => {
       const row = await tx.background.upsert({ where: key(en.index), create: { editionId, index: en.index, ...data }, update: data });
       const backgroundId = row.id;
-      await replaceTranslations(tx, 'backgroundTranslation', 'backgroundId', backgroundId,
-        translationsFor(backgrounds, en.index, (r) => ({ name: r.name, featureName: r.feature?.name ?? null, featureDescription: text(r.feature?.desc) })));
+      const translations = translationsFor(backgrounds, en.index, (r) => ({ name: r.name, featureName: r.feature?.name ?? null, featureDescription: text(r.feature?.desc) }));
+      // Historiques maison : noms français de background-labels.json (descriptions non traduites)
+      const frLabel = labels[en.index];
+      if (frLabel && !translations.some((t) => t.localeCode === 'fr')) {
+        translations.push({ localeCode: 'fr', data: { name: frLabel.name, featureName: frLabel.featureName ?? null, featureDescription: null } });
+      }
+      await replaceTranslations(tx, 'backgroundTranslation', 'backgroundId', backgroundId, translations);
 
       await tx.backgroundProficiency.deleteMany({ where: { backgroundId } });
       await tx.backgroundProficiency.createMany({

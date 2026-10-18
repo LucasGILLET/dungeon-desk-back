@@ -1,0 +1,51 @@
+{
+  "_comment": "Noms français des historiques maison (custom-backgrounds.json est en anglais). Les descriptions restent en anglais faute de traduction : l'API s'y rabat champ par champ.",
+  "charlatan": {
+    "name": "Charlatan",
+    "featureName": "Fausse identité"
+  },
+  "criminal": {
+    "name": "Criminel",
+    "featureName": "Contact criminel"
+  },
+  "entertainer": {
+    "name": "Artiste",
+    "featureName": "À la demande générale"
+  },
+  "folk-hero": {
+    "name": "Héros du peuple",
+    "featureName": "Hospitalité rustique"
+  },
+  "guild-artisan": {
+    "name": "Artisan de guilde",
+    "featureName": "Membre de guilde"
+  },
+  "hermit": {
+    "name": "Ermite",
+    "featureName": "Découverte"
+  },
+  "noble": {
+    "name": "Noble",
+    "featureName": "Position privilégiée"
+  },
+  "outlander": {
+    "name": "Étranger",
+    "featureName": "Voyageur"
+  },
+  "sage": {
+    "name": "Sage",
+    "featureName": "Chercheur"
+  },
+  "sailor": {
+    "name": "Marin",
+    "featureName": "Place à bord"
+  },
+  "soldier": {
+    "name": "Soldat",
+    "featureName": "Grade militaire"
+  },
+  "urchin": {
+    "name": "Enfant des rues",
+    "featureName": "Secrets de la ville"
+  }
+}
