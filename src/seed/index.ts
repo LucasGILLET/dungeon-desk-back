@@ -4,7 +4,7 @@
 //   --edition 2014           édition à importer (défaut : 2014)
 //   --only <domaines>        liste séparée par des virgules parmi :
 //                            base, referentiels, equipement, maitrises, sorts, classes, races, historiques, presentation, pnj,
-//                            monstres, objets-magiques
+//                            monstres, objets-magiques, regles, guides
 //   --classes <index>        classes à importer (défaut : toutes), ex. wizard,fighter
 //
 // Chaque domaine ne dépend que des précédents ; relancer le seed met à jour les
@@ -22,8 +22,10 @@ import { importPresentation } from './importers/presentation';
 import { importNpcGenerator } from './importers/npcGenerator';
 import { importMonsters } from './importers/monsters';
 import { importMagicItems } from './importers/magicItems';
+import { importRules } from './importers/rules';
+import { importGuides } from './importers/guides';
 
-const DOMAINS = ['base', 'referentiels', 'equipement', 'maitrises', 'sorts', 'classes', 'races', 'historiques', 'presentation', 'pnj', 'monstres', 'objets-magiques'] as const;
+const DOMAINS = ['base', 'referentiels', 'equipement', 'maitrises', 'sorts', 'classes', 'races', 'historiques', 'presentation', 'pnj', 'monstres', 'objets-magiques', 'regles', 'guides'] as const;
 
 function option(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
@@ -63,6 +65,9 @@ async function main(): Promise<void> {
     // Après les sorts et les classes (incantation des monstres), l'équipement (armures)
     if (run('monstres')) await importMonsters(prisma, refs, edition);
     if (run('objets-magiques')) await importMagicItems(prisma, refs, edition);
+    if (run('regles')) await importRules(prisma, refs, edition);
+    // Après les classes, races et règles, vers lesquelles renvoient les cartes
+    if (run('guides')) await importGuides(prisma, refs, edition);
     if (untranslated) log(`${untranslated} description(s) de choix non traduite(s) dans les fichiers sources : repli sur l'anglais`);
     log(`terminé en ${((Date.now() - started) / 1000).toFixed(1)} s`);
   } finally {

@@ -1,0 +1,215 @@
+[
+  {
+    "name": "Combat",
+    "index": "combat",
+    "desc": "# Combat\n",
+    "subsections": [
+      {
+        "name": "L’Ordre de combat",
+        "index": "the-order-of-combat",
+        "url": "/api/2014/rule-sections/the-order-of-combat"
+      },
+      {
+        "name": "Déplacement et position",
+        "index": "movement-and-position",
+        "url": "/api/2014/rule-sections/movement-and-position"
+      },
+      {
+        "name": "Actions en combat",
+        "index": "actions-in-combat",
+        "url": "/api/2014/rule-sections/actions-in-combat"
+      },
+      {
+        "name": "Effectuer une attaque",
+        "index": "making-an-attack",
+        "url": "/api/2014/rule-sections/making-an-attack"
+      },
+      {
+        "name": "Abri",
+        "index": "cover",
+        "url": "/api/2014/rule-sections/cover"
+      },
+      {
+        "name": "Dégâts et guérison",
+        "index": "damage-and-healing",
+        "url": "/api/2014/rule-sections/damage-and-healing"
+      },
+      {
+        "name": "Combat monté",
+        "index": "mounted-combat",
+        "url": "/api/2014/rule-sections/mounted-combat"
+      },
+      {
+        "name": "Combat subaquatique",
+        "index": "underwater-combat",
+        "url": "/api/2014/rule-sections/underwater-combat"
+      }
+    ],
+    "url": "/api/2014/rules/combat"
+  },
+  {
+    "name": "Utiliser les caractéristiques",
+    "index": "using-ability-scores",
+    "desc": "# Utiliser les caractéristiques\n\nSix caractéristiques donnent une description rapide des capacités physiques et mentales de toute créature :\n- **Force**, mesure la puissance physique\r\n- **Dextérité**, mesure l’agilité\r\n- **Constitution**, mesure l’endurance\r\n- **Intelligence**, mesure le raisonnement et la mémoire\r\n- **Sagesse**, mesure la perception et l’intuition\r\n- **Charisme**, mesurer la force de la personnalité\n\nEst-ce qu’un personnage est musclé et perspicace ? Brillant et charmant ? Agile et robuste ? Les valeurs des caractéristiques définissent les qualités et les faiblesses d’une créature.\n\nLes trois principaux jets de dés du jeu (le jet de caractéristique, le jet de sauvegarde et le jet d’attaque) se basent sur les six valeurs des caractéristiques. L’introduction du manuel décrit la règle de base derrière ces jets : lancer un d20, ajouter un modificateur de caractéristique provenant d’une des six caractéristiques, et comparer le total à l’objectif.\n\n**Valeurs et modificateurs de caractéristique** Chaque caractéristique d’une créature a une valeur, un nombre qui définit l’ampleur de cette caractéristique. Une valeur de caractéristique est une mesure des capacités innées, mais englobe également la formation et la compétence d’une créature dans les activités liées à cette caractéristique.\n\nUne valeur de 10 ou 11 est la moyenne humaine normale, mais les aventuriers et de nombreux monstres sont un cran au-dessus de la moyenne dans la plupart des caractéristiques. Une valeur de 18 est généralement la plus élevée qu’une personne atteint. Les aventuriers peuvent avoir des valeurs qui montent jusqu’à 20, et certains monstres et êtres divins peuvent avoir des valeurs qui montent jusqu’à 30.\n\nChaque caractéristique possède également un modificateur, qui va de -5 (pour une valeur de caractéristique de 1) à +10 (pour une valeur de caractéristique de 30). Le tableau des Valeurs et modificateurs de caractéristique donne les modificateurs de caractéristique suivant la valeur de celle-ci, de 1 à 30.\n",
+    "subsections": [
+      {
+        "name": "Valeurs et modificateurs de caractéristique",
+        "index": "ability-scores-and-modifiers",
+        "url": "/api/2014/rule-sections/ability-scores-and-modifiers"
+      },
+      {
+        "name": "Avantage et désavantage",
+        "index": "advantage-and-disadvantage",
+        "url": "/api/2014/rule-sections/advantage-and-disadvantage"
+      },
+      {
+        "name": "Bonus de maîtrise",
+        "index": "proficiency-bonus",
+        "url": "/api/2014/rule-sections/proficiency-bonus"
+      },
+      {
+        "name": "Jets de caractéristique",
+        "index": "ability-checks",
+        "url": "/api/2014/rule-sections/ability-checks"
+      },
+      {
+        "name": "Utiliser chaque caractéristique",
+        "index": "using-each-ability",
+        "url": "/api/2014/rule-sections/using-each-ability"
+      },
+      {
+        "name": "Jets de sauvegarde",
+        "index": "saving-throws",
+        "url": "/api/2014/rule-sections/saving-throws"
+      }
+    ],
+    "url": "/api/2014/rules/using-ability-scores"
+  },
+  {
+    "name": "Partir à l’aventure",
+    "index": "adventuring",
+    "desc": "# Partir à l’aventure\n",
+    "subsections": [
+      {
+        "name": "Temps",
+        "index": "time",
+        "url": "/api/2014/rule-sections/time"
+      },
+      {
+        "name": "Déplacement",
+        "index": "movement",
+        "url": "/api/2014/rule-sections/movement"
+      },
+      {
+        "name": "Environnement",
+        "index": "the-environment",
+        "url": "/api/2014/rule-sections/the-environment"
+      },
+      {
+        "name": "Pièges",
+        "index": "traps",
+        "url": "/api/2014/rule-sections/traps"
+      },
+      {
+        "name": "Maladies",
+        "index": "diseases",
+        "url": "/api/2014/rule-sections/diseases"
+      },
+      {
+        "name": "Folie",
+        "index": "madness",
+        "url": "/api/2014/rule-sections/madness"
+      },
+      {
+        "name": "Repos",
+        "index": "resting",
+        "url": "/api/2014/rule-sections/resting"
+      },
+      {
+        "name": "Entre les aventures",
+        "index": "between-adventures",
+        "url": "/api/2014/rule-sections/between-adventures"
+      }
+    ],
+    "url": "/api/2014/rules/adventuring"
+  },
+  {
+    "name": "Incantations",
+    "index": "spellcasting",
+    "desc": "# Incantation\n\nLa magie imprègne les univers des jeux de fantasy et se manifeste souvent sous la forme de sorts.\n\nCe chapitre présente les règles relatives au lancement de sorts. Chaque classe de personnage a sa propre manière d'apprendre et de préparer ses sorts, et les monstres utilisent les sorts à leur manière. Quelle que soit son origine, un sort obéit aux règles décrites ici.\n",
+    "subsections": [
+      {
+        "name": "Qu’est-ce qu’un sort?",
+        "index": "what-is-a-spell",
+        "url": "/api/2014/rule-sections/what-is-a-spell"
+      },
+      {
+        "name": "Lancer un sort",
+        "index": "casting-a-spell",
+        "url": "/api/2014/rule-sections/casting-a-spell"
+      }
+    ],
+    "url": "/api/2014/rules/spellcasting"
+  },
+  {
+    "name": "Équipement",
+    "index": "equipment",
+    "desc": "# Équipement\n\nLes pièces communes ont différentes dénominations en fonction de la valeur du métal à partir duquel elles sont fabriquées. Les trois pièces de monnaie les plus courantes sont la pièce d’or (po), la pièce d’argent (pa), et la pièce de cuivre (pc).\n\nAvec une pièce d'or, un personnage peut acheter un sac de couchage, 15 mètres de bonne corde ou une chèvre. Un artisan qualifié (mais pas exceptionnel) peut gagner une pièce d'or par jour. La pièce d'or est l'unité de mesure standard de la richesse, même si la pièce elle-même n'est pas couramment utilisée. Lorsque les marchands discutent d'opérations impliquant des biens ou des services d'une valeur de centaines ou de milliers de pièces d'or, les transactions n'impliquent généralement pas l'échange de pièces physiques. La pièce en or est plutôt une mesure standard de la valeur, et l'échange réel est en lingots d'or, lettres de crédit ou biens de valeur.\n\nUne pièce d'or vaut dix pièces d'argent, la pièce la plus répandue parmi les gens du peuple. Une pièce d'argent est le salaire d'un ouvrier pour une demi-journée, une fiole d'huile pour une lampe ou une nuit de repos dans une auberge pauvre.\n\nUne pièce d'argent vaut dix pièces de cuivre, la pièce la plus courante chez les ouvriers et les mendiants. Un seul morceau de cuivre achète une bougie, une torche ou un morceau de craie.\n\nIl existe également des pièces moins communes faites d’autres métaux précieux et qui apparaissent parfois dans les trésors. La pièce d’électrum (pe) et la pièce de platine (pp) proviennent d’empires déchus et de royaumes perdus, c’est pourquoi elles suscitent parfois méfiance et scepticisme lorsqu’elles sont utilisées dans les transactions. Une pièce d’électrum vaut cinq pièces d’argent, et une pièce de platine vaut dix pièces d’or.\n\nUne pièce standard pèse environ 10 grammes, donc cent pièces pèsent un kilogramme.\n",
+    "subsections": [
+      {
+        "name": "Taux de change standard",
+        "index": "standard-exchange-rates",
+        "url": "/api/2014/rule-sections/standard-exchange-rates"
+      },
+      {
+        "name": "Objets",
+        "index": "objects",
+        "url": "/api/2014/rule-sections/objects"
+      },
+      {
+        "name": "Poisons",
+        "index": "poisons",
+        "url": "/api/2014/rule-sections/poisons"
+      },
+      {
+        "name": "Harmonisation",
+        "index": "attunement",
+        "url": "/api/2014/rule-sections/attunement"
+      },
+      {
+        "name": "Porter et utiliser des objets",
+        "index": "wearing-and-wielding-items",
+        "url": "/api/2014/rule-sections/wearing-and-wielding-items"
+      },
+      {
+        "name": "Activer un objet",
+        "index": "activating-an-item",
+        "url": "/api/2014/rule-sections/activating-an-item"
+      },
+      {
+        "name": "Objets magiques intelligents",
+        "index": "sentient-magic-items",
+        "url": "/api/2014/rule-sections/sentient-magic-items"
+      }
+    ],
+    "url": "/api/2014/rules/equipment"
+  },
+  {
+    "name": "Appendice",
+    "index": "appendix",
+    "desc": "# Appendice\n",
+    "subsections": [
+      {
+        "name": "Panthéons historiques de fantasy",
+        "index": "fantasy-historical-pantheons",
+        "url": "/api/2014/rule-sections/fantasy-historical-pantheons"
+      },
+      {
+        "name": "Plans d’existence",
+        "index": "the-planes-of-existence",
+        "url": "/api/2014/rule-sections/the-planes-of-existence"
+      }
+    ],
+    "url": "/api/2014/rules/appendix"
+  }
+]

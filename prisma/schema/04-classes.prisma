@@ -48,6 +48,7 @@ model Class {
 
   npcs                 Npc[]
   monsterSpellcastings MonsterSpellcasting[]
+  guideCards           GuideCard[]
 
   @@unique([editionId, index])
 }

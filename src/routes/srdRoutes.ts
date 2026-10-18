@@ -3,6 +3,7 @@ import { getClasses, getClassByIndex } from '../controllers/srdController';
 import {
   getAbilityScores, getAlignments, getBackgrounds, getConditions, getCreationRules, getEquipment, getFeats, getNpcTables, getRaces, getSkills, getSpells,
 } from '../controllers/srdContentController';
+import { getGuide, getGuides, getRuleChapters, getRuleSection } from '../controllers/srdGuideController';
 import { getMagicItemByIndex, getMagicItems, getMonsterByIndex, getMonsters } from '../controllers/srdBestiaryController';
 
 const router = Router();
@@ -300,5 +301,69 @@ router.get('/:edition/magic-items', getMagicItems);
  *       404: { description: Not found }
  */
 router.get('/:edition/magic-items/:index', getMagicItemByIndex);
+
+/**
+ * @swagger
+ * /srd/{edition}/rule-chapters:
+ *   get:
+ *     summary: SRD rules table of contents (chapters and section names)
+ *     operationId: getSrdRuleChapters
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: OK }
+ */
+router.get('/:edition/rule-chapters', getRuleChapters);
+
+/**
+ * @swagger
+ * /srd/{edition}/rule-sections/{index}:
+ *   get:
+ *     summary: SRD rule section (Markdown)
+ *     operationId: getSrdRuleSection
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: path, name: index, required: true, schema: { type: string, example: cover } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: OK }
+ *       404: { description: Not found }
+ */
+router.get('/:edition/rule-sections/:index', getRuleSection);
+
+/**
+ * @swagger
+ * /srd/{edition}/guides:
+ *   get:
+ *     summary: Published guide pages of the application
+ *     operationId: getSrdGuides
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: OK }
+ */
+router.get('/:edition/guides', getGuides);
+
+/**
+ * @swagger
+ * /srd/{edition}/guides/{index}:
+ *   get:
+ *     summary: Guide page with its sections and cards
+ *     operationId: getSrdGuide
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: path, name: index, required: true, schema: { type: string, example: classes } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: OK }
+ *       404: { description: Not found }
+ */
+router.get('/:edition/guides/:index', getGuide);
 
 export default router;

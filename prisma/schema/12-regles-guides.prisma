@@ -1,0 +1,213 @@
+// ============================================================================
+// RÈGLES DU SRD ET GUIDES (rattachés à une édition)
+// ----------------------------------------------------------------------------
+// Règles : texte du SRD (5e-SRD-Rules et Rule-Sections), en Markdown traduit,
+// importé par src/seed/importers/rules.ts.
+//
+// Guides : contenu éditorial de l'application (pages « Apprendre DnD »,
+// aide-mémoire de combat), importé depuis custom/guides.json. Une page est
+// une suite de sections (titre + texte), chacune suivie de cartes ; une carte
+// peut porter des listes à puces et renvoyer vers une classe, une race, une
+// section de règles ou une autre section du guide (détail).
+// La mise en page reste dans le front ; seul le contenu est ici.
+// ============================================================================
+
+model RuleChapter {
+  id        Int     @id @default(autoincrement())
+  editionId Int
+  edition   Edition @relation(fields: [editionId], references: [id])
+  index     String // "combat"
+  position  Int
+
+  translations RuleChapterTranslation[]
+  sections     RuleSection[]
+
+  @@unique([editionId, index])
+}
+
+model RuleChapterTranslation {
+  id            Int         @id @default(autoincrement())
+  ruleChapterId Int
+  localeCode    String
+  name          String // "Combat"
+  description   String?     @db.Text
+  ruleChapter   RuleChapter @relation(fields: [ruleChapterId], references: [id], onDelete: Cascade)
+  locale        Locale      @relation(fields: [localeCode], references: [code])
+
+  @@unique([ruleChapterId, localeCode])
+}
+
+model RuleSection {
+  id        Int         @id @default(autoincrement())
+  editionId Int
+  edition   Edition     @relation(fields: [editionId], references: [id])
+  index     String // "cover"
+  chapterId Int
+  chapter   RuleChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  position  Int
+
+  translations RuleSectionTranslation[]
+  guideCards   GuideCard[]
+
+  @@unique([editionId, index])
+}
+
+model RuleSectionTranslation {
+  id            Int         @id @default(autoincrement())
+  ruleSectionId Int
+  localeCode    String
+  name          String // "Abri"
+  description   String      @db.Text // Markdown, titres compris
+  ruleSection   RuleSection @relation(fields: [ruleSectionId], references: [id], onDelete: Cascade)
+  locale        Locale      @relation(fields: [localeCode], references: [code])
+
+  @@unique([ruleSectionId, localeCode])
+}
+
+// --- Guides ---------------------------------------------------------------------
+
+// Couleur d'accent d'une page, section ou carte : le front en déduit ses classes
+enum GuideAccent {
+  NEUTRAL
+  SLATE
+  ZINC
+  RED
+  ORANGE
+  AMBER
+  YELLOW
+  EMERALD
+  TEAL
+  CYAN
+  SKY
+  BLUE
+  VIOLET
+  FUCHSIA
+  ROSE
+}
+
+model GuidePage {
+  id        Int          @id @default(autoincrement())
+  editionId Int
+  edition   Edition      @relation(fields: [editionId], references: [id])
+  index     String // "classes", "combat-cheat-sheet"
+  position  Int
+  // Masquée dans l'application (brouillon)
+  published Boolean      @default(true)
+  icon      String?
+  accent    GuideAccent?
+
+  translations GuidePageTranslation[]
+  sections     GuideSection[]
+
+  @@unique([editionId, index])
+}
+
+model GuidePageTranslation {
+  id          Int       @id @default(autoincrement())
+  guidePageId Int
+  localeCode  String
+  title       String // "Choix de classe" (navigation)
+  shortTitle  String? // "Classes" (badge)
+  eyebrow     String? // "Choix de la classe"
+  heading     String? // "Choisir sa classe, sans se perdre"
+  intro       String?   @db.Text // Markdown
+  guidePage   GuidePage @relation(fields: [guidePageId], references: [id], onDelete: Cascade)
+  locale      Locale    @relation(fields: [localeCode], references: [code])
+
+  @@unique([guidePageId, localeCode])
+}
+
+model GuideSection {
+  id       Int          @id @default(autoincrement())
+  pageId   Int
+  page     GuidePage    @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  index    String // "martial-melee", "action"
+  position Int
+  // Niveau de titre : 1 (partie), 2 (sous-partie), 3
+  level    Int          @default(1)
+  icon     String?
+  accent   GuideAccent?
+
+  translations GuideSectionTranslation[]
+  cards        GuideCard[]
+  // Cartes qui ouvrent cette section en détail (aide-mémoire : "Attaquer")
+  openedBy     GuideCard[]               @relation("GuideCardDetail")
+
+  @@unique([pageId, index])
+}
+
+model GuideSectionTranslation {
+  id             Int          @id @default(autoincrement())
+  guideSectionId Int
+  localeCode     String
+  title          String? // "Les classes martiales"
+  subtitle       String? // "Action principale"
+  body           String?      @db.Text // Markdown
+  guideSection   GuideSection @relation(fields: [guideSectionId], references: [id], onDelete: Cascade)
+  locale         Locale       @relation(fields: [localeCode], references: [code])
+
+  @@unique([guideSectionId, localeCode])
+}
+
+model GuideCard {
+  id        Int          @id @default(autoincrement())
+  sectionId Int
+  section   GuideSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  index     String // "fighter", "dodge"
+  position  Int
+  icon      String?
+  accent    GuideAccent?
+
+  // Renvois facultatifs
+  classId         Int?
+  class           Class?        @relation(fields: [classId], references: [id], onDelete: SetNull)
+  raceId          Int?
+  race            Race?         @relation(fields: [raceId], references: [id], onDelete: SetNull)
+  ruleSectionId   Int?
+  ruleSection     RuleSection?  @relation(fields: [ruleSectionId], references: [id], onDelete: SetNull)
+  detailSectionId Int?
+  detailSection   GuideSection? @relation("GuideCardDetail", fields: [detailSectionId], references: [id], onDelete: SetNull)
+
+  translations GuideCardTranslation[]
+  lists        GuideCardList[]
+
+  @@unique([sectionId, index])
+}
+
+model GuideCardTranslation {
+  id          Int       @id @default(autoincrement())
+  guideCardId Int
+  localeCode  String
+  title       String // "Guerrier", "Esquiver"
+  eyebrow     String? // "Le spécialiste du combat"
+  summary     String?   @db.Text // Markdown
+  advice      String?   @db.Text // encadré « À retenir »
+  guideCard   GuideCard @relation(fields: [guideCardId], references: [id], onDelete: Cascade)
+  locale      Locale    @relation(fields: [localeCode], references: [code])
+
+  @@unique([guideCardId, localeCode])
+}
+
+// Liste à puces d'une carte ("Talents raciaux", ou sans titre)
+model GuideCardList {
+  id       Int       @id @default(autoincrement())
+  cardId   Int
+  card     GuideCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  position Int
+
+  translations GuideCardListTranslation[]
+
+  @@unique([cardId, position])
+}
+
+model GuideCardListTranslation {
+  id              Int           @id @default(autoincrement())
+  guideCardListId Int
+  localeCode      String
+  label           String? // "Talents raciaux"
+  items           String        @db.Text // une puce par ligne
+  guideCardList   GuideCardList @relation(fields: [guideCardListId], references: [id], onDelete: Cascade)
+  locale          Locale        @relation(fields: [localeCode], references: [code])
+
+  @@unique([guideCardListId, localeCode])
+}

@@ -47,6 +47,7 @@ model Race {
   weightVarianceKg Int?
   npcs             Npc[]
   npcTableEntries  NpcTableEntry[]
+  guideCards       GuideCard[]
 
   @@unique([editionId, index])
 }

@@ -1,0 +1,1362 @@
+{
+  "_comment": "Contenu éditorial des guides (pages Apprendre DnD, aide-mémoire de combat), importé par src/seed/importers/guides.ts. Une carte peut renvoyer vers une classe (class), une race (race), une section de règles (rule) ou une section de la même page (detail).",
+  "pages": [
+    {
+      "index": "classes",
+      "accent": "AMBER",
+      "fr": {
+        "title": "Choix de classe",
+        "shortTitle": "Classes",
+        "eyebrow": "Choix de la classe",
+        "heading": "Choisir sa classe, sans se perdre",
+        "intro": "Choisir sa classe est une étape importante. Voyons ensemble les différentes options pour trouver celle qui correspond le mieux à ton style de jeu et à l’histoire que tu veux raconter avec ton personnage."
+      },
+      "sections": [
+        {
+          "index": "types",
+          "fr": {
+            "title": "Les différents types de classes",
+            "subtitle": null,
+            "body": "Il existe deux grandes catégories de classes dans D&D 5e : les classes martiales et les classes de magie."
+          },
+          "cards": [],
+          "level": 1
+        },
+        {
+          "index": "martial",
+          "fr": {
+            "title": "Les classes martiales",
+            "subtitle": null,
+            "body": "Les classes martiales regroupent toutes les classes spécialisées dans le combat rapproché et l'utilisation d'armes et d'armures. Elles sont généralement plus simples à prendre en main.\n\nLes classes martiales sont : Guerrier, Barbare, Paladin, Rôdeur, Moine et Roublard.\n\nOn peut également les sous-diviser en trois catégories : les classes de combat au corps à corps pur, les classes mi-magiques et les classes basées sur la dextérité."
+          },
+          "cards": [],
+          "level": 2
+        },
+        {
+          "index": "martial-melee",
+          "fr": {
+            "title": "Les classes de combat au corps à corps pur",
+            "subtitle": null,
+            "body": "Ces classes sont centrées sur le combat en mêlée, avec une grande capacité à encaisser les dégâts et à infliger des coups puissants. Elles sont idéales pour les joueurs qui veulent être au cœur de l'action."
+          },
+          "cards": [
+            {
+              "index": "fighter",
+              "accent": "SLATE",
+              "class": "fighter",
+              "fr": {
+                "title": "Guerrier",
+                "eyebrow": "Le spécialiste du combat",
+                "summary": "Les Guerriers sont des combattants très spécialisés, capables d’utiliser aussi bien des épées et des boucliers que des arbalètes, et tout ce qu’il y a entre les deux ! Ils maîtrisent aussi pratiquement tous les types d’armures. Pense à un guerrier comme à un soldat spécialisé : très tactique et précis dans son style de combat.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Très polyvalent",
+                      "Excellent avec les armes et les armures",
+                      "Facile à prendre en main"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "barbarian",
+              "accent": "RED",
+              "class": "barbarian",
+              "fr": {
+                "title": "Barbare",
+                "eyebrow": "La force brute",
+                "summary": "La capacité principale d’un barbare s’appelle la « Rage », qui lui permet de canaliser toute sa colère dans ses prouesses au combat et de devenir une véritable force terrifiante sur le champ de bataille. D’un point de vue mécanique, la rage te permet d’infliger plus de dégâts tout en en subissant moins. Il y a quelques autres effets importants liés à la rage, mais ce sont les deux principaux. Les barbares sont aussi la seule classe à avoir un dé de vie en D12, ce qui signifie qu’ils ont en moyenne plus de points de vie que n’importe quelle autre classe.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Dégâts puissants",
+                      "Très résistant",
+                      "Style de jeu instinctif"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "level": 3
+        },
+        {
+          "index": "martial-half-casters",
+          "fr": {
+            "title": "Les classes martiales mi-magiques",
+            "subtitle": null,
+            "body": "Ces classes combinent les compétences de combat rapproché des classes martiales avec une certaine capacité magique. Elles sont souvent plus complexes à maîtriser mais offrent une grande variété d'options tactiques."
+          },
+          "cards": [
+            {
+              "index": "paladin",
+              "accent": "AMBER",
+              "class": "paladin",
+              "fr": {
+                "title": "Paladin",
+                "eyebrow": "Le chevalier sacré",
+                "summary": "Les paladins sont des guerriers dévoués qui tirent leurs pouvoirs d’un serment qu’ils ont prêté. Ce sont souvent les chevaliers classiques en armure étincelante, mais ce n’est pas obligatoire. Les paladins sont des demi-lanceurs de sorts, donc ils ont accès à quelques sorts. Ils ont aussi « Imposition des mains », qui leur permet de soigner. Ils ont également « Châtiment divin », qui leur permet d’infliger plus de dégâts avec leurs attaques.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Bon équilibre entre dégâts et soutien",
+                      "Capacités de soin",
+                      "Très fort en mêlée"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "ranger",
+              "accent": "EMERALD",
+              "class": "ranger",
+              "fr": {
+                "title": "Rôdeur",
+                "eyebrow": "Le chasseur de la nature",
+                "summary": "Les rôdeurs tirent leurs capacités de leur lien avec la nature. Comme les paladins, ce sont des demi-lanceurs de sorts, mais avec un accès à des sorts davantage liés à la nature. Ils utilisent leur connaissance de la nature pour soutenir le groupe et infliger plus de dégâts en combat. Beaucoup de gens sous-estiment le rôdeur en tant que source de dégâts, mais ils peuvent en infliger énormément. C’est aussi la classe idéale si tu veux un compagnon animal pour combattre à tes côtés.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Très bon en exploration",
+                      "Dégâts constants",
+                      "Aide beaucoup le groupe"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "level": 3
+        },
+        {
+          "index": "martial-dexterity",
+          "fr": {
+            "title": "Les classes martiales basées sur la dextérité",
+            "subtitle": null,
+            "body": "Les classes martiales basées sur la dextérité sont celles qui utilisent principalement leur agilité et leur précision pour infliger des dégâts. Elles sont généralement plus fragiles mais également plus difficiles à toucher."
+          },
+          "cards": [
+            {
+              "index": "monk",
+              "accent": "VIOLET",
+              "class": "monk",
+              "fr": {
+                "title": "Moine",
+                "eyebrow": "L’artiste martial mobile",
+                "summary": "Les moines sont des artistes martiaux agiles qui utilisent généralement leurs poings comme arme principale. Ils ont accès à des « points de ki », une ressource que tu peux dépenser pour faire des attaques supplémentaires, te déplacer davantage, effectuer des actions supplémentaires en action bonus, et plein d’autres choses. Un point important cependant : dans une campagne très axée sur le combat, le moine ne devrait probablement pas être la seule classe martiale du groupe. En effet, en moyenne, les moines ont moins de points de vie que les guerriers, barbares, paladins ou rôdeurs. Donc même s’ils sont agiles et difficiles à toucher, quand ils le sont, ils prennent cher.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Très mobile",
+                      "Beaucoup d’options tactiques",
+                      "Très bon pour harceler les ennemis"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "rogue",
+              "accent": "ZINC",
+              "class": "rogue",
+              "fr": {
+                "title": "Roublard",
+                "eyebrow": "Furtivité et précision",
+                "summary": "Les roublards : l’assassin silencieux tapi dans l’ombre. Comme les moines, ils sont agiles et rapides, mais là où les moines infligent de petits dégâts plusieurs fois par tour, les roublards infligent de gros dégâts en un seul coup grâce à leur « attaque sournoise ». Ils excellent aussi dans la discrétion, le vol et l’investigation.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Excellent en furtivité",
+                      "Gros pic de dégâts",
+                      "Très bon pour l’infiltration"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "level": 3
+        },
+        {
+          "index": "magic",
+          "fr": {
+            "title": "Les classes de magie",
+            "subtitle": null,
+            "body": "Les classes de magie sont celles qui utilisent principalement la magie pour infliger des dégâts, soutenir le groupe ou contrôler le champ de bataille. Elles sont souvent plus complexes à jouer, mais offrent une grande variété d'options tactiques.\n\nLes classes de magie sont : Magicien, Occultiste, Clerc, Druide, Barde et Ensorceleur.\n\nToutes les classes magiques sont par essence dotées d'une forme de polyvalence, plus ou moins prononcée. On peut ainsi en distinguer trois sous-catégories : les classes polyvalentes, les classes équilibrées et les classes spécialisées."
+          },
+          "cards": [],
+          "level": 2
+        },
+        {
+          "index": "magic-versatile",
+          "fr": {
+            "title": "Les classes magiques polyvalentes",
+            "subtitle": null,
+            "body": "Les classes magiques polyvalentes sont celles qui peuvent utiliser le plus de sorts et s'adapter à différentes situations de combat. Ces classes sont généralement plus difficiles à maîtriser mais offrent une grande flexibilité."
+          },
+          "cards": [
+            {
+              "index": "wizard",
+              "accent": "BLUE",
+              "class": "wizard",
+              "fr": {
+                "title": "Magicien",
+                "eyebrow": "Le maître de la magie",
+                "summary": "Les magiciens sont les lanceurs de sorts les plus polyvalents, avec accès à une vaste gamme de sorts. Ils peuvent se spécialiser dans différents types de magie, comme la magie de feu, de glace, d’illusion, etc. Cependant, ils sont généralement plus fragiles que les classes martiales et doivent faire attention à leur positionnement en combat.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Très polyvalent",
+                      "Accès à une grande variété de sorts",
+                      "Peut se spécialiser dans différents types de magie"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "cleric",
+              "accent": "EMERALD",
+              "class": "cleric",
+              "fr": {
+                "title": "Clerc",
+                "eyebrow": "La voix d'un dieu",
+                "summary": "Les clercs sont des servants de dieux ou de forces divines, avec accès à une variété de sorts divins. Ils peuvent soigner les alliés, bénir les armes, et lutter contre les morts-vivants. Cependant, ils sont généralement moins polyvalents que les magiciens et doivent faire attention à leur positionnement en combat.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Soins et bénédiction",
+                      "Lutte contre les morts-vivants",
+                      "Positionnement important en combat"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "level": 3
+        },
+        {
+          "index": "magic-balanced",
+          "fr": {
+            "title": "Les classes magiques équilibrées",
+            "subtitle": null,
+            "body": "Les classes magiques équilibrées sont celles qui offrent un bon équilibre entre leurs capacités de combat, de soutien et de contrôle. Elles sont généralement plus faciles à maîtriser que les classes polyvalentes ou spécialisées, mais offrent moins de flexibilité."
+          },
+          "cards": [
+            {
+              "index": "druid",
+              "accent": "EMERALD",
+              "class": "druid",
+              "fr": {
+                "title": "Druide",
+                "eyebrow": "Le gardien de la nature",
+                "summary": "Les druides sont des protecteurs de la nature, avec accès à une variété de sorts liés à la nature. Ils peuvent se transformer en animaux grâce à leur « Forme Sauvage », ce qui leur donne une grande flexibilité en combat. Cependant, ils sont généralement moins résistants que les classes martiales et doivent faire attention à leur positionnement en combat.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Sorts liés à la nature",
+                      "Forme Sauvage pour se transformer en animaux",
+                      "Positionnement important en combat"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "bard",
+              "accent": "FUCHSIA",
+              "class": "bard",
+              "fr": {
+                "title": "Barde",
+                "eyebrow": "Le soutien polyvalent",
+                "summary": "Les bardes sont des artistes et des conteurs, avec accès à une variété de sorts de soutien. Ils peuvent inspirer les alliés, charmer les ennemis, et utiliser leur musique pour influencer le champ de bataille. Cependant, ils sont généralement moins résistants que les classes martiales et doivent faire attention à leur positionnement en combat.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Sorts de soutien",
+                      "Inspiration pour les alliés",
+                      "Positionnement important en combat"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "level": 3
+        },
+        {
+          "index": "magic-specialists",
+          "fr": {
+            "title": "Les classes magiques spécialisées",
+            "subtitle": null,
+            "body": "Les classes magiques spécialisées sont celles qui excellent dans un domaine particulier, comme le combat, le soutien ou le contrôle. Elles sont généralement plus difficiles à maîtriser mais offrent une grande puissance dans leur domaine d'expertise."
+          },
+          "cards": [
+            {
+              "index": "sorcerer",
+              "accent": "VIOLET",
+              "class": "sorcerer",
+              "fr": {
+                "title": "Ensorceleur",
+                "eyebrow": "Le lanceur de sorts inné",
+                "summary": "Les ensorceleurs tirent leurs pouvoirs d’une source innée, comme un ancêtre puissant ou une lignée magique. Ils ont moins de sorts que les magiciens, mais ils peuvent les lancer plus souvent grâce à leur « points de sort ». Ils ont aussi des capacités uniques liées à leur lignée magique.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Lancement de sorts plus fréquent",
+                      "Capacités uniques liées à la lignée",
+                      "Moins de sorts que les magiciens"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "warlock",
+              "accent": "ZINC",
+              "class": "warlock",
+              "fr": {
+                "title": "Occultiste",
+                "eyebrow": "Pacte avec des forces surnaturelles",
+                "summary": "Les occultistes sont des praticiens de l’occulte, avec accès à une variété de sorts liés à la magie noire et aux forces surnaturelles. Ils peuvent invoquer des entités maléfiques et manipuler les énergies sombres. Cependant, ils sont généralement moins résistants que les classes martiales et doivent faire attention à leur positionnement en combat.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Sorts liés à l’occulte",
+                      "Invoquer des entités maléfiques",
+                      "Manipulation des énergies sombres"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "level": 3
+        }
+      ]
+    },
+    {
+      "index": "races",
+      "accent": "EMERALD",
+      "fr": {
+        "title": "Choix de race",
+        "shortTitle": "Races",
+        "eyebrow": "Choix de la race",
+        "heading": "Choisir une race qui donne le bon ton",
+        "intro": "La première chose à choisir lors de la création de son personnage est sa race. Mais alors... laquelle choisir pour débuter ? Voyons ensemble ce qu'il en est."
+      },
+      "sections": [
+        {
+          "index": "what-is-a-race",
+          "fr": {
+            "title": "Qu'est-ce qu'une race ?",
+            "subtitle": null,
+            "body": "Dans Donjons et Dragons, chaque personnage appartient à une race spécifique. Certaines sont assez courantes, comme les hommes, elfes, halfelins et nains, tandis que d'autres sont bien plus rares, comme par exemple les tieffelins. Certaines races se divisent elles-mêmes en sous-races comme par exemple les nains des montagnes et les nains des collines.\n\nLe choix de la race influe grandement sur l'identité de votre personnage : c'est à la fois votre point de départ et votre vitrine. Ce choix influera sur votre apparence générale et quelques talents détenus naturellement par votre personnage."
+          },
+          "cards": []
+        },
+        {
+          "index": "how-to-choose",
+          "fr": {
+            "title": "Comment choisir sa race ?",
+            "subtitle": null,
+            "body": "Trois points importants sont à prendre en compte pour choisir votre race.\n\nLe plus important d'entre eux est votre vision du personnage que vous voulez incarner : quelle image avez-vous en tête ? Quel genre de personnage voulez-vous jouer ? Plutôt un petit voleur agile halfelin ou un guerrier massif demi-orc ?\n\nSi vous ne savez pas déjà quelle race vous convient le mieux avec le premier point, vous pouvez aussi vous baser sur les talents raciaux que chaque race possède. Par exemple, les elfes ont une vision nocturne qui leur permet de voir dans l'obscurité, tandis que les nains ont une résistance naturelle au poison.\n\nEnfin, vous pouvez aussi vous baser sur les statistiques dont aura besoin votre personnage : si vous savez d'ores et déjà que vous voulez jouer un barbare, opter pour une race qui augmente votre force et votre constitution comme le nain des montagnes ou le demi-orc peut être un bon choix."
+          },
+          "cards": []
+        },
+        {
+          "index": "race-list",
+          "fr": {
+            "title": "Liste des races",
+            "subtitle": null,
+            "body": null
+          },
+          "cards": [
+            {
+              "index": "human",
+              "accent": "NEUTRAL",
+              "race": "human",
+              "fr": {
+                "title": "Humain",
+                "eyebrow": "Polyvalence maximale",
+                "summary": "Flexible et facile à integrer dans n'importe quel concept de personnage.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "label": "Caractéristiques physiques",
+                    "items": [
+                      "Taille moyenne (1m50 a 1m90)",
+                      "Poids tres variable selon l'origine",
+                      "Maturite et longévité comparables au monde reel"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Talents raciaux",
+                    "items": [
+                      "Polyvalence (competences et styles varies)",
+                      "Version variante: don de niveau 1 possible",
+                      "Adaptation facile a toutes les classes"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Bonus de caractéristiques",
+                    "items": [
+                      "+1 dans toutes les caracteristiques"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "elf",
+              "accent": "EMERALD",
+              "race": "elf",
+              "fr": {
+                "title": "Elfe",
+                "eyebrow": "Agile et mystique",
+                "summary": "Race raffinee, rapide et souvent liee a la magie ou a la perception.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "label": "Caractéristiques physiques",
+                    "items": [
+                      "Taille moyenne et silhouette fine",
+                      "Traits fins, oreilles pointues",
+                      "Longue esperance de vie (plusieurs siecles)"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Talents raciaux",
+                    "items": [
+                      "Vision dans le noir",
+                      "Ascendance feerique (avantage contre charme)",
+                      "Transe (repos en 4 heures)"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Bonus de caractéristiques",
+                    "items": [
+                      "+2 Dextérité",
+                      "Sous-races: bonus additionnel (ex: Intelligence, Sagesse ou Charisme)"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "dwarf",
+              "accent": "AMBER",
+              "race": "dwarf",
+              "fr": {
+                "title": "Nain",
+                "eyebrow": "Robuste et tenace",
+                "summary": "Solide et resistant, tres fiable pour les roles de premiere ligne.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "label": "Caractéristiques physiques",
+                    "items": [
+                      "Petite taille (environ 1m20 a 1m50)",
+                      "Corpulence dense et musculaire",
+                      "Longue longevite (plus de 300 ans)"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Talents raciaux",
+                    "items": [
+                      "Vision dans le noir",
+                      "Resistance au poison nain",
+                      "Maitrise d'outils et d'armes traditionnels"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Bonus de caractéristiques",
+                    "items": [
+                      "+2 Constitution",
+                      "Sous-races: +1 Force (montagne) ou +1 Sagesse (colline)"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "halfling",
+              "accent": "EMERALD",
+              "race": "halfling",
+              "fr": {
+                "title": "Halfelin",
+                "eyebrow": "Petit mais audacieux",
+                "summary": "Excellent pour les personnages discrets, mobiles et difficiles a destabiliser.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "label": "Caractéristiques physiques",
+                    "items": [
+                      "Petite taille (environ 90 cm)",
+                      "Poids leger",
+                      "Maturite rapide et vie d'environ 150 ans"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Talents raciaux",
+                    "items": [
+                      "Chance halfeline (relance des 1)",
+                      "Brave (avantage contre peur)",
+                      "Agilite halfeline (se faufiler entre creatures plus grandes)"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Bonus de caractéristiques",
+                    "items": [
+                      "+2 Dextérité",
+                      "Sous-races: +1 Charisme (pied-leger) ou +1 Constitution (robuste)"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "dragonborn",
+              "accent": "RED",
+              "race": "dragonborn",
+              "fr": {
+                "title": "Drakeide",
+                "eyebrow": "Heritage draconique",
+                "summary": "Race puissante et impressionnante, adaptee aux combattants offensifs.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "label": "Caractéristiques physiques",
+                    "items": [
+                      "Grande taille (souvent pres de 2m)",
+                      "Corps massif a ecailles",
+                      "Presence physique marquante"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Talents raciaux",
+                    "items": [
+                      "Souffle draconique",
+                      "Resistance elementaire liee a la couleur",
+                      "Langue draconique"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Bonus de caractéristiques",
+                    "items": [
+                      "+2 Force",
+                      "+1 Charisme"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "gnome",
+              "accent": "SKY",
+              "race": "gnome",
+              "fr": {
+                "title": "Gnome",
+                "eyebrow": "Ingenieux et curieux",
+                "summary": "Ideal pour les personnages malins, techniques ou orientes magie.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "label": "Caractéristiques physiques",
+                    "items": [
+                      "Tres petite taille (90 cm a 1m10)",
+                      "Corps leger et vif",
+                      "Longue vie (350 a 500 ans)"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Talents raciaux",
+                    "items": [
+                      "Ruse gnome (avantage jets mentaux contre magie)",
+                      "Vision dans le noir",
+                      "Specialisation selon sous-race (inventivite ou magie)"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Bonus de caractéristiques",
+                    "items": [
+                      "+2 Intelligence",
+                      "Sous-races: +1 Dextérité (forêt) ou +1 Constitution (roches)"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "half-elf",
+              "accent": "FUCHSIA",
+              "race": "half-elf",
+              "fr": {
+                "title": "Demi-elfe",
+                "eyebrow": "Equilibre social",
+                "summary": "Excellent profil polyvalent, fort en interactions et adaptable.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "label": "Caractéristiques physiques",
+                    "items": [
+                      "Taille moyenne",
+                      "Traits melanges humains/elfiques",
+                      "Longévité superieure a l'humain"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Talents raciaux",
+                    "items": [
+                      "Vision dans le noir",
+                      "Ascendance feerique",
+                      "Polyvalence de competences"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Bonus de caractéristiques",
+                    "items": [
+                      "+2 Charisme"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "half-orc",
+              "accent": "EMERALD",
+              "race": "half-orc",
+              "fr": {
+                "title": "Demi-orc",
+                "eyebrow": "Puissance brutale",
+                "summary": "Parfait pour les personnages aggressifs, resistants et intimidants.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "label": "Caractéristiques physiques",
+                    "items": [
+                      "Grande taille et musculature forte",
+                      "Canines visibles et allure imposante",
+                      "Vie plus courte que la moyenne humaine"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Talents raciaux",
+                    "items": [
+                      "Vision dans le noir",
+                      "Endurance implacable (reste a 1 PV)",
+                      "Attaques sauvages (degats critiques renforces)"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Bonus de caractéristiques",
+                    "items": [
+                      "+2 Force",
+                      "+1 Constitution"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "tiefling",
+              "accent": "VIOLET",
+              "race": "tiefling",
+              "fr": {
+                "title": "Tieffelin",
+                "eyebrow": "Sang infernal",
+                "summary": "Race charismatique et magique, ideale pour les profils atypiques.",
+                "advice": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "label": "Caractéristiques physiques",
+                    "items": [
+                      "Taille moyenne",
+                      "Cornes, queue et traits infernaux",
+                      "Grande diversite d'apparences"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Talents raciaux",
+                    "items": [
+                      "Vision dans le noir",
+                      "Resistance au feu",
+                      "Magie infernale progressive (thaumaturgie puis sorts)"
+                    ]
+                  }
+                },
+                {
+                  "fr": {
+                    "label": "Bonus de caractéristiques",
+                    "items": [
+                      "+2 Charisme",
+                      "+1 Intelligence"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": "combat",
+      "accent": "SKY",
+      "published": false,
+      "fr": {
+        "title": "Conseils de combat",
+        "shortTitle": "Combat",
+        "eyebrow": "Conseils de combat",
+        "heading": "Garder le combat simple et lisible",
+        "intro": "Avant de te perdre dans les détails, retiens surtout que le combat repose sur le positionnement, les actions et la gestion des ressources."
+      },
+      "sections": [
+        {
+          "index": "tips",
+          "fr": {
+            "title": null,
+            "subtitle": null,
+            "body": null
+          },
+          "cards": [
+            {
+              "index": "commencer-simple",
+              "accent": "BLUE",
+              "fr": {
+                "title": "Commencer simple",
+                "eyebrow": "Le premier réflexe",
+                "summary": "Si tu débutes, concentre-toi sur une seule routine de combat au lieu de vouloir tout optimiser.",
+                "advice": "La simplicité rend le combat beaucoup plus fluide pour les premières sessions."
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Lis ta fiche avant la partie",
+                      "Choisis une action par tour",
+                      "Pose des questions au MJ"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "bien-se-placer",
+              "accent": "CYAN",
+              "fr": {
+                "title": "Bien se placer",
+                "eyebrow": "Le vrai gain tactique",
+                "summary": "Le placement compte souvent autant que les dégâts. Être au bon endroit peut changer tout un combat.",
+                "advice": "Un bon placement vaut parfois plus qu’un gros jet de dégâts."
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Protège les alliés fragiles",
+                      "Évite les menaces inutiles",
+                      "Cherche les angles favorables"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "garder-ses-ressources",
+              "accent": "VIOLET",
+              "fr": {
+                "title": "Garder ses ressources",
+                "eyebrow": "Ne pas tout claquer trop vite",
+                "summary": "Les capacités limitées sont souvent les plus fortes. Il faut apprendre à les garder pour le bon moment.",
+                "advice": "Jouer proprement, c’est aussi savoir quand ne rien faire de spectaculaire."
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Ne gaspille pas tes ressources",
+                      "Garde une option d’urgence",
+                      "Pense au prochain combat"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": "background",
+      "accent": "ROSE",
+      "published": false,
+      "fr": {
+        "title": "Créer le background",
+        "shortTitle": "Background",
+        "eyebrow": "Créer le background",
+        "heading": "Donner une raison claire d’aventure",
+        "intro": "Le background sert à donner une raison claire d’aventure à ton personnage. Il n’a pas besoin d’être long, mais il doit être utile."
+      },
+      "sections": [
+        {
+          "index": "tips",
+          "fr": {
+            "title": null,
+            "subtitle": null,
+            "body": null
+          },
+          "cards": [
+            {
+              "index": "une-origine-simple",
+              "accent": "ZINC",
+              "fr": {
+                "title": "Une origine simple",
+                "eyebrow": "Commencer proprement",
+                "summary": "Décris d’où vient ton personnage et ce qu’il faisait avant l’aventure.",
+                "advice": "Un bon background tient souvent en quelques phrases claires."
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Origine",
+                      "Métier ou ancien rôle",
+                      "Lien avec le monde"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "une-motivation-forte",
+              "accent": "AMBER",
+              "fr": {
+                "title": "Une motivation forte",
+                "eyebrow": "Ce qui le pousse à partir",
+                "summary": "Donne au personnage une raison d’agir: protéger quelqu’un, chercher une vérité, fuir un passé, prouver quelque chose.",
+                "advice": "Une motivation claire rend le personnage plus facile à jouer."
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "But concret",
+                      "Conflit personnel",
+                      "Objectif à moyen terme"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "index": "un-trait-marquant",
+              "accent": "EMERALD",
+              "fr": {
+                "title": "Un trait marquant",
+                "eyebrow": "Le détail qui reste",
+                "summary": "Ajoute une habitude, une peur, une manie ou une relation importante pour rendre le personnage mémorable.",
+                "advice": "Ce détail suffit souvent à rendre un personnage vivant."
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "Une manie",
+                      "Une peur",
+                      "Une relation forte"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": "combat-cheat-sheet",
+      "icon": "⚔️",
+      "accent": "YELLOW",
+      "fr": {
+        "title": "Aide combat",
+        "shortTitle": "Combat",
+        "eyebrow": "Aide-mémoire",
+        "heading": "Combat"
+      },
+      "sections": [
+        {
+          "index": "action",
+          "icon": "⚔️",
+          "accent": "EMERALD",
+          "fr": {
+            "title": "Action",
+            "subtitle": "Action principale",
+            "body": "Choisis **une seule** option par tour."
+          },
+          "cards": [
+            {
+              "index": "attack",
+              "icon": "⚔️",
+              "detail": "attack-sequence",
+              "fr": {
+                "title": "Attaquer",
+                "summary": "Clique pour voir les jets de dés et détails."
+              },
+              "lists": []
+            },
+            {
+              "index": "cast-a-spell",
+              "icon": "🪄",
+              "rule": "casting-a-spell",
+              "fr": {
+                "title": "Lancer un sort",
+                "summary": "Vérifie que le temps d'incantation est bien **« 1 action »**."
+              },
+              "lists": []
+            },
+            {
+              "index": "dodge",
+              "icon": "🛡️",
+              "rule": "actions-in-combat",
+              "fr": {
+                "title": "Esquiver",
+                "summary": "Vous vous tenez prêt à esquiver les attaques ennemies. Jusqu'à votre prochain tour, les ennemis ont un désavantage pour vous attaquer, et vous avez un avantage à vos jets de sauvegarde de Dextérité."
+              },
+              "lists": []
+            },
+            {
+              "index": "search",
+              "icon": "🔍",
+              "rule": "actions-in-combat",
+              "fr": {
+                "title": "Chercher",
+                "summary": "Vous effectuez un test de Perception ou d'Investigation pour trouver quelque chose."
+              },
+              "lists": []
+            },
+            {
+              "index": "disengage",
+              "icon": "🫣",
+              "rule": "actions-in-combat",
+              "fr": {
+                "title": "Se désengager",
+                "summary": "Votre déplacement ne provoque pas d'attaque d'opportunité pendant ce tour."
+              },
+              "lists": []
+            },
+            {
+              "index": "dash",
+              "icon": "💨",
+              "rule": "actions-in-combat",
+              "fr": {
+                "title": "Foncer",
+                "summary": "Vous doublez votre vitesse de déplacement pour ce tour."
+              },
+              "lists": []
+            },
+            {
+              "index": "help",
+              "icon": "🤝",
+              "rule": "actions-in-combat",
+              "fr": {
+                "title": "Aider",
+                "summary": "Vous assistez une créature proche dans sa tâche, lui donnant un avantage sur celle-ci."
+              },
+              "lists": []
+            },
+            {
+              "index": "hide",
+              "icon": "🫥",
+              "rule": "actions-in-combat",
+              "fr": {
+                "title": "Se cacher",
+                "summary": "Vous effectuez un test de Discrétion pour tenter de vous cacher de vos ennemis."
+              },
+              "lists": []
+            },
+            {
+              "index": "ready",
+              "icon": "⏳",
+              "rule": "actions-in-combat",
+              "fr": {
+                "title": "Se tenir prêt",
+                "summary": "Vous attendez des conditions précises pour agir : votre action se déclenche en réaction à un événement."
+              },
+              "lists": []
+            },
+            {
+              "index": "use-an-object",
+              "icon": "🧪",
+              "rule": "actions-in-combat",
+              "fr": {
+                "title": "Utiliser un objet",
+                "summary": "Vous utilisez un objet non magique qui s'utilise au prix de votre action."
+              },
+              "lists": []
+            },
+            {
+              "index": "use-a-magic-item",
+              "icon": "🧪",
+              "rule": "activating-an-item",
+              "fr": {
+                "title": "Utiliser un objet magique",
+                "summary": "Vous utilisez un objet magique qui s'utilise au prix de votre action."
+              },
+              "lists": []
+            },
+            {
+              "index": "use-a-feature",
+              "icon": "🧪",
+              "fr": {
+                "title": "Utiliser une capacité spéciale",
+                "summary": "Vous utilisez une aptitude de classe ou autre capacité spéciale qui s'utilise au prix d'une action."
+              },
+              "lists": []
+            }
+          ]
+        },
+        {
+          "index": "attack-sequence",
+          "icon": "⚔️",
+          "accent": "EMERALD",
+          "fr": {
+            "title": "La séquence d'attaque",
+            "subtitle": "Détail de l'attaque",
+            "body": null
+          },
+          "cards": [
+            {
+              "index": "attack-roll",
+              "icon": "1",
+              "rule": "making-an-attack",
+              "fr": {
+                "title": "Jet d'attaque (toucher)",
+                "eyebrow": "Est-ce que je touche l'armure ?",
+                "summary": "1d20 + bonus d'attaque",
+                "advice": "contre la **CA** (classe d'armure) de la cible"
+              },
+              "lists": []
+            },
+            {
+              "index": "damage-roll",
+              "icon": "2",
+              "rule": "damage-and-healing",
+              "fr": {
+                "title": "Jet de dégâts (blesser)",
+                "eyebrow": "Combien ça fait mal ?",
+                "summary": "Dé de l'arme + modificateur de caractéristique",
+                "advice": "(ex : 1d8 + 3)"
+              },
+              "lists": []
+            },
+            {
+              "index": "critical-hit",
+              "icon": "🎯",
+              "accent": "AMBER",
+              "fr": {
+                "title": "Critique (20 naturel)",
+                "summary": "Touche automatiquement. Double les dés (pas le bonus)."
+              },
+              "lists": []
+            },
+            {
+              "index": "critical-miss",
+              "icon": "💀",
+              "accent": "RED",
+              "fr": {
+                "title": "Échec (1 naturel)",
+                "summary": "Rate automatiquement."
+              },
+              "lists": []
+            },
+            {
+              "index": "range-and-disadvantage",
+              "icon": "🏹",
+              "rule": "making-an-attack",
+              "fr": {
+                "title": "Portée et désavantage",
+                "summary": null
+              },
+              "lists": [
+                {
+                  "fr": {
+                    "items": [
+                      "🛑 **Corps à corps :** si tu tires à distance avec un ennemi collé à toi, tu as un **désavantage**.",
+                      "🏹 **Portée longue :** tirer très loin (2e chiffre de la portée) donne un **désavantage**."
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": "movement",
+          "icon": "🦶",
+          "accent": "SKY",
+          "fr": {
+            "title": "Mouvement",
+            "subtitle": "Déplacement",
+            "body": null
+          },
+          "cards": [
+            {
+              "index": "speed",
+              "icon": "🦶",
+              "rule": "movement-and-position",
+              "fr": {
+                "title": "9 m / 30 pieds",
+                "summary": "C'est la vitesse standard de la plupart des races."
+              },
+              "lists": []
+            },
+            {
+              "index": "split",
+              "icon": "✂️",
+              "rule": "movement-and-position",
+              "fr": {
+                "title": "Fractionnable",
+                "summary": "Tu peux bouger, attaquer, et finir ton mouvement après."
+              },
+              "lists": []
+            },
+            {
+              "index": "difficult-terrain",
+              "icon": "🏔️",
+              "rule": "movement-and-position",
+              "fr": {
+                "title": "Terrain difficile",
+                "summary": "Sur terrain difficile, chaque mètre coûte le double."
+              },
+              "lists": []
+            },
+            {
+              "index": "stand-up",
+              "icon": "🤸",
+              "rule": "movement-and-position",
+              "fr": {
+                "title": "Se relever",
+                "summary": "Coûte la **moitié** de ta vitesse maximale."
+              },
+              "lists": []
+            }
+          ]
+        },
+        {
+          "index": "bonus",
+          "icon": "⚡",
+          "accent": "AMBER",
+          "fr": {
+            "title": "Bonus",
+            "subtitle": "Action bonus",
+            "body": "Tu ne peux utiliser une action bonus **que** si une capacité te le permet."
+          },
+          "cards": [
+            {
+              "index": "two-weapon-fighting",
+              "icon": "⚔️",
+              "rule": "making-an-attack",
+              "fr": {
+                "title": "Combat à deux armes",
+                "summary": "Si tu attaques avec une arme légère en main principale, tu peux attaquer avec l'autre (sans bonus aux dégâts)."
+              },
+              "lists": []
+            },
+            {
+              "index": "quick-spells",
+              "icon": "⚡",
+              "rule": "casting-a-spell",
+              "fr": {
+                "title": "Sorts rapides",
+                "summary": "Les sorts avec un temps d'incantation « 1 action bonus » (ex : foulée brumeuse, mot de guérison)."
+              },
+              "lists": []
+            },
+            {
+              "index": "class-features",
+              "icon": "🎓",
+              "fr": {
+                "title": "Capacités de classe",
+                "summary": "Rage (barbare), ruse (roublard), inspiration bardique..."
+              },
+              "lists": []
+            }
+          ]
+        },
+        {
+          "index": "other",
+          "icon": "💬",
+          "accent": "ZINC",
+          "fr": {
+            "title": "Autre",
+            "subtitle": "Interaction",
+            "body": "Tu peux faire une de ces choses « en passant » pendant ton tour."
+          },
+          "cards": [
+            {
+              "index": "talk",
+              "icon": "🗣️",
+              "fr": {
+                "title": "Parler à un allié ou un ennemi",
+                "summary": null
+              },
+              "lists": []
+            },
+            {
+              "index": "interact",
+              "icon": "🚪",
+              "fr": {
+                "title": "Utiliser un objet non magique (une seule fois)",
+                "summary": null
+              },
+              "lists": []
+            },
+            {
+              "index": "draw-weapon",
+              "icon": "🗡️",
+              "fr": {
+                "title": "Sortir OU ranger une arme",
+                "summary": null
+              },
+              "lists": []
+            },
+            {
+              "index": "pick-up",
+              "icon": "🎒",
+              "fr": {
+                "title": "Ramasser un objet au sol",
+                "summary": null
+              },
+              "lists": []
+            }
+          ]
+        },
+        {
+          "index": "reaction",
+          "icon": "💥",
+          "accent": "VIOLET",
+          "fr": {
+            "title": "Réaction",
+            "subtitle": "Réaction",
+            "body": "Une réaction coupe la parole aux autres. Tu récupères ta réaction au début de ton prochain tour."
+          },
+          "cards": [
+            {
+              "index": "opportunity-attack",
+              "icon": "💥",
+              "rule": "making-an-attack",
+              "fr": {
+                "title": "Attaque d'opportunité",
+                "summary": "Quand un ennemi **quitte** ta zone de portée sans se désengager.",
+                "advice": "Une seule attaque au corps à corps"
+              },
+              "lists": []
+            },
+            {
+              "index": "readied-action",
+              "icon": "⏳",
+              "rule": "actions-in-combat",
+              "fr": {
+                "title": "Action préparée",
+                "summary": "Le déclencheur que tu avais préparé avec ton action arrive."
+              },
+              "lists": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
