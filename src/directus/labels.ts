@@ -10,6 +10,7 @@ export const MENU: { folder: string; label: string; icon: string; collections: s
   { folder: 'menu_choix', label: 'Choix', icon: 'checklist', collections: ['Choice', 'ChoiceOption', 'ChoiceOptionItem'] },
   { folder: 'menu_referentiels', label: 'Référentiels', icon: 'menu_book', collections: ['AbilityScore', 'Skill', 'Proficiency', 'Language', 'Condition', 'Alignment', 'DamageType', 'MagicSchool', 'CreatureType', 'Terrain'] },
   { folder: 'menu_base', label: 'Langues et éditions', icon: 'translate', collections: ['Locale', 'Edition'] },
+  { folder: 'menu_generateur', label: 'Générateur de PNJ', icon: 'casino', collections: ['NpcTableEntry'] },
   { folder: 'menu_application', label: 'Application', icon: 'person', collections: ['User', 'Character', 'Npc'] },
 ];
 
@@ -66,6 +67,10 @@ export const COLLECTIONS: Record<string, [string, string]> = {
   CharacterPersonality: ['Personnalité', 'Personnalité'],
   CharacterCondition: ['État', 'États'],
   Npc: ['PNJ', 'PNJ'],
+  NpcAbilityScore: ['Caractéristique du PNJ', 'Caractéristiques du PNJ'],
+  NpcTableEntry: ['Entrée du générateur', 'Entrées du générateur'],
+  NpcTableEntryTranslation: ['Traduction', 'Traductions'],
+  ClassRecommendedAbility: ['Caractéristique recommandée', 'Caractéristiques recommandées'],
 };
 
 // Libellés communs à toutes les tables (nom du champ → libellé)

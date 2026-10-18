@@ -4,7 +4,7 @@ Le schéma est réparti par domaine dans [`prisma/schema/`](../../prisma/schema/
 
 | Fichier | Contenu |
 |---|---|
-| `schema.prisma` | générateur, source de données, modèles applicatifs (`User`, `Npc`) |
+| `schema.prisma` | générateur, source de données, modèle `User` |
 | `00-base.prisma` | langues, éditions et **conventions de modélisation** (en tête de fichier) |
 | `01-referentiels.prisma` | caractéristiques, compétences, alignements, types de dégâts, écoles de magie, états, langues, maîtrises… |
 | `02-equipement.prisma` | équipement, armes, armures, véhicules, paquetages |
@@ -14,8 +14,9 @@ Le schéma est réparti par domaine dans [`prisma/schema/`](../../prisma/schema/
 | `06-historiques-dons.prisma` | historiques (tables de personnalité comprises) et dons |
 | `07-sorts.prisma` | sorts |
 | `08-personnages.prisma` | personnages : classes et montées de niveau, réponses aux choix, sorts connus, inventaire, état en partie |
+| `09-pnj.prisma` | PNJ (race, classe et alignement référencés) et tables du générateur de PNJ |
 
-Migrations : `20261015160000_add_srd_socle` (socle), `20261016180000_add_srd_races_backgrounds` (races et historiques), `20261016190000_race_sizes_json`, `20261016200000_stats_own_primary_key`, `20261017100000_character_model` (personnages).
+Migrations : `20261015160000_add_srd_socle` (socle), `20261016180000_add_srd_races_backgrounds` (races et historiques), `20261016190000_race_sizes_json`, `20261016200000_stats_own_primary_key`, `20261017100000_character_model` (personnages), `20261018100000_presentation_and_npcs` (présentation, règles de création, PNJ ; convertit les PNJ existants).
 
 - Nommage, contraintes CHECK, JSONB, seed et API : [`conventions.md`](conventions.md)
 - Schémas Zod des colonnes JSONB : [`src/srd/jsonb.ts`](../../src/srd/jsonb.ts)

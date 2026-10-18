@@ -18,7 +18,8 @@ const enumValues = new Map(enums.map((e) => [e.name, e.values.map((v) => v.name)
 
 // Tables applicatives : visibles, mais hors des données de jeu (ni rôles ni formulaires soignés)
 // Données de l'application (utilisateurs, personnages, PNJ), hors rôles des données de jeu
-export const isAppModel = (name: string) => ['User', 'Npc'].includes(name) || name.startsWith('Character');
+export const isAppModel = (name: string) =>
+  name === 'User' || name.startsWith('Character') || (name.startsWith('Npc') && !name.startsWith('NpcTable'));
 export const srdModels = models.filter((m) => !isAppModel(m.name));
 export const isTranslation = (m: Model) => m.name.endsWith('Translation') && byName.has(m.name.slice(0, -'Translation'.length));
 

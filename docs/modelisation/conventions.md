@@ -47,6 +47,7 @@ Prisma ne sait pas exprimer les contraintes `CHECK`. Elles sont ajoutées à la 
 - **Lignes référencées par les personnages** : les choix, leurs options et les entrées des tables de personnalité sont mis à jour en place pour garder leurs `id` : un choix reprend le premier choix existant de même type chez son propriétaire (les options, par position). Seules les lignes en trop sont supprimées, ce qui échoue (`Restrict`) si un personnage les a choisies : le seed ne casse jamais un personnage en silence.
 - **Langues** : un import lit le fichier anglais, qui fait référence, puis complète les traductions à partir des fichiers de chaque langue disponible, en associant les entrées par `index`. Une entrée sans traduction dans une langue est importée quand même ; l'API se rabattra sur la langue par défaut.
 - **Ordre** : langues et éditions, puis référentiels, puis équipement et maîtrises, puis sorts, puis classes. Chaque importeur ne dépend que des précédents.
+- **Présentation et générateur** : `custom/presentation.json` (accroches, icônes, difficulté, caractéristiques recommandées) est réappliqué après chaque import des classes, races ou historiques, qui remplacent les traductions ; `custom/npc-generator.json` remplit les tables du générateur de PNJ et le profil physique des races.
 - **Commande** : `npx prisma db seed`. Le paramètre facultatif `--only <domaine>` limite l'import.
 
 ## 5. API (lecture)

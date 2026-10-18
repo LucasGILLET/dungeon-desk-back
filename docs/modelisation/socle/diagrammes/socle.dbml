@@ -108,6 +108,12 @@ Enum ChoicePool {
   ANY_LANGUAGE
 }
 
+Enum ClassDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
 Enum ClassColumnValueType {
   INTEGER
   DICE
@@ -188,6 +194,28 @@ Enum AbilityGenerationMethod {
   MANUAL
 }
 
+Enum NpcGender {
+  MALE
+  FEMALE
+  NON_BINARY
+}
+
+Enum NpcTableKind {
+  FIRST_NAME
+  LAST_NAME
+  NAME_PREFIX
+  NAME_SUFFIX
+  BODY_TYPE
+  SOCIAL_STATUS
+  PROFESSION
+  RELATION
+  PERSONALITY
+  MOTIVATION
+  QUIRK
+  ORIGIN
+  HISTORY_EVENT
+}
+
 Table Locale {
   code varchar [pk, note: '"fr", "en"']
   name varchar [not null, note: 'nom dans sa propre langue : "Français", "English"']
@@ -202,6 +230,9 @@ Table Edition {
   releaseYear int [not null]
   isDefault boolean [not null, default: false]
   position int [not null]
+  pointBuyBudget int [not null, default: 27]
+  pointBuyCosts jsonb [not null, default: '"{\"8\":0,\"9\":1,\"10\":2,\"11\":3,\"12\":4,\"13\":5,\"14\":7,\"15\":9}"']
+  standardArray jsonb [not null, default: '"[15,14,13,12,10,8]"']
   Note: 'Relations vers Edition non dessinées (référencée par presque toutes les tables).'
 }
 
@@ -228,6 +259,7 @@ Table AbilityScoreTranslation {
   localeCode varchar [not null]
   abbreviation varchar [not null, note: '"FOR" / "STR"']
   name varchar [not null, note: '"Force" / "Strength"']
+  summary varchar [note: 'accroche : "Puissance physique, combat au corps à corps"']
   description varchar
   indexes {
     (abilityScoreId, localeCode) [unique]
@@ -591,6 +623,7 @@ Table Class {
   index varchar [not null, note: '"wizard"']
   hitDie int [not null, note: '6 → d6']
   subclassLevel int [not null]
+  difficulty ClassDifficulty [not null, default: 'MEDIUM']
   source ContentSource [not null, default: 'SRD']
   ownerId int
   createdAt timestamp [not null, default: `now()`]
@@ -600,10 +633,21 @@ Table Class {
   }
 }
 
+Table ClassRecommendedAbility {
+  id int [pk, increment]
+  classId int [not null]
+  abilityScoreId int [not null]
+  position int [not null]
+  indexes {
+    (classId, abilityScoreId) [unique]
+  }
+}
+
 Table ClassTranslation {
   id int [pk, increment]
   classId int [not null]
   localeCode varchar [not null]
+  summary varchar [note: 'accroche : "Maître des armes et de l\'armure"']
   name varchar [not null, note: '"Magicien"']
   description varchar
   subclassLabel varchar [not null]
@@ -764,6 +808,7 @@ Table Subclass {
   index varchar [not null, note: '"evocation"']
   classId int [not null]
   casterType CasterType
+  icon varchar [note: 'emoji affiché dans le créateur']
   source ContentSource [not null, default: 'SRD']
   ownerId int
   createdAt timestamp [not null, default: `now()`]
@@ -838,10 +883,16 @@ Table Race {
   index varchar [not null, note: '"dwarf"']
   sizes jsonb [not null]
   speeds jsonb [not null]
+  icon varchar [note: 'emoji']
   source ContentSource [not null, default: 'SRD']
   ownerId int
   createdAt timestamp [not null, default: `now()`]
   updatedAt timestamp [not null]
+  npcFrequency int [not null, default: 1]
+  baseHeightCm int
+  heightVarianceCm int
+  baseWeightKg int
+  weightVarianceKg int
   indexes {
     (editionId, index) [unique]
   }
@@ -852,6 +903,7 @@ Table RaceTranslation {
   raceId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Nain"']
+  summary varchar [note: 'accroche : "Créatures robustes et résistantes…"']
   ageText varchar
   alignmentText varchar
   sizeText varchar
@@ -973,6 +1025,7 @@ Table Background {
   id int [pk, increment]
   editionId int [not null]
   index varchar [not null, note: '"acolyte"']
+  icon varchar [note: 'emoji']
   source ContentSource [not null, default: 'SRD']
   ownerId int
   createdAt timestamp [not null, default: `now()`]
@@ -987,6 +1040,7 @@ Table BackgroundTranslation {
   backgroundId int [not null]
   localeCode varchar [not null]
   name varchar [not null, note: '"Acolyte"']
+  summary varchar [note: 'accroche : "Vous avez servi dans un temple…"']
   featureName varchar
   featureDescription varchar
   indexes {
@@ -1280,6 +1334,62 @@ Table CharacterCondition {
   }
 }
 
+Table Npc {
+  id int [pk, increment]
+  userId int [not null]
+  editionId int [not null]
+  name varchar [not null, note: 'nom complet affiché']
+  firstName varchar
+  lastName varchar
+  raceId int [not null]
+  subraceId int
+  classId int [note: 'null = roturier']
+  alignmentId int
+  gender NpcGender
+  age int
+  heightCm int
+  weightKg int
+  bodyType varchar
+  profession varchar
+  socialStatus varchar
+  relations varchar
+  personality varchar
+  motivation varchar
+  quirk varchar
+  history varchar
+  notes varchar
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+}
+
+Table NpcAbilityScore {
+  id int [pk, increment]
+  npcId int [not null]
+  abilityScoreId int [not null]
+  score int [not null]
+  indexes {
+    (npcId, abilityScoreId) [unique]
+  }
+}
+
+Table NpcTableEntry {
+  id int [pk, increment]
+  kind NpcTableKind [not null]
+  raceId int [note: 'entrée propre à une race (prénoms, noms de famille)']
+  value varchar
+  weight int [not null, default: 1, note: 'probabilité relative du tirage']
+}
+
+Table NpcTableEntryTranslation {
+  id int [pk, increment]
+  entryId int [not null]
+  localeCode varchar [not null]
+  text varchar [not null]
+  indexes {
+    (entryId, localeCode) [unique]
+  }
+}
+
 Ref: AbilityScoreTranslation.abilityScoreId > AbilityScore.id
 Ref: Skill.abilityScoreId > AbilityScore.id
 Ref: SkillTranslation.skillId > Skill.id
@@ -1332,6 +1442,8 @@ Ref: ChoiceOptionItem.languageId > Language.id
 Ref: ChoiceOptionItem.abilityScoreId > AbilityScore.id
 Ref: ChoiceOptionItem.spellId > Spell.id
 Ref: ChoiceOptionItem.traitId > Trait.id
+Ref: ClassRecommendedAbility.classId > Class.id
+Ref: ClassRecommendedAbility.abilityScoreId > AbilityScore.id
 Ref: ClassTranslation.classId > Class.id
 Ref: ClassPrimaryAbility.classId > Class.id
 Ref: ClassPrimaryAbility.abilityScoreId > AbilityScore.id
@@ -1438,6 +1550,14 @@ Ref: CharacterPersonality.characterId > Character.id
 Ref: CharacterPersonality.optionId > BackgroundPersonalityOption.id
 Ref: CharacterCondition.characterId > Character.id
 Ref: CharacterCondition.conditionId > Condition.id
+Ref: Npc.raceId > Race.id
+Ref: Npc.subraceId > Subrace.id
+Ref: Npc.classId > Class.id
+Ref: Npc.alignmentId > Alignment.id
+Ref: NpcAbilityScore.npcId > Npc.id
+Ref: NpcAbilityScore.abilityScoreId > AbilityScore.id
+Ref: NpcTableEntry.raceId > Race.id
+Ref: NpcTableEntryTranslation.entryId > NpcTableEntry.id
 
 TableGroup "Socle des données de jeu" [color: #7F8C8D] {
   Locale
@@ -1492,6 +1612,7 @@ TableGroup "Choix" [color: #2C3E50] {
 
 TableGroup "Classes, sous-classes et capacités de classe" [color: #24BAB1] {
   Class
+  ClassRecommendedAbility
   ClassTranslation
   ClassPrimaryAbility
   ClassSavingThrow
@@ -1564,4 +1685,11 @@ TableGroup "Personnages" [color: #C0392B] {
   CharacterCurrency
   CharacterPersonality
   CharacterCondition
+}
+
+TableGroup "Pnj et générateur de pnj" [color: #7F8C8D] {
+  Npc
+  NpcAbilityScore
+  NpcTableEntry
+  NpcTableEntryTranslation
 }
