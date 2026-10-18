@@ -328,3 +328,18 @@ export const getNpcTables = async (req: Request, res: Response) => {
     fail(res, 'NPC tables', error);
   }
 };
+
+export const getAlignments = async (req: Request, res: Response) => {
+  try {
+    const ctx = await resolveLang(req);
+    const rows = await prisma.alignment.findMany({ orderBy: { id: 'asc' }, include: { translations: t } });
+    setCache(res);
+    res.json(rows.map((a) => {
+      const at = pick(a.translations, ctx);
+      // "Loyal Bon (LB)" : l'abréviation a déjà son champ
+      return { index: a.index, name: at.name.replace(/\s*\([^)]*\)$/, ''), abbreviation: at.abbreviation, ethic: a.ethic, morality: a.morality };
+    }));
+  } catch (error) {
+    fail(res, 'alignments', error);
+  }
+};

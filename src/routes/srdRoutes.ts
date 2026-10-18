@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { getClasses, getClassByIndex } from '../controllers/srdController';
 import {
-  getAbilityScores, getBackgrounds, getConditions, getCreationRules, getEquipment, getFeats, getNpcTables, getRaces, getSkills, getSpells,
+  getAbilityScores, getAlignments, getBackgrounds, getConditions, getCreationRules, getEquipment, getFeats, getNpcTables, getRaces, getSkills, getSpells,
 } from '../controllers/srdContentController';
 
 const router = Router();
@@ -220,5 +220,20 @@ router.get('/:edition/rules', getCreationRules);
  *       200: { description: OK }
  */
 router.get('/:edition/npc-tables', getNpcTables);
+
+/**
+ * @swagger
+ * /srd/{edition}/alignments:
+ *   get:
+ *     summary: Alignments (translated)
+ *     operationId: getSrdAlignments
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: OK }
+ */
+router.get('/:edition/alignments', getAlignments);
 
 export default router;
