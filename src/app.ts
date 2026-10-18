@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
+import compression from 'compression';
 import morgan from 'morgan';
 import responseTime from 'response-time';
 import helmet from 'helmet';
@@ -80,6 +81,8 @@ app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true
 }));
+// Réponses compressées : la liste des sorts passe d'environ 570 Ko à une centaine
+app.use(compression());
 app.use(express.json());
 
 // Swagger Documentation
