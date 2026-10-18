@@ -30,6 +30,8 @@ const wizard = {
   index: 'wizard',
   hitDie: 6,
   subclassLevel: 2,
+  difficulty: 'HARD',
+  recommendedAbilities: [{ abilityScore: { index: 'int', translations: tr({ name: 'Intelligence' }, { name: 'Intelligence' }) } }],
   translations: tr({ name: 'Wizard', subclassLabel: 'Arcane Tradition' }, { name: 'Magicien', subclassLabel: 'Tradition arcanique' }),
   savingThrows: [{ abilityScore: { index: 'int', translations: tr({ name: 'Intelligence' }, { name: 'Intelligence' }) } }],
   proficiencies: [{ proficiency: { index: 'daggers', translations: tr({ name: 'Daggers' }, { name: 'Dagues' }) } }],
@@ -104,8 +106,8 @@ describe('SRD Controller', () => {
   describe('GET /api/srd/:edition/classes', () => {
     it('should list the classes of the edition with their translated name', async () => {
       (prisma.class.findMany as any).mockResolvedValue([
-        { index: 'barbarian', hitDie: 12, subclassLevel: 3, translations: tr({ name: 'Barbarian' }, { name: 'Barbare' }) },
-        { index: 'wizard', hitDie: 6, subclassLevel: 2, translations: tr({ name: 'Wizard' }, { name: 'Magicien' }) },
+        { index: 'barbarian', hitDie: 12, subclassLevel: 3, difficulty: 'MEDIUM', recommendedAbilities: [], spellcasting: null, translations: tr({ name: 'Barbarian' }, { name: 'Barbare' }) },
+        { index: 'wizard', hitDie: 6, subclassLevel: 2, difficulty: 'MEDIUM', recommendedAbilities: [], spellcasting: null, translations: tr({ name: 'Wizard' }, { name: 'Magicien' }) },
       ]);
 
       const res = await request(app).get('/api/srd/2014/classes?lang=fr');
@@ -113,8 +115,8 @@ describe('SRD Controller', () => {
       expect(res.status).toBe(200);
       expect(res.headers['cache-control']).toBe('public, max-age=3600');
       expect(res.body).toEqual([
-        { index: 'barbarian', name: 'Barbare', lang: 'fr', hitDie: 12, subclassLevel: 3 },
-        { index: 'wizard', name: 'Magicien', lang: 'fr', hitDie: 6, subclassLevel: 2 },
+        { index: 'barbarian', name: 'Barbare', lang: 'fr', hitDie: 12, subclassLevel: 3, difficulty: 'MEDIUM', casterType: null, recommendedAbilities: [] },
+        { index: 'wizard', name: 'Magicien', lang: 'fr', hitDie: 6, subclassLevel: 2, difficulty: 'MEDIUM', casterType: null, recommendedAbilities: [] },
       ]);
       const query = (prisma.class.findMany as any).mock.calls[0][0];
       expect(query.where).toEqual({ edition: { code: '2014' } });
@@ -123,7 +125,7 @@ describe('SRD Controller', () => {
 
     it("should fall back to the author's language for homebrew content", async () => {
       (prisma.class.findMany as any).mockResolvedValue([
-        { index: 'wizard', hitDie: 6, subclassLevel: 2, translations: [{ localeCode: 'fr', name: 'Magicien' }] },
+        { index: 'wizard', hitDie: 6, subclassLevel: 2, difficulty: 'MEDIUM', recommendedAbilities: [], spellcasting: null, translations: [{ localeCode: 'fr', name: 'Magicien' }] },
       ]);
 
       const res = await request(app).get('/api/srd/2014/classes?lang=en');
@@ -134,7 +136,7 @@ describe('SRD Controller', () => {
 
     it('should use Accept-Language when no lang is given', async () => {
       (prisma.class.findMany as any).mockResolvedValue([
-        { index: 'wizard', hitDie: 6, subclassLevel: 2, translations: tr({ name: 'Wizard' }, { name: 'Magicien' }) },
+        { index: 'wizard', hitDie: 6, subclassLevel: 2, difficulty: 'MEDIUM', recommendedAbilities: [], spellcasting: null, translations: tr({ name: 'Wizard' }, { name: 'Magicien' }) },
       ]);
 
       const res = await request(app).get('/api/srd/2014/classes').set('Accept-Language', 'fr-FR,fr;q=0.9,en;q=0.8');
@@ -145,7 +147,7 @@ describe('SRD Controller', () => {
 
     it('should fall back to the default language for an unknown lang', async () => {
       (prisma.class.findMany as any).mockResolvedValue([
-        { index: 'wizard', hitDie: 6, subclassLevel: 2, translations: tr({ name: 'Wizard' }, { name: 'Magicien' }) },
+        { index: 'wizard', hitDie: 6, subclassLevel: 2, difficulty: 'MEDIUM', recommendedAbilities: [], spellcasting: null, translations: tr({ name: 'Wizard' }, { name: 'Magicien' }) },
       ]);
 
       const res = await request(app).get('/api/srd/2014/classes?lang=de');
@@ -157,7 +159,7 @@ describe('SRD Controller', () => {
     it('should fall back to the default language, not the first translation found', async () => {
       // Traduction espagnole listée avant l'anglais, pas de français
       (prisma.class.findMany as any).mockResolvedValue([
-        { index: 'wizard', hitDie: 6, subclassLevel: 2, translations: [{ localeCode: 'es', name: 'Mago' }, { localeCode: 'en', name: 'Wizard' }] },
+        { index: 'wizard', hitDie: 6, subclassLevel: 2, difficulty: 'MEDIUM', recommendedAbilities: [], spellcasting: null, translations: [{ localeCode: 'es', name: 'Mago' }, { localeCode: 'en', name: 'Wizard' }] },
       ]);
 
       const res = await request(app).get('/api/srd/2014/classes?lang=fr');
@@ -298,6 +300,7 @@ describe('SRD Controller', () => {
         abilityBonus: [{ abilityScore: ability, bonus: 2 }],
         languages: [{ language: { index: 'elvish', translations: tr({ name: 'Elvish' }, { name: 'Elfique' }) } }],
         traits: [darkvision],
+        choices: [], npcFrequency: 15, baseHeightCm: 160, heightVarianceCm: 20, baseWeightKg: 50, weightVarianceKg: 15,
         subraces: [{ index: 'wood-elf', source: 'HOMEBREW', translations: [{ localeCode: 'fr', name: 'Elfe des bois', description: null }], abilityBonus: [], traits: [] }],
       }]);
 
@@ -312,6 +315,7 @@ describe('SRD Controller', () => {
         subraces: [{ index: 'wood-elf', name: 'Elfe des bois', source: 'HOMEBREW' }],
       });
       expect((prisma.race.findMany as any).mock.calls[0][0].where).toEqual({ edition: { code: '2014' } });
+      expect(res.body[0]).toMatchObject({ abilityBonusChoice: null, npcProfile: { frequency: 15, heightCm: { base: 160, variance: 20 }, weightKg: { base: 50, variance: 15 } } });
     });
   });
 
@@ -352,6 +356,16 @@ describe('SRD Controller', () => {
         save: { ability: { index: 'dex' }, success: 'HALF' }, area: { type: 'SPHERE', sizeFt: 20 },
         classes: [{ index: 'wizard', name: 'Magicien' }],
       });
+    });
+  });
+
+  describe('presentation of a class', () => {
+    it('should expose difficulty and recommended abilities', async () => {
+      (prisma.class.findFirst as any).mockResolvedValue(wizard);
+
+      const res = await request(app).get('/api/srd/2014/classes/wizard?lang=fr');
+
+      expect(res.body).toMatchObject({ difficulty: 'HARD', recommendedAbilities: [{ index: 'int', name: 'Intelligence' }] });
     });
   });
 });

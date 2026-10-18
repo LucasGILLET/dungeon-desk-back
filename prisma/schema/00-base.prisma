@@ -108,6 +108,8 @@ model Locale {
   backgroundTranslations          BackgroundTranslation[]
   personalityOptionTranslations   PersonalityOptionTranslation[]
   featTranslations                FeatTranslation[]
+
+  npcTableEntryTranslations NpcTableEntryTranslation[]
 }
 
 model Edition {
@@ -116,6 +118,14 @@ model Edition {
   releaseYear Int
   isDefault   Boolean @default(false)
   position    Int
+
+  // Règles de création des caractéristiques (identiques en 2014 et 2024, mais
+  // propres à l'édition). JSONB neutres en langue, validés par Zod.
+  pointBuyBudget Int  @default(27)
+  // { "8": 0, "9": 1, …, "15": 9 } : coût de chaque valeur
+  pointBuyCosts  Json @default("{\"8\":0,\"9\":1,\"10\":2,\"11\":3,\"12\":4,\"13\":5,\"14\":7,\"15\":9}")
+  // [15, 14, 13, 12, 10, 8]
+  standardArray  Json @default("[15,14,13,12,10,8]")
 
   translations        EditionTranslation[]
   conditions          Condition[]
@@ -136,6 +146,9 @@ model Edition {
 
   // Personnages qui l'utilisent
   characters Character[]
+
+  // PNJ qui l'utilisent
+  npcs Npc[]
 }
 
 model EditionTranslation {

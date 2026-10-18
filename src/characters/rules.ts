@@ -55,7 +55,8 @@ export interface ClassRule {
 }
 
 export interface RulesContext {
-  edition: { id: number; code: string } | null;
+  // Règles de création des caractéristiques de l'édition
+  edition: { id: number; code: string; pointBuyBudget: number; pointBuyCosts: Record<string, number>; standardArray: number[] } | null;
   abilities: Map<string, number>; // index → id
   constitutionId: number | undefined;
   race: { id: number; bonuses: Map<number, number>; traitIds: number[] } | null;
@@ -140,8 +141,6 @@ export interface Analysis {
   availableChoices: number[];
 }
 
-const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
-const POINT_BUY_COST: Record<number, number> = { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 };
 const MAX_ATTUNED = 3;
 
 export const modifier = (score: number) => Math.floor((score - 10) / 2);
@@ -175,12 +174,15 @@ export function analyse(input: CharacterInput, ctx: RulesContext): Analysis {
   }
   if (abilityScores.length !== ctx.abilities.size) fail('abilityScores', `Expected the ${ctx.abilities.size} ability scores (${[...ctx.abilities.keys()].join(', ')})`);
   const bases = Object.values(input.abilityScores);
-  if (input.abilityMethod === 'STANDARD_ARRAY' && [...bases].sort((a, b) => b - a).join() !== STANDARD_ARRAY.join()) {
-    fail('abilityScores', `Standard array must be ${STANDARD_ARRAY.join(', ')}`);
+  const { standardArray, pointBuyCosts, pointBuyBudget } = ctx.edition;
+  const sortedArray = [...standardArray].sort((a, b) => b - a);
+  if (input.abilityMethod === 'STANDARD_ARRAY' && [...bases].sort((a, b) => b - a).join() !== sortedArray.join()) {
+    fail('abilityScores', `Standard array must be ${sortedArray.join(', ')}`);
   }
   if (input.abilityMethod === 'POINT_BUY') {
-    if (bases.some((s) => POINT_BUY_COST[s] === undefined)) fail('abilityScores', 'Point buy scores must be between 8 and 15');
-    else if (bases.reduce((sum, s) => sum + POINT_BUY_COST[s], 0) > 27) fail('abilityScores', 'Point buy cannot exceed 27 points');
+    const values = Object.keys(pointBuyCosts).map(Number);
+    if (bases.some((s) => pointBuyCosts[String(s)] === undefined)) fail('abilityScores', `Point buy scores must be between ${Math.min(...values)} and ${Math.max(...values)}`);
+    else if (bases.reduce((sum, s) => sum + pointBuyCosts[String(s)]!, 0) > pointBuyBudget) fail('abilityScores', `Point buy cannot exceed ${pointBuyBudget} points`);
   }
 
   // --- Classes et niveaux ---

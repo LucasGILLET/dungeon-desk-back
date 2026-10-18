@@ -20,6 +20,9 @@ model Race {
   // JSONB Speeds : { walk: 25, fly?, swim?, climb?, burrow? } (pieds)
   speeds    Json
 
+  // Présentation dans le créateur
+  icon String? // emoji
+
   source    ContentSource @default(SRD)
   ownerId   Int?
   owner     User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
@@ -36,6 +39,15 @@ model Race {
   // Personnages qui l'utilisent
   characters Character[]
 
+  // Générateur de PNJ : fréquence de tirage, taille et poids (base + variation aléatoire)
+  npcFrequency     Int             @default(1)
+  baseHeightCm     Int?
+  heightVarianceCm Int?
+  baseWeightKg     Int?
+  weightVarianceKg Int?
+  npcs             Npc[]
+  npcTableEntries  NpcTableEntry[]
+
   @@unique([editionId, index])
 }
 
@@ -45,6 +57,7 @@ model RaceTranslation {
   localeCode    String
   name          String // "Nain"
   // Textes descriptifs du SRD 2014
+  summary       String? // accroche : "Créatures robustes et résistantes…"
   ageText       String? @db.Text
   alignmentText String? @db.Text
   sizeText      String? @db.Text
@@ -112,6 +125,8 @@ model Subrace {
 
   // Personnages qui l'utilisent
   characters Character[]
+
+  npcs Npc[]
 
   @@unique([editionId, index])
 }

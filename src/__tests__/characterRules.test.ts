@@ -52,7 +52,7 @@ const choices: ChoiceRule[] = [
 ];
 
 const ctx: RulesContext = {
-  edition: { id: 1, code: '2014' },
+  edition: { id: 1, code: '2014', pointBuyBudget: 27, pointBuyCosts: { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 }, standardArray: [15, 14, 13, 12, 10, 8] },
   abilities: new Map(ABILITIES.map((a) => [a, abilityId(a)])),
   constitutionId: abilityId('con'),
   race: { id: 5, bonuses: new Map([[abilityId('dex'), 2]]), traitIds: [] },

@@ -3,7 +3,7 @@
 // Options (après `--`) :
 //   --edition 2014           édition à importer (défaut : 2014)
 //   --only <domaines>        liste séparée par des virgules parmi :
-//                            base, referentiels, equipement, maitrises, sorts, classes, races, historiques
+//                            base, referentiels, equipement, maitrises, sorts, classes, races, historiques, presentation, pnj
 //   --classes <index>        classes à importer (défaut : toutes), ex. wizard,fighter
 //
 // Chaque domaine ne dépend que des précédents ; relancer le seed met à jour les
@@ -17,8 +17,10 @@ import { importSpells } from './importers/spells';
 import { ClassImporter } from './importers/classes';
 import { importRaces } from './importers/races';
 import { importBackgrounds } from './importers/backgrounds';
+import { importPresentation } from './importers/presentation';
+import { importNpcGenerator } from './importers/npcGenerator';
 
-const DOMAINS = ['base', 'referentiels', 'equipement', 'maitrises', 'sorts', 'classes', 'races', 'historiques'] as const;
+const DOMAINS = ['base', 'referentiels', 'equipement', 'maitrises', 'sorts', 'classes', 'races', 'historiques', 'presentation', 'pnj'] as const;
 
 function option(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
@@ -52,6 +54,9 @@ async function main(): Promise<void> {
     }
     if (run('races')) untranslated += (await importRaces(prisma, refs, edition)).untranslatedChoices;
     if (run('historiques')) untranslated += (await importBackgrounds(prisma, refs, edition)).untranslatedChoices;
+    // Après les classes, races et historiques, dont l'import remplace les traductions (accroches comprises)
+    if (run('classes') || run('races') || run('historiques') || run('presentation')) await importPresentation(prisma, refs, edition);
+    if (run('pnj') || run('races')) await importNpcGenerator(prisma, refs, edition);
     if (untranslated) log(`${untranslated} description(s) de choix non traduite(s) dans les fichiers sources : repli sur l'anglais`);
     log(`terminé en ${((Date.now() - started) / 1000).toFixed(1)} s`);
   } finally {

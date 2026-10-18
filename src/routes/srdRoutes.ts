@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { getClasses, getClassByIndex } from '../controllers/srdController';
-import { getBackgrounds, getConditions, getEquipment, getFeats, getRaces, getSkills, getSpells } from '../controllers/srdContentController';
+import {
+  getAbilityScores, getBackgrounds, getConditions, getCreationRules, getEquipment, getFeats, getNpcTables, getRaces, getSkills, getSpells,
+} from '../controllers/srdContentController';
 
 const router = Router();
 
@@ -173,5 +175,50 @@ router.get('/:edition/feats', getFeats);
  *       200: { description: Skills }
  */
 router.get('/:edition/skills', getSkills);
+
+/**
+ * @swagger
+ * /srd/{edition}/ability-scores:
+ *   get:
+ *     summary: Ability scores with their short summary (translated)
+ *     operationId: getAbilityScores
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: OK }
+ */
+router.get('/:edition/ability-scores', getAbilityScores);
+
+/**
+ * @swagger
+ * /srd/{edition}/rules:
+ *   get:
+ *     summary: Ability score creation rules of the edition (point buy, standard array)
+ *     operationId: getCreationRules
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: OK }
+ */
+router.get('/:edition/rules', getCreationRules);
+
+/**
+ * @swagger
+ * /srd/{edition}/npc-tables:
+ *   get:
+ *     summary: NPC generator tables, by kind (translated)
+ *     operationId: getNpcTables
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: OK }
+ */
+router.get('/:edition/npc-tables', getNpcTables);
 
 export default router;

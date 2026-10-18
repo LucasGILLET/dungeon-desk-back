@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createNpc, getNpcs, getNpcById, deleteNpc } from '../controllers/npcController';
+import { createNpc, getNpcs, getNpcById, deleteNpc, updateNpc } from '../controllers/npcController';
 import { protect } from '../middleware/authMiddleware';
 import { validateIdParam } from '../middleware/validateIdParam';
 
@@ -18,24 +18,22 @@ router.use(protect); // Toutes les routes nécessitent d'être connecté
  * @swagger
  * /npcs:
  *   post:
- *     summary: Create a new NPC
+ *     summary: Create an NPC
+ *     operationId: postNpcs
  *     tags: [NPCs]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               firstName:
- *                 type: string
- *               race:
- *                 type: string
- *               description:
- *                 type: string
+ *             $ref: '#/components/schemas/NpcInput'
  *     responses:
  *       200:
- *         description: The created NPC
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Npc'
  */
 router.post('/', createNpc);
 
@@ -43,11 +41,18 @@ router.post('/', createNpc);
  * @swagger
  * /npcs:
  *   get:
- *     summary: Get all NPCs for the current user
+ *     summary: List the NPCs of the current user
+ *     operationId: getNpcs
  *     tags: [NPCs]
  *     responses:
  *       200:
- *         description: List of NPCs
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Npc'
  */
 router.get('/', getNpcs);
 
@@ -55,7 +60,8 @@ router.get('/', getNpcs);
  * @swagger
  * /npcs/{id}:
  *   get:
- *     summary: Get an NPC by ID
+ *     summary: Get an NPC
+ *     operationId: getNpcById
  *     tags: [NPCs]
  *     parameters:
  *       - in: path
@@ -65,12 +71,64 @@ router.get('/', getNpcs);
  *           type: string
  *     responses:
  *       200:
- *         description: NPC details
- *       404:
- *         description: NPC not found
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Npc'
  */
 router.get('/:id', validateIdParam, getNpcById);
 
+/**
+ * @swagger
+ * /npcs/{id}:
+ *   put:
+ *     summary: Update an NPC
+ *     operationId: updateNpc
+ *     tags: [NPCs]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/NpcInput'
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Npc'
+ */
+router.put('/:id', validateIdParam, updateNpc);
+
+/**
+ * @swagger
+ * /npcs/{id}:
+ *   delete:
+ *     summary: Delete an NPC
+ *     operationId: deleteNpc
+ *     tags: [NPCs]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MessageResponse'
+ */
 router.delete('/:id', validateIdParam, deleteNpc);
 
 export default router;

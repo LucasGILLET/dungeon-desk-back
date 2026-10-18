@@ -18,6 +18,9 @@ model Class {
   // en 2024). Remplace getLevel1SubclassClasses() côté front.
   subclassLevel Int
 
+  // Présentation dans le créateur
+  difficulty ClassDifficulty @default(MEDIUM)
+
   source    ContentSource @default(SRD)
   ownerId   Int?
   owner     User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
@@ -38,17 +41,41 @@ model Class {
   spells                  ClassSpell[]
   multiclassRequirements  MulticlassRequirement[]
   multiclassProficiencies ClassMulticlassProficiency[]
+  recommendedAbilities    ClassRecommendedAbility[]
 
   // Personnages qui l'utilisent
   characterClasses CharacterClass[]
 
+  npcs Npc[]
+
   @@unique([editionId, index])
+}
+
+// Difficulté de prise en main, pour guider les débutants dans le créateur
+enum ClassDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+// Caractéristiques à privilégier (« Force puis Constitution »), dans l'ordre.
+// Plus large que ClassPrimaryAbility (prérequis de multiclassage du SRD).
+model ClassRecommendedAbility {
+  id             Int          @id @default(autoincrement())
+  classId        Int
+  class          Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  abilityScoreId Int
+  abilityScore   AbilityScore @relation("ClassRecommendedAbilities", fields: [abilityScoreId], references: [id])
+  position       Int
+
+  @@unique([classId, abilityScoreId])
 }
 
 model ClassTranslation {
   id            Int     @id @default(autoincrement())
   classId       Int
   localeCode    String
+  summary       String? // accroche : "Maître des armes et de l'armure"
   name          String // "Magicien"
   description   String? @db.Text
   // Nom générique des sous-classes : "Tradition arcanique" (2014),
@@ -291,6 +318,8 @@ model Subclass {
   class      Class       @relation(fields: [classId], references: [id], onDelete: Cascade)
   // Lanceurs à un tiers (chevalier occulte…) : la sous-classe porte l'incantation
   casterType CasterType?
+
+  icon String? // emoji affiché dans le créateur
 
   source    ContentSource @default(SRD)
   ownerId   Int?

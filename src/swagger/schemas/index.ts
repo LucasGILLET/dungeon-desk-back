@@ -1,5 +1,6 @@
 import { characterCreateInputSchema, characterLevelSchema, characterNamesSchema, characterPreviewSchema, characterSchema, characterSheetSchema, characterSummarySchema } from './character';
 import { messageResponseSchema } from './common';
+import { npcInputSchema, npcSchema } from './npc';
 import { userSchema } from './user';
 
 export const swaggerSchemas = {
@@ -11,5 +12,7 @@ export const swaggerSchemas = {
   CharacterSummary: characterSummarySchema,
   CharacterNames: characterNamesSchema,
   MessageResponse: messageResponseSchema,
+  NpcInput: npcInputSchema,
+  Npc: npcSchema,
   User: userSchema,
 } as const;

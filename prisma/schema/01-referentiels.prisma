@@ -27,10 +27,13 @@ model AbilityScore {
   raceAbilityBonuses    RaceAbilityBonus[]
   subraceAbilityBonuses SubraceAbilityBonus[]
   featPrerequisites     FeatPrerequisite[]
+  recommendedFor        ClassRecommendedAbility[] @relation("ClassRecommendedAbilities")
 
   // Personnages qui l'utilisent
   characterScores    CharacterAbilityScore[]
   characterIncreases CharacterAbilityIncrease[]
+
+  npcScores NpcAbilityScore[]
 }
 
 model AbilityScoreTranslation {
@@ -39,6 +42,7 @@ model AbilityScoreTranslation {
   localeCode     String
   abbreviation   String // "FOR" / "STR"
   name           String // "Force" / "Strength"
+  summary        String? // accroche : "Puissance physique, combat au corps à corps"
   description    String?      @db.Text
   abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id], onDelete: Cascade)
   locale         Locale       @relation(fields: [localeCode], references: [code])
@@ -92,6 +96,8 @@ model Alignment {
 
   // Personnages qui l'utilisent
   characters Character[]
+
+  npcs Npc[]
 }
 
 model AlignmentTranslation {

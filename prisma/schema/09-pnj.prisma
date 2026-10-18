@@ -1,0 +1,115 @@
+// ============================================================================
+// PNJ ET GÉNÉRATEUR DE PNJ
+// ----------------------------------------------------------------------------
+// Un PNJ référence les données de jeu (race, classe, alignement) au lieu d'en
+// garder une copie, comme un personnage. Ses traits (profession, manie,
+// histoire…) sont du texte libre : tirés par le générateur, puis modifiables
+// par le MJ.
+//
+// Le générateur tire ses valeurs dans NpcTableEntry : prénoms et noms par race,
+// professions, manies… éditables dans le back-office. Les noms propres sont
+// neutres en langue (value) ; les autres entrées sont traduites.
+// ============================================================================
+
+enum NpcGender {
+  MALE
+  FEMALE
+  NON_BINARY
+}
+
+model Npc {
+  id          Int        @id @default(autoincrement())
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  editionId   Int
+  edition     Edition    @relation(fields: [editionId], references: [id])
+  name        String // nom complet affiché
+  firstName   String?
+  lastName    String?
+  raceId      Int
+  race        Race       @relation(fields: [raceId], references: [id], onDelete: Restrict)
+  subraceId   Int?
+  subrace     Subrace?   @relation(fields: [subraceId], references: [id], onDelete: Restrict)
+  classId     Int? // null = roturier
+  class       Class?     @relation(fields: [classId], references: [id], onDelete: Restrict)
+  alignmentId Int?
+  alignment   Alignment? @relation(fields: [alignmentId], references: [id], onDelete: Restrict)
+
+  gender   NpcGender?
+  age      Int?
+  heightCm Int?
+  weightKg Int?
+
+  // Texte libre (tiré par le générateur, modifiable)
+  bodyType     String?
+  profession   String?
+  socialStatus String?
+  relations    String?
+  personality  String?
+  motivation   String?
+  quirk        String?
+  history      String? @db.Text
+  notes        String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  abilityScores NpcAbilityScore[]
+
+  @@index([userId])
+}
+
+model NpcAbilityScore {
+  id             Int          @id @default(autoincrement())
+  npcId          Int
+  npc            Npc          @relation(fields: [npcId], references: [id], onDelete: Cascade)
+  abilityScoreId Int
+  abilityScore   AbilityScore @relation(fields: [abilityScoreId], references: [id], onDelete: Restrict)
+  score          Int
+
+  @@unique([npcId, abilityScoreId])
+}
+
+// --- Tables du générateur ------------------------------------------------------
+
+enum NpcTableKind {
+  FIRST_NAME // par race
+  LAST_NAME // par race, ou commun (raceId null)
+  NAME_PREFIX // syllabes de repli : préfixe + suffixe
+  NAME_SUFFIX
+  BODY_TYPE
+  SOCIAL_STATUS
+  PROFESSION
+  RELATION
+  PERSONALITY
+  MOTIVATION
+  QUIRK
+  ORIGIN // « Vient de la capitale »
+  HISTORY_EVENT // « … et cherche son frère disparu »
+}
+
+// Une valeur tirable. Noms propres : value (neutre en langue) ; texte :
+// traductions. Exactement l'un des deux (vérifié par le seed).
+model NpcTableEntry {
+  id     Int          @id @default(autoincrement())
+  kind   NpcTableKind
+  raceId Int? // entrée propre à une race (prénoms, noms de famille)
+  race   Race?        @relation(fields: [raceId], references: [id], onDelete: Cascade)
+  value  String?
+  weight Int          @default(1) // probabilité relative du tirage
+
+  translations NpcTableEntryTranslation[]
+
+  @@index([kind, raceId])
+}
+
+model NpcTableEntryTranslation {
+  id         Int           @id @default(autoincrement())
+  entryId    Int
+  localeCode String
+  text       String
+  entry      NpcTableEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  locale     Locale        @relation(fields: [localeCode], references: [code])
+
+  @@unique([entryId, localeCode])
+}

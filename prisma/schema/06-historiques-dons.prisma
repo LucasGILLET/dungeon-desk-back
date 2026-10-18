@@ -15,6 +15,9 @@ model Background {
   edition   Edition @relation(fields: [editionId], references: [id])
   index     String // "acolyte"
 
+  // Présentation dans le créateur
+  icon String? // emoji
+
   source    ContentSource @default(SRD)
   ownerId   Int?
   owner     User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
@@ -39,6 +42,7 @@ model BackgroundTranslation {
   localeCode         String
   name               String // "Acolyte"
   // Aptitude d'historique : "Abri du fidèle"
+  summary            String? // accroche : "Vous avez servi dans un temple…"
   featureName        String?
   featureDescription String?    @db.Text
   background         Background @relation(fields: [backgroundId], references: [id], onDelete: Cascade)

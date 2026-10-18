@@ -32,7 +32,15 @@ const toChoiceRule = (c: ChoiceRow): ChoiceRule => ({
 });
 
 export async function loadRulesContext(db: Db, input: CharacterInput): Promise<RulesContext> {
-  const edition = await db.edition.findUnique({ where: { code: input.edition }, select: { id: true, code: true } });
+  const editionRow = await db.edition.findUnique({
+    where: { code: input.edition },
+    select: { id: true, code: true, pointBuyBudget: true, pointBuyCosts: true, standardArray: true },
+  });
+  const edition = editionRow && {
+    ...editionRow,
+    pointBuyCosts: editionRow.pointBuyCosts as Record<string, number>,
+    standardArray: editionRow.standardArray as number[],
+  };
   const abilities = await db.abilityScore.findMany({ select: { id: true, index: true } });
   const empty: RulesContext = {
     edition, abilities: ids(abilities), constitutionId: abilities.find((a) => a.index === 'con')?.id,

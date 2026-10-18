@@ -31,15 +31,3 @@ model User {
   homebrewBackgrounds   Background[]
   homebrewFeats         Feat[]
 }
-
-model Npc {
-  id        Int      @id @default(autoincrement())
-  name      String
-  race      String
-  class     String?
-  data      Json
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}

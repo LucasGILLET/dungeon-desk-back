@@ -1,0 +1,293 @@
+{
+  "_comment": "Présentation dans le créateur (accroches, icônes, difficulté, caractéristiques recommandées). Reprise du front.",
+  "classes": {
+    "barbarian": {
+      "difficulty": "EASY",
+      "recommended": [
+        "str",
+        "con"
+      ],
+      "summary": {
+        "fr": "Combattant sauvage utilisant la rage comme arme."
+      }
+    },
+    "bard": {
+      "difficulty": "MEDIUM",
+      "recommended": [
+        "cha",
+        "dex"
+      ],
+      "summary": {
+        "fr": "Artiste magique, soutien polyvalent du groupe."
+      }
+    },
+    "cleric": {
+      "difficulty": "MEDIUM",
+      "recommended": [
+        "wis",
+        "con"
+      ],
+      "summary": {
+        "fr": "Guérisseur divin, soutien et protection du groupe."
+      }
+    },
+    "druid": {
+      "difficulty": "HARD",
+      "recommended": [
+        "wis",
+        "con"
+      ],
+      "summary": {
+        "fr": "Gardien de la nature, magie et métamorphose."
+      }
+    },
+    "fighter": {
+      "difficulty": "EASY",
+      "recommended": [
+        "str",
+        "con"
+      ],
+      "summary": {
+        "fr": "Maître des armes et de l'armure, spécialiste du combat."
+      }
+    },
+    "monk": {
+      "difficulty": "MEDIUM",
+      "recommended": [
+        "dex",
+        "wis"
+      ],
+      "summary": {
+        "fr": "Artiste martial utilisant l'énergie interne."
+      }
+    },
+    "paladin": {
+      "difficulty": "MEDIUM",
+      "recommended": [
+        "str",
+        "cha"
+      ],
+      "summary": {
+        "fr": "Guerrier saint, alliant combat et magie divine."
+      }
+    },
+    "ranger": {
+      "difficulty": "MEDIUM",
+      "recommended": [
+        "dex",
+        "wis"
+      ],
+      "summary": {
+        "fr": "Chasseur expert, à l'aise en nature et à distance."
+      }
+    },
+    "rogue": {
+      "difficulty": "MEDIUM",
+      "recommended": [
+        "dex",
+        "int"
+      ],
+      "summary": {
+        "fr": "Expert en discrétion, crochetage et attaques sournoises."
+      }
+    },
+    "sorcerer": {
+      "difficulty": "HARD",
+      "recommended": [
+        "cha",
+        "con"
+      ],
+      "summary": {
+        "fr": "Magie innée puissante mais limitée en sorts."
+      }
+    },
+    "warlock": {
+      "difficulty": "MEDIUM",
+      "recommended": [
+        "cha",
+        "con"
+      ],
+      "summary": {
+        "fr": "Pacte avec des entités d'outre-monde pour la magie."
+      }
+    },
+    "wizard": {
+      "difficulty": "HARD",
+      "recommended": [
+        "int",
+        "con"
+      ],
+      "summary": {
+        "fr": "Manipulateur de la magie arcane, puissant mais fragile."
+      }
+    }
+  },
+  "races": {
+    "dwarf": {
+      "icon": "⚔️",
+      "summary": {
+        "fr": "Créatures robustes et résistantes, les nains excellent dans l'artisanat et la guerre souterraine."
+      }
+    },
+    "elf": {
+      "icon": "🧝",
+      "summary": {
+        "fr": "Gracieux et longévives, les elfes sont des êtres magiques connectés à la nature et aux arts."
+      }
+    },
+    "halfling": {
+      "icon": "🌱",
+      "summary": {
+        "fr": "Petits et chanceux, les halfelins sont des aventuriers intrépides et opportunistes."
+      }
+    },
+    "human": {
+      "icon": "👤",
+      "summary": {
+        "fr": "Adaptables et ambitieux, les humains sont la race la plus répandue et diverse de Faerûn."
+      }
+    },
+    "dragonborn": {
+      "icon": "🐲",
+      "summary": {
+        "fr": "Descendants des dragons, ils possèdent une force impressionnante et un souffle draconique."
+      }
+    },
+    "gnome": {
+      "icon": "🔮",
+      "summary": {
+        "fr": "Ingénieux et curieux, les gnomes excellent dans l'invention et la magie illusionniste."
+      }
+    },
+    "half-elf": {
+      "icon": "✨",
+      "summary": {
+        "fr": "Mélange d'elfe et d'humain, ils combinent la grâce elfique avec l'adaptabilité humaine."
+      }
+    },
+    "half-orc": {
+      "icon": "💪",
+      "summary": {
+        "fr": "Puissants et endurants, les demi-orcs allient la force orc avec d'autres héritages."
+      }
+    },
+    "tiefling": {
+      "icon": "😈",
+      "summary": {
+        "fr": "Marqués par un héritage infernal, ils possèdent des pouvoirs surnaturels et une résistance aux éléments."
+      }
+    }
+  },
+  "backgrounds": {
+    "acolyte": {
+      "icon": "⛪",
+      "summary": {
+        "fr": "Vous avez servi dans un temple, apprenant les rites sacrés et les connaissances religieuses."
+      }
+    },
+    "charlatan": {
+      "icon": "🎭",
+      "summary": {
+        "fr": "Maître de la tromperie, vous savez convaincre les gens de croire en vos mensonges."
+      }
+    },
+    "criminal": {
+      "icon": "🔓",
+      "summary": {
+        "fr": "Vous avez un passé criminel, connaissant les dessous de la société."
+      }
+    },
+    "entertainer": {
+      "icon": "🎨",
+      "summary": {
+        "fr": "Vous divertissez les foules par votre art, musique, théâtre ou autre performance."
+      }
+    },
+    "folk-hero": {
+      "icon": "🏹",
+      "summary": {
+        "fr": "Vous êtes un héros populaire, défendant les opprimés et luttant contre l'injustice."
+      }
+    },
+    "guild-artisan": {
+      "icon": "🔨",
+      "summary": {
+        "fr": "Membre d'une guilde, vous maîtrisez un métier et avez des contacts professionnels."
+      }
+    },
+    "hermit": {
+      "icon": "🏔️",
+      "summary": {
+        "fr": "Vous avez vécu en isolement, méditant et découvrant d'importantes vérités."
+      }
+    },
+    "noble": {
+      "icon": "👑",
+      "summary": {
+        "fr": "Issu de la noblesse, vous avez des manières raffinées et des contacts haut placés."
+      }
+    },
+    "outlander": {
+      "icon": "🏕️",
+      "summary": {
+        "fr": "Vous venez des terres sauvages, survivant en harmonie avec la nature."
+      }
+    },
+    "sage": {
+      "icon": "📚",
+      "summary": {
+        "fr": "Vous avez consacré votre vie à l'étude, accumulant connaissances et sagesse."
+      }
+    },
+    "sailor": {
+      "icon": "⚓",
+      "summary": {
+        "fr": "Vous avez navigué sur les océans, affrontant tempêtes et créatures marines."
+      }
+    },
+    "soldier": {
+      "icon": "⚔️",
+      "summary": {
+        "fr": "Vous avez servi dans une armée, apprenant discipline et tactiques militaires."
+      }
+    },
+    "urchin": {
+      "icon": "🏘️",
+      "summary": {
+        "fr": "Vous avez grandi dans les rues, apprenant à survivre par vos propres moyens."
+      }
+    }
+  },
+  "subclasses": {
+    "war": "⚔️",
+    "life": "💚",
+    "light": "☀️",
+    "nature": "🌿",
+    "trickery": "🎭",
+    "draconic": "🐉",
+    "wild-magic": "⚡",
+    "great-old-one": "👁️",
+    "archfey": "🧚",
+    "fiend": "😈"
+  },
+  "abilityScores": {
+    "str": {
+      "fr": "Puissance physique, combat au corps à corps"
+    },
+    "dex": {
+      "fr": "Agilité, réflexes, attaques à distance"
+    },
+    "con": {
+      "fr": "Endurance, points de vie, résistance"
+    },
+    "int": {
+      "fr": "Raisonnement, mémoire, magie arcane"
+    },
+    "wis": {
+      "fr": "Perception, intuition, magie divine"
+    },
+    "cha": {
+      "fr": "Force de personnalité, persuasion"
+    }
+  }
+}

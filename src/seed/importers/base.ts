@@ -15,6 +15,10 @@ const EDITIONS = [
     releaseYear: 2014,
     isDefault: true,
     position: 1,
+    // Achat de points (27 points, valeurs de 8 à 15) et tableau standard
+    pointBuyBudget: 27,
+    pointBuyCosts: { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 },
+    standardArray: [15, 14, 13, 12, 10, 8],
     translations: {
       en: {
         name: 'D&D 5e (2014)',

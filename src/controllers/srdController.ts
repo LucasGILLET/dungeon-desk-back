@@ -15,13 +15,21 @@ export const getClasses = async (req: Request, res: Response) => {
     const ctx = await resolveLang(req);
     const classes = await prisma.class.findMany({
       where: { edition: { code: req.params.edition } },
-      include: { translations: allLangs },
+      include: {
+        translations: allLangs,
+        recommendedAbilities: { orderBy: { position: 'asc' }, include: { abilityScore: { select: { index: true, translations: allLangs } } } },
+        spellcasting: { select: { casterType: true } },
+      },
       orderBy: { index: 'asc' },
     });
     setCache(res);
     res.json(classes.map((c) => {
       const t = pick(c.translations, ctx);
-      return { index: c.index, name: t.name, lang: t.lang, hitDie: c.hitDie, subclassLevel: c.subclassLevel };
+      return {
+        index: c.index, name: t.name, lang: t.lang, hitDie: c.hitDie, subclassLevel: c.subclassLevel,
+        summary: t.summary, difficulty: c.difficulty, casterType: c.spellcasting?.casterType ?? null,
+        recommendedAbilities: c.recommendedAbilities.map((r) => ({ index: r.abilityScore.index, name: pick(r.abilityScore.translations, ctx).name })),
+      };
     }));
   } catch (error) {
     logger.error(`Error fetching SRD classes: ${error instanceof Error ? error.message : error}`);
@@ -77,6 +85,7 @@ export const getClassByIndex = async (req: Request, res: Response) => {
         },
         features: { orderBy: [{ level: 'asc' }, { id: 'asc' }], include: { translations: t, subclass: true, parent: { select: { index: true } } } },
         _count: { select: { spells: true } },
+        recommendedAbilities: { orderBy: { position: 'asc' }, include: { abilityScore: { include: { translations: t } } } },
       },
     });
     if (!cls) return res.status(404).json({ message: 'Class not found' });
@@ -94,6 +103,9 @@ export const getClassByIndex = async (req: Request, res: Response) => {
       hitDie: cls.hitDie,
       subclassLevel: cls.subclassLevel,
       subclassLabel: ct.subclassLabel,
+      summary: ct.summary,
+      difficulty: cls.difficulty,
+      recommendedAbilities: cls.recommendedAbilities.map((r) => ref(r.abilityScore.index, r.abilityScore.translations)),
       savingThrows: cls.savingThrows.map((s) => ref(s.abilityScore.index, s.abilityScore.translations)),
       proficiencies: cls.proficiencies.map((p) => ref(p.proficiency.index, p.proficiency.translations)),
       startingEquipment: cls.startingEquipment.map((e) => ({ ...ref(e.equipment.index, e.equipment.translations), quantity: e.quantity })),
@@ -148,6 +160,7 @@ export const getClassByIndex = async (req: Request, res: Response) => {
           index: s.index,
           name: st.name,
           source: s.source,
+          icon: s.icon,
           description: st.description,
           // Sorts de domaine, de serment… (toujours préparés)
           spells: s.spells.map((sp) => ({ ...ref(sp.spell.index, sp.spell.translations), level: sp.spell.level, requiredClassLevel: sp.requiredClassLevel })),

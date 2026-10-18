@@ -1,0 +1,873 @@
+{
+  "_comment": "Tables du générateur de PNJ (reprises du front). Noms propres : chaînes neutres en langue ; autres entrées : traductions.",
+  "raceProfiles": {
+    "human": {
+      "npcFrequency": 40,
+      "baseHeightCm": 160,
+      "heightVarianceCm": 30,
+      "baseWeightKg": 60,
+      "weightVarianceKg": 30
+    },
+    "dwarf": {
+      "npcFrequency": 15,
+      "baseHeightCm": 120,
+      "heightVarianceCm": 15,
+      "baseWeightKg": 65,
+      "weightVarianceKg": 25
+    },
+    "elf": {
+      "npcFrequency": 15,
+      "baseHeightCm": 160,
+      "heightVarianceCm": 20,
+      "baseWeightKg": 50,
+      "weightVarianceKg": 15
+    },
+    "halfling": {
+      "npcFrequency": 10,
+      "baseHeightCm": 90,
+      "heightVarianceCm": 15,
+      "baseWeightKg": 18,
+      "weightVarianceKg": 5
+    },
+    "dragonborn": {
+      "npcFrequency": 3,
+      "baseHeightCm": 180,
+      "heightVarianceCm": 25,
+      "baseWeightKg": 90,
+      "weightVarianceKg": 40
+    },
+    "gnome": {
+      "npcFrequency": 5,
+      "baseHeightCm": 95,
+      "heightVarianceCm": 15,
+      "baseWeightKg": 18,
+      "weightVarianceKg": 5
+    },
+    "half-elf": {
+      "npcFrequency": 5,
+      "baseHeightCm": 160,
+      "heightVarianceCm": 25,
+      "baseWeightKg": 60,
+      "weightVarianceKg": 25
+    },
+    "half-orc": {
+      "npcFrequency": 4,
+      "baseHeightCm": 175,
+      "heightVarianceCm": 30,
+      "baseWeightKg": 80,
+      "weightVarianceKg": 40
+    },
+    "tiefling": {
+      "npcFrequency": 3,
+      "baseHeightCm": 160,
+      "heightVarianceCm": 25,
+      "baseWeightKg": 60,
+      "weightVarianceKg": 25
+    }
+  },
+  "names": {
+    "human": {
+      "first": [
+        "Alden",
+        "Broc",
+        "Caldon",
+        "Drog",
+        "Kael",
+        "Paren",
+        "Rurik",
+        "Stedd",
+        "Ulf",
+        "Varis",
+        "Alethra",
+        "Bess",
+        "Cefrey",
+        "Kethra",
+        "Mara",
+        "Olma",
+        "Sila",
+        "Wela"
+      ],
+      "last": [
+        "Amblecouronne",
+        "Buckman",
+        "Chantebrume",
+        "Dundragon",
+        "Evenwood",
+        "Grandmanteau",
+        "Greycastle",
+        "Havelock",
+        "Ironheart",
+        "Jass"
+      ]
+    },
+    "dwarf": {
+      "first": [
+        "Adrik",
+        "Baern",
+        "Brottor",
+        "Dain",
+        "Eberk",
+        "Einkil",
+        "Fargrim",
+        "Gardain",
+        "Harbek",
+        "Kildrak",
+        "Morgran",
+        "Orsik",
+        "Oskar",
+        "Rangrim",
+        "Rurik",
+        "Taklinn",
+        "Thoradin",
+        "Thorin",
+        "Tordek",
+        "Traubon",
+        "Travok",
+        "Ulfgar",
+        "Veit",
+        "Vondal",
+        "Amber",
+        "Artin",
+        "Audhild",
+        "Bardryn",
+        "Dagnal",
+        "Diesa",
+        "Eldeth",
+        "Falkrunn",
+        "Finellen",
+        "Gunnloda",
+        "Gurdis",
+        "Helja",
+        "Hlin",
+        "Kathra",
+        "Kristryd",
+        "Ilde",
+        "Liftrasa",
+        "Mardred",
+        "Riswynn",
+        "Sannl",
+        "Torbera",
+        "Torgga",
+        "Vistra"
+      ],
+      "last": [
+        "Balderk",
+        "Battlehammer",
+        "Brawnanvil",
+        "Dankil",
+        "Fireforge",
+        "Frostbeard",
+        "Gorunn",
+        "Holderhek",
+        "Ironfist",
+        "Loderr",
+        "Lutgehr",
+        "Rumnaheim",
+        "Strakeln",
+        "Torunn",
+        "Ungart"
+      ]
+    },
+    "elf": {
+      "first": [
+        "Adran",
+        "Aelar",
+        "Aramil",
+        "Arannis",
+        "Aust",
+        "Beiro",
+        "Berrian",
+        "Carric",
+        "Enialis",
+        "Erdan",
+        "Erevan",
+        "Galinndan",
+        "Hadarai",
+        "Heian",
+        "Himo",
+        "Immeral",
+        "Ivellios",
+        "Laucian",
+        "Mindartis",
+        "Paelias",
+        "Peren",
+        "Quarion",
+        "Riardon",
+        "Rolen",
+        "Soveliss",
+        "Thamior",
+        "Tharivol",
+        "Theren",
+        "Varis",
+        "Adrie",
+        "Althaea",
+        "Anastrianna",
+        "Andraste",
+        "Antinua",
+        "Bethrynna",
+        "Birel",
+        "Caelynn",
+        "Drusilia",
+        "Enna",
+        "Felosial",
+        "Ielenia",
+        "Jelenneth",
+        "Keyleth",
+        "Leshanna",
+        "Lia",
+        "Meriele",
+        "Mialee",
+        "Naivara",
+        "Quelenna",
+        "Quillathe",
+        "Sariel",
+        "Shanairra",
+        "Shava",
+        "Silaqui",
+        "Theirastra",
+        "Thia",
+        "Vadania",
+        "Valanthe",
+        "Xanaphia"
+      ],
+      "last": [
+        "Amakiir",
+        "Amastacia",
+        "Galanodel",
+        "Holimion",
+        "Ilphelkiir",
+        "Liadon",
+        "Meliamne",
+        "Naïlo",
+        "Siannodel",
+        "Xiloscient"
+      ]
+    },
+    "halfling": {
+      "first": [
+        "Alton",
+        "Ander",
+        "Cade",
+        "Corrin",
+        "Eldon",
+        "Errich",
+        "Finnan",
+        "Garret",
+        "Lindal",
+        "Lyle",
+        "Merric",
+        "Milo",
+        "Osborn",
+        "Perrin",
+        "Reed",
+        "Roscoe",
+        "Wellby",
+        "Andry",
+        "Bree",
+        "Callie",
+        "Cora",
+        "Euphemia",
+        "Jillian",
+        "Kithri",
+        "Lavinia",
+        "Lidda",
+        "Merla",
+        "Nedda",
+        "Paela",
+        "Portia",
+        "Seraphina",
+        "Shaena",
+        "Trym",
+        "Vani",
+        "Verna"
+      ],
+      "last": [
+        "Brossebroussaille",
+        "Bonnebarrique",
+        "Vertbouteille",
+        "Hautecolline",
+        "Soucolline",
+        "Théfeuille",
+        "Martel",
+        "Pied-Léger"
+      ]
+    },
+    "gnome": {
+      "first": [
+        "Boddynock",
+        "Dimble",
+        "Fonkin",
+        "Gimble",
+        "Glim",
+        "Gerbo",
+        "Jebeddo",
+        "Namfoodle",
+        "Roondar",
+        "Seebo",
+        "Zook",
+        "Bimpnottin",
+        "Breena",
+        "Caramip",
+        "Carlin",
+        "Donella",
+        "Duvamil",
+        "Ella",
+        "Ellyjobell",
+        "Ellywick",
+        "Lilli",
+        "Loopmottin",
+        "Lorilla",
+        "Mardnab",
+        "Nissa",
+        "Nyx",
+        "Oda",
+        "Orla",
+        "Roywyn",
+        "Shamil",
+        "Tana",
+        "Waywocket",
+        "Zanna"
+      ],
+      "last": [
+        "Beren",
+        "Daergel",
+        "Folkor",
+        "Garrick",
+        "Nackle",
+        "Murnig",
+        "Ningel",
+        "Raulnor",
+        "Scheppen",
+        "Timbers",
+        "Turen"
+      ]
+    },
+    "dragonborn": {
+      "first": [
+        "Arjhan",
+        "Balasar",
+        "Bharash",
+        "Donaar",
+        "Ghesh",
+        "Heskan",
+        "Kriv",
+        "Medrash",
+        "Mehen",
+        "Nadarr",
+        "Pandjed",
+        "Patrin",
+        "Rhogar",
+        "Shamash",
+        "Shedinn",
+        "Tarhun",
+        "Torinn",
+        "Akra",
+        "Biri",
+        "Daar",
+        "Farideh",
+        "Harann",
+        "Havilar",
+        "Jheri",
+        "Kava",
+        "Korinn",
+        "Mishann",
+        "Nala",
+        "Perra",
+        "Raiann",
+        "Sora",
+        "Surina",
+        "Thava",
+        "Uadjit"
+      ],
+      "last": [
+        "Clethtinthiallor",
+        "Daardendrian",
+        "Delmirev",
+        "Drachedandion",
+        "Fenkenkabradon",
+        "Kepeshkmolik",
+        "Kerrhylon",
+        "Kimbatuul",
+        "Linxakasendalor",
+        "Myastan",
+        "Nemmonis",
+        "Norixius",
+        "Ophinshtalajiir",
+        "Prexijandilin",
+        "Shestendeliath",
+        "Turnuroth",
+        "Verthisathurgiesh",
+        "Yarjerit"
+      ]
+    },
+    "tiefling": {
+      "first": [
+        "Akmenos",
+        "Amnon",
+        "Barakas",
+        "Damakos",
+        "Ekemon",
+        "Iados",
+        "Kairon",
+        "Leucis",
+        "Melech",
+        "Mordai",
+        "Morthos",
+        "Pelaios",
+        "Skamos",
+        "Therai",
+        "Akta",
+        "Anakis",
+        "Bryseis",
+        "Criella",
+        "Damaia",
+        "Ea",
+        "Kallista",
+        "Lerissa",
+        "Makaria",
+        "Nemeia",
+        "Orianna",
+        "Phelaia",
+        "Rieta"
+      ],
+      "last": [
+        "Art",
+        "Charogne",
+        "Chant",
+        "Creed",
+        "Despair",
+        "Excellence",
+        "Fear",
+        "Glory",
+        "Hope",
+        "Ideal",
+        "Music",
+        "Nowhere",
+        "Open",
+        "Poetry",
+        "Quest",
+        "Random",
+        "Reverence",
+        "Sorrow",
+        "Temerity",
+        "Torment",
+        "Weary"
+      ]
+    },
+    "half-orc": {
+      "first": [
+        "Dench",
+        "Feng",
+        "Gell",
+        "Henk",
+        "Holg",
+        "Imsh",
+        "Keth",
+        "Krusk",
+        "Mhurren",
+        "Ront",
+        "Shump",
+        "Thokk",
+        "Baggi",
+        "Emen",
+        "Engong",
+        "Kansif",
+        "Myev",
+        "Neega",
+        "Ovak",
+        "Ownka",
+        "Shautha",
+        "Sutha",
+        "Vola",
+        "Volen",
+        "Yevelda"
+      ],
+      "last": []
+    }
+  },
+  "common": {
+    "LAST_NAME": [
+      "Chantebrise",
+      "Vif-Esprit",
+      "Coeur-de-Fer",
+      "Sombreval",
+      "Lunea",
+      "Fort-Ecu",
+      "Pied-Léger",
+      "Barbe-Rousse",
+      "Vert-Feuille",
+      "Roc-Fendu",
+      "Aube-Claire",
+      "Nuit-Noire"
+    ],
+    "NAME_PREFIX": [
+      "Thal",
+      "El",
+      "Dor",
+      "Val",
+      "Syl",
+      "Mor",
+      "Grim",
+      "Aro",
+      "Olo",
+      "Fen",
+      "Bor",
+      "Kal",
+      "Mer",
+      "Zar",
+      "Tor"
+    ],
+    "NAME_SUFFIX": [
+      "or",
+      "ian",
+      "us",
+      "ar",
+      "en",
+      "is",
+      "a",
+      "ine",
+      "da",
+      "ra",
+      "th",
+      "dalle",
+      "mir",
+      "las",
+      "wyn"
+    ]
+  },
+  "texts": {
+    "BODY_TYPE": [
+      {
+        "fr": "Fin"
+      },
+      {
+        "fr": "Athlétique"
+      },
+      {
+        "fr": "Corpulent"
+      },
+      {
+        "fr": "Musclé"
+      },
+      {
+        "fr": "Sec"
+      },
+      {
+        "fr": "Rondelet"
+      },
+      {
+        "fr": "Massif"
+      },
+      {
+        "fr": "Svelte"
+      },
+      {
+        "fr": "Courbé"
+      },
+      {
+        "fr": "Gigantesque"
+      },
+      {
+        "fr": "Chétif"
+      }
+    ],
+    "SOCIAL_STATUS": [
+      {
+        "fr": "Misérable"
+      },
+      {
+        "fr": "Pauvre"
+      },
+      {
+        "fr": "Modeste"
+      },
+      {
+        "fr": "Aisé"
+      },
+      {
+        "fr": "Riche"
+      },
+      {
+        "fr": "Aristocrate"
+      }
+    ],
+    "PROFESSION": [
+      {
+        "fr": "Fermier"
+      },
+      {
+        "fr": "Forgeron"
+      },
+      {
+        "fr": "Aubergiste"
+      },
+      {
+        "fr": "Marchand"
+      },
+      {
+        "fr": "Garde"
+      },
+      {
+        "fr": "Scribe"
+      },
+      {
+        "fr": "Prêtre"
+      },
+      {
+        "fr": "Chasseur"
+      },
+      {
+        "fr": "Pêcheur"
+      },
+      {
+        "fr": "Mineur"
+      },
+      {
+        "fr": "Tisserand"
+      },
+      {
+        "fr": "Cordonnier"
+      },
+      {
+        "fr": "Maçon"
+      },
+      {
+        "fr": "Charpentier"
+      },
+      {
+        "fr": "Cuisinier"
+      },
+      {
+        "fr": "Boulanger"
+      },
+      {
+        "fr": "Voleur"
+      },
+      {
+        "fr": "Mendiant"
+      },
+      {
+        "fr": "Herboriste"
+      },
+      {
+        "fr": "Alchimiste"
+      },
+      {
+        "fr": "Artiste"
+      },
+      {
+        "fr": "Soldat"
+      },
+      {
+        "fr": "Marin"
+      },
+      {
+        "fr": "Érudit"
+      },
+      {
+        "fr": "Magistrat"
+      },
+      {
+        "fr": "Apothicaire"
+      },
+      {
+        "fr": "Bucheron"
+      },
+      {
+        "fr": "Meunier"
+      },
+      {
+        "fr": "Ecuyer"
+      }
+    ],
+    "RELATION": [
+      {
+        "fr": "Célibataire"
+      },
+      {
+        "fr": "Marié(e)"
+      },
+      {
+        "fr": "Veuf/Veuve"
+      },
+      {
+        "fr": "Divorcé(e)"
+      },
+      {
+        "fr": "Fiancé(e)"
+      },
+      {
+        "fr": "Vit avec ses parents"
+      },
+      {
+        "fr": "Orphelin"
+      },
+      {
+        "fr": "A charge de famille nombreuse"
+      },
+      {
+        "fr": "A un frère jumeau"
+      },
+      {
+        "fr": "Sans attache"
+      },
+      {
+        "fr": "Membre d'une guilde influente"
+      }
+    ],
+    "PERSONALITY": [
+      {
+        "fr": "Optimiste et joyeux"
+      },
+      {
+        "fr": "Renfrogné et méfiant"
+      },
+      {
+        "fr": "Curieux de tout"
+      },
+      {
+        "fr": "Arrogant et fier"
+      },
+      {
+        "fr": "Timide et réservé"
+      },
+      {
+        "fr": "Bavard impénitent"
+      },
+      {
+        "fr": "Sévère et discipliné"
+      },
+      {
+        "fr": "Flegmatique"
+      },
+      {
+        "fr": "Nerveux et agité"
+      },
+      {
+        "fr": "Mélancolique"
+      },
+      {
+        "fr": "Charismatique"
+      }
+    ],
+    "MOTIVATION": [
+      {
+        "fr": "Devenir riche"
+      },
+      {
+        "fr": "Protéger sa famille"
+      },
+      {
+        "fr": "Se venger d'un affront"
+      },
+      {
+        "fr": "Découvrir un secret ancien"
+      },
+      {
+        "fr": "Gagner du pouvoir politique"
+      },
+      {
+        "fr": "Trouver l'amour"
+      },
+      {
+        "fr": "Expiar une faute passée"
+      },
+      {
+        "fr": "Simplement survivre"
+      },
+      {
+        "fr": "Changer de vie"
+      }
+    ],
+    "QUIRK": [
+      {
+        "fr": "Joue avec une pièce entre ses doigts"
+      },
+      {
+        "fr": "Parle très fort"
+      },
+      {
+        "fr": "Renifle constamment"
+      },
+      {
+        "fr": "Bégaye quand il est nerveux"
+      },
+      {
+        "fr": "A une cicatrice distinctive"
+      },
+      {
+        "fr": "Collectionne les cailloux"
+      },
+      {
+        "fr": "Déteste les chats"
+      },
+      {
+        "fr": "Parle à son arme/outil"
+      },
+      {
+        "fr": "A un tic de l'oeil"
+      },
+      {
+        "fr": "Mange tout le temps"
+      },
+      {
+        "fr": "Sent le tabac froid"
+      },
+      {
+        "fr": "Répète la fin de ses phrases"
+      }
+    ],
+    "ORIGIN": [
+      {
+        "fr": "Né dans un village voisin"
+      },
+      {
+        "fr": "Vient de la capitale"
+      },
+      {
+        "fr": "A grandi dans la rue"
+      },
+      {
+        "fr": "Issu d'une famille de marchands"
+      },
+      {
+        "fr": "Ancien aventurier rangé"
+      },
+      {
+        "fr": "Refugié de guerre"
+      },
+      {
+        "fr": "Enfant du pays"
+      },
+      {
+        "fr": "Vagabond sédentarisé"
+      }
+    ],
+    "HISTORY_EVENT": [
+      {
+        "fr": "a tout perdu au jeu"
+      },
+      {
+        "fr": "a sauvé le village d'un incendie"
+      },
+      {
+        "fr": "cherche son frère disparu"
+      },
+      {
+        "fr": "rêve de voyager"
+      },
+      {
+        "fr": "cache un lourd secret"
+      },
+      {
+        "fr": "est endetté jusqu'au cou"
+      },
+      {
+        "fr": "vient de gagner un gros héritage"
+      },
+      {
+        "fr": "se cache de la milice"
+      }
+    ]
+  }
+}

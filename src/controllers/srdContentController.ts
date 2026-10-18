@@ -39,6 +39,8 @@ export const getRaces = async (req: Request, res: Response) => {
         languages: { include: { language: named } },
         traits: trait,
         subraces: { orderBy: { id: 'asc' }, include: { translations: t, abilityBonus: bonus, traits: trait } },
+        // Bonus de caractéristique au choix (demi-elfe : +1 à deux caractéristiques)
+        choices: { where: { kind: 'ABILITY_SCORE_INCREASE' }, select: { choose: true, options: { select: { items: { select: { bonus: true } } }, take: 1 } } },
       },
     });
     const traitOf = (row: { trait: { index: string; translations: { localeCode: string; name: string; description: string }[] } }) => {
@@ -55,6 +57,8 @@ export const getRaces = async (req: Request, res: Response) => {
         name: rt.name,
         lang: rt.lang,
         source: r.source,
+        icon: r.icon,
+        summary: rt.summary,
         sizes: r.sizes,
         speeds: r.speeds,
         age: rt.ageText,
@@ -62,6 +66,13 @@ export const getRaces = async (req: Request, res: Response) => {
         size: rt.sizeText,
         languageDescription: rt.languageText,
         abilityBonuses: r.abilityBonus.map(bonusOf),
+        abilityBonusChoice: r.choices[0] ? { choose: r.choices[0].choose, bonus: r.choices[0].options[0]?.items[0]?.bonus ?? 1 } : null,
+        // Générateur de PNJ : fréquence de tirage, taille et poids (base + variation)
+        npcProfile: {
+          frequency: r.npcFrequency,
+          heightCm: r.baseHeightCm != null ? { base: r.baseHeightCm, variance: r.heightVarianceCm ?? 0 } : null,
+          weightKg: r.baseWeightKg != null ? { base: r.baseWeightKg, variance: r.weightVarianceKg ?? 0 } : null,
+        },
         languages: r.languages.map((l) => ref(l.language)),
         traits: r.traits.map(traitOf),
         subraces: r.subraces.map((s) => {
@@ -110,6 +121,8 @@ export const getBackgrounds = async (req: Request, res: Response) => {
         name: bt.name,
         lang: bt.lang,
         source: b.source,
+        icon: b.icon,
+        summary: bt.summary ?? b.translations.find((x) => x.summary)?.summary ?? null,
         // Champ par champ : un historique maison a un nom français mais une description anglaise
         feature: bt.featureName
           ? { name: bt.featureName, description: bt.featureDescription ?? b.translations.find((x) => x.featureDescription)?.featureDescription ?? null }
@@ -260,5 +273,58 @@ export const getSkills = async (req: Request, res: Response) => {
     res.json(rows.map((s) => ({ index: s.index, name: pick(s.translations, ctx).name, ability: ref(s.abilityScore) })));
   } catch (error) {
     fail(res, 'skills', error);
+  }
+};
+
+// --- Caractéristiques, règles de création, générateur de PNJ ------------------------------
+
+export const getAbilityScores = async (req: Request, res: Response) => {
+  try {
+    const ctx = await resolveLang(req);
+    const rows = await prisma.abilityScore.findMany({ orderBy: { id: 'asc' }, include: { translations: t } });
+    setCache(res);
+    res.json(rows.map((a) => {
+      const at = pick(a.translations, ctx);
+      return { index: a.index, name: at.name, abbreviation: at.abbreviation, summary: at.summary ?? null, description: at.description ?? null };
+    }));
+  } catch (error) {
+    fail(res, 'ability scores', error);
+  }
+};
+
+// Règles de création des caractéristiques de l'édition
+export const getCreationRules = async (req: Request, res: Response) => {
+  try {
+    const edition = await prisma.edition.findUnique({ where: { code: req.params.edition } });
+    if (!edition) return res.status(404).json({ message: 'Edition not found' });
+    setCache(res);
+    res.json({
+      pointBuy: { budget: edition.pointBuyBudget, costs: edition.pointBuyCosts },
+      standardArray: edition.standardArray,
+    });
+  } catch (error) {
+    fail(res, 'creation rules', error);
+  }
+};
+
+// Tables du générateur, par type : { FIRST_NAME: [{ race: 'elf', text: 'Aelar', weight: 1 }], … }
+export const getNpcTables = async (req: Request, res: Response) => {
+  try {
+    const ctx = await resolveLang(req);
+    const rows = await prisma.npcTableEntry.findMany({
+      where: { OR: [{ raceId: null }, { race: editionWhere(req) }] },
+      orderBy: { id: 'asc' },
+      include: { race: { select: { index: true } }, translations: { orderBy: { localeCode: 'asc' } } },
+    });
+    const tables: Record<string, { race: string | null; text: string; weight: number }[]> = {};
+    for (const e of rows) {
+      const text = e.value ?? (e.translations.length ? pick(e.translations, ctx).text : null);
+      if (!text) continue;
+      (tables[e.kind] ??= []).push({ race: e.race?.index ?? null, text, weight: e.weight });
+    }
+    setCache(res);
+    res.json(tables);
+  } catch (error) {
+    fail(res, 'NPC tables', error);
   }
 };
