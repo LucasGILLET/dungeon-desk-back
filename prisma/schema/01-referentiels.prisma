@@ -33,7 +33,10 @@ model AbilityScore {
   characterScores    CharacterAbilityScore[]
   characterIncreases CharacterAbilityIncrease[]
 
-  npcScores NpcAbilityScore[]
+  npcScores            NpcAbilityScore[]
+  monsterSavingThrows  MonsterSavingThrow[]
+  monsterActions       MonsterAction[]
+  monsterSpellcastings MonsterSpellcasting[]
 }
 
 model AbilityScoreTranslation {
@@ -58,6 +61,7 @@ model Skill {
 
   translations  SkillTranslation[]
   proficiencies Proficiency[]
+  monsterSkills MonsterSkill[]
 }
 
 model SkillTranslation {
@@ -97,7 +101,8 @@ model Alignment {
   // Personnages qui l'utilisent
   characters Character[]
 
-  npcs Npc[]
+  npcs              Npc[]
+  monsterAlignments MonsterAlignment[]
 }
 
 model AlignmentTranslation {
@@ -117,10 +122,12 @@ model DamageType {
   id    Int    @id @default(autoincrement())
   index String @unique // "fire"
 
-  translations     DamageTypeTranslation[]
-  weaponStats      WeaponStats[]
-  spellDamageTypes SpellDamageType[]
-  traits           Trait[]
+  translations           DamageTypeTranslation[]
+  weaponStats            WeaponStats[]
+  spellDamageTypes       SpellDamageType[]
+  traits                 Trait[]
+  monsterDamageModifiers MonsterDamageModifier[]
+  monsterActionDamages   MonsterActionDamage[]
 }
 
 model DamageTypeTranslation {
@@ -161,6 +168,7 @@ model CreatureType {
 
   translations      CreatureTypeTranslation[]
   choiceOptionItems ChoiceOptionItem[]
+  monsters          Monster[]
 }
 
 model CreatureTypeTranslation {
@@ -173,6 +181,26 @@ model CreatureTypeTranslation {
   locale         Locale       @relation(fields: [localeCode], references: [code])
 
   @@unique([creatureTypeId, localeCode])
+}
+
+// Sous-types de créatures : "(démon)", "(métamorphe)", "(toute race)"
+model CreatureSubtype {
+  id    Int    @id @default(autoincrement())
+  index String @unique // "demon", "shapechanger", "any-race"
+
+  translations    CreatureSubtypeTranslation[]
+  monsterSubtypes MonsterSubtype[]
+}
+
+model CreatureSubtypeTranslation {
+  id                Int             @id @default(autoincrement())
+  creatureSubtypeId Int
+  localeCode        String
+  name              String // "démon", "métamorphe"
+  creatureSubtype   CreatureSubtype @relation(fields: [creatureSubtypeId], references: [id], onDelete: Cascade)
+  locale            Locale          @relation(fields: [localeCode], references: [code])
+
+  @@unique([creatureSubtypeId, localeCode])
 }
 
 // Terrains de prédilection (rôdeur 2014), auparavant de simples chaînes
@@ -206,7 +234,9 @@ model Condition {
   translations ConditionTranslation[]
 
   // Personnages qui l'utilisent
-  characters CharacterCondition[]
+  characters                 CharacterCondition[]
+  monsterArmorClasses        MonsterArmorClass[]
+  monsterConditionImmunities MonsterConditionImmunity[]
 
   @@unique([editionId, index])
 }
@@ -253,6 +283,7 @@ model Language {
 
   // Personnages qui l'utilisent
   characterChoices CharacterChoice[]
+  monsterLanguages MonsterLanguage[]
 
   @@unique([editionId, index])
 }

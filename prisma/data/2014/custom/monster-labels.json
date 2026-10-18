@@ -1,0 +1,73 @@
+{
+  "_comment": "Libellés des monstres absents des fichiers SRD traduits : sous-types de créatures, précisions des résistances, ligne Langues (traduite par segments, puis nom des langues). Utilisé par src/seed/importers/monsters.ts.",
+  "creatureSubtypes": {
+    "any-race": { "en": "any race", "fr": "toute race" },
+    "demon": { "en": "demon", "fr": "démon" },
+    "devil": { "en": "devil", "fr": "diable" },
+    "dwarf": { "en": "dwarf", "fr": "nain" },
+    "elf": { "en": "elf", "fr": "elfe" },
+    "gnoll": { "en": "gnoll", "fr": "gnoll" },
+    "gnome": { "en": "gnome", "fr": "gnome" },
+    "goblinoid": { "en": "goblinoid", "fr": "gobelinoïde" },
+    "grimlock": { "en": "grimlock", "fr": "grimlock" },
+    "human": { "en": "human", "fr": "humain" },
+    "kobold": { "en": "kobold", "fr": "kobold" },
+    "lizardfolk": { "en": "lizardfolk", "fr": "homme-lézard" },
+    "merfolk": { "en": "merfolk", "fr": "homme-poisson" },
+    "orc": { "en": "orc", "fr": "orc" },
+    "sahuagin": { "en": "sahuagin", "fr": "sahuagin" },
+    "shapechanger": { "en": "shapechanger", "fr": "métamorphe" },
+    "titan": { "en": "titan", "fr": "titan" }
+  },
+  "damageNotes": {
+    "that aren't silvered": "non argentées",
+    "that aren't adamantine": "qui ne sont pas en adamantium",
+    "(from stoneskin)": "(grâce à peau de pierre)",
+    "damage from spells": "dégâts des sorts",
+    "from magic weapons wielded by good creatures": "des armes magiques maniées par des créatures bonnes"
+  },
+  "languageSegments": {
+    "all": "toutes",
+    "any one language": "une langue au choix",
+    "any one language (usually Common)": "une langue au choix (généralement le commun)",
+    "any two languages": "deux langues au choix",
+    "any four languages": "quatre langues au choix",
+    "any six languages": "six langues au choix",
+    "the languages it knew in life": "les langues qu'il connaissait de son vivant",
+    "any languages it knew in life": "toutes les langues qu'il connaissait de son vivant",
+    "one language known by its creator": "une langue connue de son créateur",
+    "understands the languages of its creator but can't speak": "comprend les langues de son créateur mais ne peut pas parler",
+    "understands all languages it spoke in life but can't speak": "comprend toutes les langues qu'il parlait de son vivant mais ne peut pas parler",
+    "understands all languages it knew in life but can't speak": "comprend toutes les langues qu'il connaissait de son vivant mais ne peut pas parler",
+    "understands commands given in any language but can't speak": "comprend les ordres donnés dans n'importe quelle langue mais ne peut pas parler"
+  },
+  "languagePhrases": [
+    ["(can't speak in boar form)", "(ne peut pas parler sous forme de sanglier)"],
+    ["(works only with creatures that understand Abyssal)", "(ne fonctionne qu'avec les créatures qui comprennent l'abyssal)"],
+    ["plus up to five other languages", "plus jusqu'à cinq autres langues"],
+    ["plus any two languages", "plus deux langues au choix"],
+    ["but can't speak it", "mais ne peut pas le parler"],
+    ["but doesn't speak it", "mais ne le parle pas"],
+    ["but can't speak", "mais ne peut pas parler"],
+    ["understands", "comprend"],
+    ["and", "et"]
+  ],
+  "extraLanguages": {
+    "Aquan": "Aquatique",
+    "Auran": "Aérien",
+    "Ignan": "Igné",
+    "Terran": "Terreux",
+    "Druidic": "Druidique",
+    "Thieves' cant": "Argot des voleurs",
+    "Blink Dog": "Chien esquiveur",
+    "Giant Eagle": "Aigle géant",
+    "Giant Elk": "Élan géant",
+    "Giant Owl": "Chouette géante",
+    "Winter Wolf": "Loup arctique",
+    "Worg": "Worg",
+    "Gnoll": "Gnoll",
+    "Otyugh": "Otyugh",
+    "Sahuagin": "Sahuagin",
+    "Sphinx": "Sphinx"
+  }
+}

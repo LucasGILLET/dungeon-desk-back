@@ -3,6 +3,7 @@ import { getClasses, getClassByIndex } from '../controllers/srdController';
 import {
   getAbilityScores, getAlignments, getBackgrounds, getConditions, getCreationRules, getEquipment, getFeats, getNpcTables, getRaces, getSkills, getSpells,
 } from '../controllers/srdContentController';
+import { getMagicItemByIndex, getMagicItems, getMonsterByIndex, getMonsters } from '../controllers/srdBestiaryController';
 
 const router = Router();
 
@@ -235,5 +236,69 @@ router.get('/:edition/npc-tables', getNpcTables);
  *       200: { description: OK }
  */
 router.get('/:edition/alignments', getAlignments);
+
+/**
+ * @swagger
+ * /srd/{edition}/monsters:
+ *   get:
+ *     summary: Monsters, summary for search and filters (translated)
+ *     operationId: getSrdMonsters
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: Monster summaries }
+ */
+router.get('/:edition/monsters', getMonsters);
+
+/**
+ * @swagger
+ * /srd/{edition}/monsters/{index}:
+ *   get:
+ *     summary: Monster stat block (structured fields, distances in feet)
+ *     operationId: getSrdMonster
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: path, name: index, required: true, schema: { type: string, example: aboleth } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: Monster stat block }
+ *       404: { description: Not found }
+ */
+router.get('/:edition/monsters/:index', getMonsterByIndex);
+
+/**
+ * @swagger
+ * /srd/{edition}/magic-items:
+ *   get:
+ *     summary: Magic items, without description (translated)
+ *     operationId: getSrdMagicItems
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: Magic items }
+ */
+router.get('/:edition/magic-items', getMagicItems);
+
+/**
+ * @swagger
+ * /srd/{edition}/magic-items/{index}:
+ *   get:
+ *     summary: Magic item with its description and variants
+ *     operationId: getSrdMagicItem
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: path, name: index, required: true, schema: { type: string, example: bag-of-holding } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: Magic item with its description and variants }
+ *       404: { description: Not found }
+ */
+router.get('/:edition/magic-items/:index', getMagicItemByIndex);
 
 export default router;

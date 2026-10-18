@@ -46,7 +46,8 @@ model Class {
   // Personnages qui l'utilisent
   characterClasses CharacterClass[]
 
-  npcs Npc[]
+  npcs                 Npc[]
+  monsterSpellcastings MonsterSpellcasting[]
 
   @@unique([editionId, index])
 }

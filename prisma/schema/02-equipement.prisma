@@ -22,6 +22,7 @@ model EquipmentCategory {
   choiceItems   ChoiceOptionItem[]             @relation("ChoiceItemCategory")
   proficiencies Proficiency[]
   choices       Choice[]
+  magicItems    MagicItem[]
 
   @@unique([editionId, index])
 }
@@ -81,8 +82,9 @@ model Equipment {
   backgroundStartingEquipments BackgroundStartingEquipment[]
 
   // Personnages qui l'utilisent
-  characterChoices CharacterChoice[]
-  characterItems   CharacterItem[]
+  characterChoices            CharacterChoice[]
+  characterItems              CharacterItem[]
+  monsterArmorClassEquipments MonsterArmorClassEquipment[]
 
   @@unique([editionId, index])
 }

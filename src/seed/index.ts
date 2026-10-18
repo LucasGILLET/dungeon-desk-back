@@ -3,7 +3,8 @@
 // Options (après `--`) :
 //   --edition 2014           édition à importer (défaut : 2014)
 //   --only <domaines>        liste séparée par des virgules parmi :
-//                            base, referentiels, equipement, maitrises, sorts, classes, races, historiques, presentation, pnj
+//                            base, referentiels, equipement, maitrises, sorts, classes, races, historiques, presentation, pnj,
+//                            monstres, objets-magiques
 //   --classes <index>        classes à importer (défaut : toutes), ex. wizard,fighter
 //
 // Chaque domaine ne dépend que des précédents ; relancer le seed met à jour les
@@ -19,8 +20,10 @@ import { importRaces } from './importers/races';
 import { importBackgrounds } from './importers/backgrounds';
 import { importPresentation } from './importers/presentation';
 import { importNpcGenerator } from './importers/npcGenerator';
+import { importMonsters } from './importers/monsters';
+import { importMagicItems } from './importers/magicItems';
 
-const DOMAINS = ['base', 'referentiels', 'equipement', 'maitrises', 'sorts', 'classes', 'races', 'historiques', 'presentation', 'pnj'] as const;
+const DOMAINS = ['base', 'referentiels', 'equipement', 'maitrises', 'sorts', 'classes', 'races', 'historiques', 'presentation', 'pnj', 'monstres', 'objets-magiques'] as const;
 
 function option(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
@@ -57,6 +60,9 @@ async function main(): Promise<void> {
     // Après les classes, races et historiques, dont l'import remplace les traductions (accroches comprises)
     if (run('classes') || run('races') || run('historiques') || run('presentation')) await importPresentation(prisma, refs, edition);
     if (run('pnj') || run('races')) await importNpcGenerator(prisma, refs, edition);
+    // Après les sorts et les classes (incantation des monstres), l'équipement (armures)
+    if (run('monstres')) await importMonsters(prisma, refs, edition);
+    if (run('objets-magiques')) await importMagicItems(prisma, refs, edition);
     if (untranslated) log(`${untranslated} description(s) de choix non traduite(s) dans les fichiers sources : repli sur l'anglais`);
     log(`terminé en ${((Date.now() - started) / 1000).toFixed(1)} s`);
   } finally {

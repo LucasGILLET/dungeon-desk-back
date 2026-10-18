@@ -1,7 +1,7 @@
 // ============================================================================
 // Socle des données de jeu (SRD) : base commune
 // ----------------------------------------------------------------------------
-// Le schéma est réparti en un fichier par domaine (00 à 07 ; les domaines à venir sont dans
+// Le schéma est réparti en un fichier par domaine (00 à 11 ; les domaines à venir sont dans
 // docs/modelisation/brouillons) ; schema.prisma
 // contient le générateur, la source de données et les modèles applicatifs.
 // Conventions complémentaires (nommage, CHECK, seed, API) :
@@ -109,7 +109,13 @@ model Locale {
   personalityOptionTranslations   PersonalityOptionTranslation[]
   featTranslations                FeatTranslation[]
 
-  npcTableEntryTranslations NpcTableEntryTranslation[]
+  npcTableEntryTranslations         NpcTableEntryTranslation[]
+  creatureSubtypeTranslations       CreatureSubtypeTranslation[]
+  monsterTranslations               MonsterTranslation[]
+  monsterDamageModifierTranslations MonsterDamageModifierTranslation[]
+  monsterActionTranslations         MonsterActionTranslation[]
+  magicItemTranslations             MagicItemTranslation[]
+  monsterArmorClassTranslations     MonsterArmorClassTranslation[]
 }
 
 model Edition {
@@ -148,7 +154,9 @@ model Edition {
   characters Character[]
 
   // PNJ qui l'utilisent
-  npcs Npc[]
+  npcs       Npc[]
+  monsters   Monster[]
+  magicItems MagicItem[]
 }
 
 model EditionTranslation {

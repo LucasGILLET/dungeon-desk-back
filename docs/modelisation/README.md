@@ -20,7 +20,7 @@ Migrations : `20261015160000_add_srd_socle` (socle), `20261016180000_add_srd_rac
 
 - Nommage, contraintes CHECK, JSONB, seed et API : [`conventions.md`](conventions.md)
 - Schémas Zod des colonnes JSONB : [`src/srd/jsonb.ts`](../../src/srd/jsonb.ts)
-- Domaines modélisés mais pas encore branchés (monstres) : [`brouillons/`](brouillons/)
+- Domaines modélisés mais pas encore branchés (aucun pour le moment) : [`brouillons/`](brouillons/)
 - Règles de construction d'un personnage (validation, fiche calculée) : [`src/characters/`](../../src/characters/)
 
 ## Diagrammes

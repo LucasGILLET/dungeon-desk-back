@@ -110,7 +110,7 @@ export class Refs {
     readonly editionId: number,
   ) {}
 
-  private static SHARED = new Set(['abilityScore', 'skill', 'alignment', 'damageType', 'magicSchool', 'creatureType', 'terrain']);
+  private static SHARED = new Set(['abilityScore', 'skill', 'alignment', 'damageType', 'magicSchool', 'creatureType', 'creatureSubtype', 'terrain']);
 
   private async load(model: string): Promise<Map<string, number>> {
     let map = this.cache.get(model);

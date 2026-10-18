@@ -75,3 +75,34 @@ export const TraitActionSchema = z
 export type DiceScaling = z.infer<typeof DiceScalingSchema>;
 export type Speeds = z.infer<typeof SpeedsSchema>;
 export type TraitAction = z.infer<typeof TraitActionSchema>;
+
+// --- Monstres ------------------------------------------------------------------
+
+// Vitesses d'un monstre : certaines créatures n'ont pas de vitesse au sol (nuées volantes, poissons)
+export const MonsterSpeedsSchema = SpeedsSchema.partial({ walk: true });
+
+// Sens en pieds ; blindBeyond = "aveugle au-delà de ce rayon" (vision aveugle)
+export const SensesSchema = z
+  .object({
+    darkvision: feet.optional(),
+    blindsight: feet.optional(),
+    blindBeyond: z.literal(true).optional(),
+    truesight: feet.optional(),
+    tremorsense: feet.optional(),
+  })
+  .strict();
+
+// Fréquence d'une action ou d'un sort de monstre
+export const MonsterUsageSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('at_will') }).strict(),
+  z.object({ type: z.literal('per_day'), times: z.number().int().positive() }).strict(),
+  z.object({ type: z.literal('recharge'), dice: z.string().regex(/^\d+d\d+$/), minValue: z.number().int().positive() }).strict(),
+  z.object({ type: z.literal('per_rest'), rests: z.array(z.enum(['short', 'long'])).min(1) }).strict(),
+]);
+
+// Emplacements de sorts par niveau : { "1": 4, "2": 3 }
+export const SpellSlotsSchema = z.record(z.string().regex(/^[1-9]$/, 'Niveau invalide'), z.number().int().positive());
+
+export type MonsterSpeeds = z.infer<typeof MonsterSpeedsSchema>;
+export type Senses = z.infer<typeof SensesSchema>;
+export type MonsterUsage = z.infer<typeof MonsterUsageSchema>;

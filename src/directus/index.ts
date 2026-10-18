@@ -51,6 +51,13 @@ function displayTemplate(m: Model): string | null {
   if (m.name === 'CharacterItem') return '{{quantity}} × {{equipmentId.index}}{{name}}';
   // Statistiques 1-1 d'un objet : affichées par le nom de l'objet
   if (['WeaponStats', 'ArmorStats', 'VehicleStats'].includes(m.name)) return '{{equipmentId.translations.name}} ({{equipmentId.index}})';
+  if (m.name === 'MonsterArmorClass') return '{{value}} ({{sourceType}})';
+  if (m.name === 'MonsterSavingThrow') return '{{abilityScoreId.index}} +{{bonus}}';
+  if (m.name === 'MonsterSkill') return '{{skillId.index}} +{{bonus}}';
+  if (m.name === 'MonsterDamageModifier') return '{{kind}} {{damageTypeId.index}}';
+  if (m.name === 'MonsterActionDamage') return '{{dice}} {{damageTypeId.index}}';
+  if (m.name === 'MonsterMultiattackStep') return '{{count}} × {{targetActionId.translations.name}}';
+  if (m.name === 'MonsterSpellcasting') return '{{abilityScoreId.index}} DD {{saveDc}}';
   if (hasIndex) return '{{index}}';
   return null;
 }

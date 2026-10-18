@@ -108,7 +108,9 @@ model Spell {
   choiceOptionItems         ChoiceOptionItem[]
 
   // Personnages qui l'utilisent
-  characterSpells CharacterSpell[]
+  characterSpells     CharacterSpell[]
+  monsterArmorClasses MonsterArmorClass[]
+  monsterSpells       MonsterSpell[]
 
   @@unique([editionId, index])
   @@index([editionId, level])

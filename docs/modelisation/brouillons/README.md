@@ -2,9 +2,7 @@
 
 Domaines modélisés et relus, mais pas encore branchés sur `prisma/schema/` : ils n'ont pas encore d'importeur, donc n'ont pas été confrontés aux vraies données.
 
-| Fichier | Étape de la feuille de route |
-|---|---|
-| `08-monstres.prisma` | 9 — monstres |
+Aucun domaine en attente : les monstres (étape 9) sont branchés dans `prisma/schema/10-monstres.prisma`, avec les objets magiques (`11-objets-magiques.prisma`).
 
 Pour brancher un domaine, avec son importeur et sa propre migration :
 
@@ -14,4 +12,4 @@ Pour brancher un domaine, avec son importeur et sa propre migration :
 4. Rajouter dans `src/srd/jsonb.ts` les schémas des colonnes JSONB du domaine (`Senses`, `SpellSlots` pour les monstres).
 5. Ajouter le domaine au menu et aux formulaires de `src/directus/` puis relancer `npm run directus:config`.
 
-Retirés en même temps, faute d'usage : `CreatureSubtype` (monstres), `WeaponMastery` (2024), les valeurs de table de classe de type texte.
+Retirés en même temps, faute d'usage : `WeaponMastery` (2024), les valeurs de table de classe de type texte. `CreatureSubtype` est revenu avec les monstres.

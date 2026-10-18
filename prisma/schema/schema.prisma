@@ -30,4 +30,6 @@ model User {
   homebrewTraits        Trait[]
   homebrewBackgrounds   Background[]
   homebrewFeats         Feat[]
+  homebrewMonsters      Monster[]
+  homebrewMagicItems    MagicItem[]
 }

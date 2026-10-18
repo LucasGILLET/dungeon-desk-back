@@ -1,0 +1,60 @@
+// ============================================================================
+// OBJETS MAGIQUES (rattachés à une édition)
+// ----------------------------------------------------------------------------
+// Source 2014 : 5e-SRD-Magic-Items (362 objets), importé par
+// src/seed/importers/magicItems.ts. Un objet générique ("Arme, +1, +2 ou +3",
+// rareté variable) regroupe ses variantes ("Arme +1", "Arme +2"…), qui sont
+// des objets à part entière.
+// ============================================================================
+
+enum MagicItemRarity {
+  COMMON
+  UNCOMMON
+  RARE
+  VERY_RARE
+  LEGENDARY
+  ARTIFACT
+  VARIES // objet générique dont les variantes ont chacune leur rareté
+}
+
+model MagicItem {
+  id                  Int               @id @default(autoincrement())
+  editionId           Int
+  edition             Edition           @relation(fields: [editionId], references: [id])
+  index               String // "bag-of-holding"
+  // "Objet merveilleux", "Anneau", "Arme"…
+  equipmentCategoryId Int
+  equipmentCategory   EquipmentCategory @relation(fields: [equipmentCategoryId], references: [id])
+  rarity              MagicItemRarity
+  requiresAttunement  Boolean           @default(false)
+  // Variante d'un objet générique ("Arme +1" → "Arme, +1, +2 ou +3")
+  parentId            Int?
+  parent              MagicItem?        @relation("MagicItemVariants", fields: [parentId], references: [id], onDelete: SetNull)
+  variants            MagicItem[]       @relation("MagicItemVariants")
+  imageUrl            String?
+
+  source    ContentSource @default(SRD)
+  ownerId   Int?
+  owner     User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  translations MagicItemTranslation[]
+
+  @@unique([editionId, index])
+  @@index([editionId, rarity])
+}
+
+model MagicItemTranslation {
+  id          Int       @id @default(autoincrement())
+  magicItemId Int
+  localeCode  String
+  name        String // "Sac sans fond"
+  // Ligne de type telle qu'imprimée : "Objet merveilleux, rare (nécessite un lien)"
+  subtitle    String?
+  description String    @db.Text
+  magicItem   MagicItem @relation(fields: [magicItemId], references: [id], onDelete: Cascade)
+  locale      Locale    @relation(fields: [localeCode], references: [code])
+
+  @@unique([magicItemId, localeCode])
+}
