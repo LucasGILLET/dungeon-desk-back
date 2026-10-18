@@ -302,3 +302,135 @@ export async function describeResources(
 
   return { hitDice, spellSlots, pactSlots, spellcasting: spellcastingInfo };
 }
+
+// --- Classe d'armure -----------------------------------------------------------------------
+
+export interface ArmorClass {
+  value: number;
+  detail: string; // "Cotte de mailles 16 + Bouclier 2", "10 + 2 (DEX) + 3 (SAG)"
+}
+
+// Armure équipée (+ DEX selon l'armure), sinon 10 + DEX, ou la défense sans
+// armure du moine (+ SAG, sans bouclier) et du barbare (+ CON) ; + bouclier.
+export async function describeArmorClass(
+  db: Db, ctx: RulesContext, input: CharacterInput, sheet: { abilityScores: Record<string, { modifier: number }> }, lang: LangContext,
+): Promise<ArmorClass> {
+  const mod = (a: string) => sheet.abilityScores[a]?.modifier ?? 0;
+  const equipped = input.items.filter((i) => i.equipped && i.equipment).map((i) => i.equipment!);
+  const armors = equipped.length
+    ? await db.equipment.findMany({
+      where: { editionId: ctx.edition?.id, index: { in: equipped }, armor: { isNot: null } },
+      select: { translations: t, armor: true },
+    })
+    : [];
+  const name = (a: (typeof armors)[number]) => pick(a.translations, lang).name;
+  const body = armors.filter((a) => a.armor!.category !== 'SHIELD').sort((a, b) => b.armor!.baseArmorClass - a.armor!.baseArmorClass)[0];
+  const shield = armors.find((a) => a.armor!.category === 'SHIELD');
+  const signed = (n: number) => (n >= 0 ? `+ ${n}` : `− ${-n}`);
+  const classes = new Set(input.classes.map((c) => c.class));
+
+  let value: number;
+  let detail: string;
+  if (body) {
+    const dex = body.armor!.addsDexModifier ? Math.min(mod('dex'), body.armor!.maxDexModifier ?? Infinity) : 0;
+    value = body.armor!.baseArmorClass + dex;
+    detail = `${name(body)} ${body.armor!.baseArmorClass}${body.armor!.addsDexModifier ? ` ${signed(dex)} (DEX)` : ''}`;
+  } else {
+    const options = [{ value: 10 + mod('dex'), detail: `10 ${signed(mod('dex'))} (DEX)` }];
+    if (classes.has('monk') && !shield) options.push({ value: 10 + mod('dex') + mod('wis'), detail: `10 ${signed(mod('dex'))} (DEX) ${signed(mod('wis'))} (SAG)` });
+    if (classes.has('barbarian')) options.push({ value: 10 + mod('dex') + mod('con'), detail: `10 ${signed(mod('dex'))} (DEX) ${signed(mod('con'))} (CON)` });
+    ({ value, detail } = options.reduce((a, b) => (b.value > a.value ? b : a)));
+  }
+  if (shield) {
+    value += shield.armor!.baseArmorClass;
+    detail += ` + ${name(shield)} ${shield.armor!.baseArmorClass}`;
+  }
+  return { value, detail };
+}
+
+// --- Capacités à utilisations limitées ----------------------------------------------------
+
+export interface FeatureResource {
+  feature: string | null; // index de capacité de classe (CharacterInput.state.featureUsage)
+  trait: string | null; // ou index de trait racial
+  name: string;
+  max: number;
+  used: number;
+  recharge: 'SHORT' | 'LONG';
+}
+
+// Nombre d'utilisations : colonne de la table de classe, valeur fixe, ou
+// formule (modificateur de caractéristique, niveau). Le texte des capacités
+// ne le dit pas de façon exploitable : la règle est ici.
+type Uses = { column: string } | { fixed: number } | ((ctx: { level: number; mod: (a: string) => number }) => number);
+type Recharge = 'SHORT' | 'LONG';
+const CLASS_RESOURCES: { class: string; feature: string; uses: Uses; recharge: Recharge | ((level: number) => Recharge) }[] = [
+  { class: 'barbarian', feature: 'rage', uses: { column: 'rage_count' }, recharge: 'LONG' },
+  { class: 'bard', feature: 'bardic-inspiration-d6', uses: ({ mod }) => Math.max(1, mod('cha')), recharge: (l) => (l >= 5 ? 'SHORT' : 'LONG') },
+  { class: 'cleric', feature: 'channel-divinity-1-rest', uses: { column: 'channel_divinity_charges' }, recharge: 'SHORT' },
+  { class: 'druid', feature: 'wild-shape-cr-1-4-or-below-no-flying-or-swim-speed', uses: { fixed: 2 }, recharge: 'SHORT' },
+  { class: 'fighter', feature: 'second-wind', uses: { fixed: 1 }, recharge: 'SHORT' },
+  { class: 'fighter', feature: 'action-surge-1-use', uses: { column: 'action_surges' }, recharge: 'SHORT' },
+  { class: 'fighter', feature: 'indomitable-1-use', uses: { column: 'indomitable_uses' }, recharge: 'LONG' },
+  { class: 'monk', feature: 'ki', uses: { column: 'ki_points' }, recharge: 'SHORT' },
+  { class: 'paladin', feature: 'divine-sense', uses: ({ mod }) => 1 + mod('cha'), recharge: 'LONG' },
+  { class: 'paladin', feature: 'lay-on-hands', uses: ({ level }) => 5 * level, recharge: 'LONG' },
+  { class: 'paladin', feature: 'channel-divinity', uses: { fixed: 1 }, recharge: 'SHORT' },
+  { class: 'sorcerer', feature: 'font-of-magic', uses: { column: 'sorcery_points' }, recharge: 'LONG' },
+  { class: 'wizard', feature: 'arcane-recovery', uses: { fixed: 1 }, recharge: 'LONG' },
+];
+const TRAIT_RESOURCES: { trait: string; uses: number; recharge: Recharge }[] = [{ trait: 'breath-weapon', uses: 1, recharge: 'SHORT' }];
+
+// "Fougue (1 utilisation)" → "Fougue", "Inspiration bardique (d6)" → "Inspiration bardique"
+const resourceName = (name: string) => name.replace(/\s*\([^)]*\)\s*$/, '');
+
+export async function describeFeatureResources(
+  db: Db, ctx: RulesContext, input: CharacterInput, sheet: { abilityScores: Record<string, { modifier: number }> }, lang: LangContext,
+): Promise<FeatureResource[]> {
+  const mod = (a: string) => sheet.abilityScores[a]?.modifier ?? 0;
+  const usedOf = (feature: string | null, trait: string | null) =>
+    input.state.featureUsage.find((u) => (feature ? u.feature === feature : u.trait === trait))?.used ?? 0;
+  const result: FeatureResource[] = [];
+
+  const owned = input.classes.flatMap((c) => {
+    const rule = ctx.classes.get(c.class);
+    return rule ? [{ c, rule }] : [];
+  });
+  const candidates = CLASS_RESOURCES.filter((r) => owned.some((o) => o.c.class === r.class));
+  if (candidates.length) {
+    const [features, levels] = await Promise.all([
+      db.classFeature.findMany({ where: { editionId: ctx.edition?.id, index: { in: candidates.map((r) => r.feature) } }, select: { index: true, level: true, translations: t } }),
+      db.classLevel.findMany({
+        where: { OR: owned.map((o) => ({ classId: o.rule.id, level: o.c.levels.length })) },
+        select: { classId: true, values: { select: { intValue: true, column: { select: { key: true } } } } },
+      }),
+    ]);
+    for (const r of candidates) {
+      const { c, rule } = owned.find((o) => o.c.class === r.class)!;
+      const feature = features.find((f) => f.index === r.feature);
+      const level = c.levels.length;
+      if (!feature || feature.level > level) continue;
+      const uses = r.uses;
+      const max = typeof uses === 'function'
+        ? uses({ level, mod })
+        : 'fixed' in uses
+          ? uses.fixed
+          : levels.find((l) => l.classId === rule.id)?.values.find((v) => v.column.key === uses.column)?.intValue ?? 0;
+      if (max <= 0) continue;
+      result.push({
+        feature: r.feature, trait: null, name: resourceName(pick(feature.translations, lang).name), max, used: usedOf(r.feature, null),
+        recharge: typeof r.recharge === 'function' ? r.recharge(level) : r.recharge,
+      });
+    }
+  }
+
+  const traitIds = [...(ctx.race?.traitIds ?? []), ...(ctx.subrace?.traitIds ?? [])];
+  if (traitIds.length) {
+    const traits = await db.trait.findMany({ where: { id: { in: traitIds }, index: { in: TRAIT_RESOURCES.map((r) => r.trait) } }, select: { index: true, translations: t } });
+    for (const trait of traits) {
+      const r = TRAIT_RESOURCES.find((x) => x.trait === trait.index)!;
+      result.push({ feature: null, trait: trait.index, name: pick(trait.translations, lang).name, max: r.uses, used: usedOf(null, trait.index), recharge: r.recharge });
+    }
+  }
+  return result;
+}

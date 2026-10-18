@@ -137,6 +137,22 @@ export const characterSheetSchema = {
     proficiencies: { type: 'array', items: { type: 'object', required: ['index', 'name', 'type'], properties: { index: { type: 'string' }, name: { type: 'string' }, type: { type: 'string', example: 'SKILL' } } } },
     expertise: { type: 'array', items: refName },
     languages: { type: 'array', items: refName },
+    hitDice: { type: 'array', items: { type: 'object', properties: { class: { type: 'string' }, die: { type: 'integer' }, total: { type: 'integer' }, used: { type: 'integer' } } } },
+    spellSlots: { type: 'array', description: 'Emplacements par niveau de sort (index 0 = niveau 1), multiclassage compris', items: { type: 'integer' } },
+    pactSlots: { type: 'object', nullable: true, properties: { level: { type: 'integer' }, count: { type: 'integer' } } },
+    spellcasting: { type: 'array', items: { type: 'object', properties: { class: { type: 'string' }, ability: { type: 'string' }, saveDC: { type: 'integer' }, attackBonus: { type: 'integer' } } } },
+    armorClass: { type: 'object', properties: { value: { type: 'integer' }, detail: { type: 'string', example: 'Cotte de mailles 16 + Bouclier 2' } } },
+    featureResources: {
+      type: 'array',
+      description: 'Capacités à utilisations limitées (rage, ki, conduit divin…)',
+      items: {
+        type: 'object',
+        properties: {
+          feature: { type: 'string', nullable: true }, trait: { type: 'string', nullable: true }, name: { type: 'string' },
+          max: { type: 'integer' }, used: { type: 'integer' }, recharge: { type: 'string', enum: ['SHORT', 'LONG'] },
+        },
+      },
+    },
   },
 } as const;
 
