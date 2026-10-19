@@ -85,12 +85,15 @@ enum GuideAccent {
   ROSE
 }
 
+// Valeurs par défaut en base (édition par défaut, identifiant aléatoire, ordre 0) :
+// Directus n'exige alors plus ces champs, masqués au rédacteur ; le flow
+// « Guides : remplissage automatique » remplace l'identifiant par un slug du titre.
 model GuidePage {
   id        Int          @id @default(autoincrement())
-  editionId Int
+  editionId Int          @default(dbgenerated("default_edition_id()"))
   edition   Edition      @relation(fields: [editionId], references: [id])
-  index     String // "classes", "combat-cheat-sheet"
-  position  Int
+  index     String       @default(dbgenerated("(gen_random_uuid())::text")) // "classes", "combat-cheat-sheet"
+  position  Int          @default(0)
   // Masquée dans l'application (brouillon)
   published Boolean      @default(true)
   icon      String?
@@ -121,8 +124,8 @@ model GuideSection {
   id       Int          @id @default(autoincrement())
   pageId   Int
   page     GuidePage    @relation(fields: [pageId], references: [id], onDelete: Cascade)
-  index    String // "martial-melee", "action"
-  position Int
+  index    String       @default(dbgenerated("(gen_random_uuid())::text")) // "martial-melee", "action"
+  position Int          @default(0)
   // Niveau de titre : 1 (partie), 2 (sous-partie), 3
   level    Int          @default(1)
   icon     String?
@@ -153,8 +156,8 @@ model GuideCard {
   id        Int          @id @default(autoincrement())
   sectionId Int
   section   GuideSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  index     String // "fighter", "dodge"
-  position  Int
+  index     String       @default(dbgenerated("(gen_random_uuid())::text")) // "fighter", "dodge"
+  position  Int          @default(0)
   icon      String?
   accent    GuideAccent?
 
@@ -193,7 +196,7 @@ model GuideCardList {
   id       Int       @id @default(autoincrement())
   cardId   Int
   card     GuideCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
-  position Int
+  position Int       @default(0)
 
   translations GuideCardListTranslation[]
 

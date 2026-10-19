@@ -6,6 +6,7 @@
 //                            base, referentiels, equipement, maitrises, sorts, classes, races, historiques, presentation, pnj,
 //                            monstres, objets-magiques, regles, guides
 //   --classes <index>        classes à importer (défaut : toutes), ex. wizard,fighter
+//   --reset-guides           réécrit les pages de guide déjà en base (sinon : seulement les pages absentes)
 //
 // Chaque domaine ne dépend que des précédents ; relancer le seed met à jour les
 // données sans créer de doublons.
@@ -67,7 +68,7 @@ async function main(): Promise<void> {
     if (run('objets-magiques')) await importMagicItems(prisma, refs, edition);
     if (run('regles')) await importRules(prisma, refs, edition);
     // Après les classes, races et règles, vers lesquelles renvoient les cartes
-    if (run('guides')) await importGuides(prisma, refs, edition);
+    if (run('guides')) await importGuides(prisma, refs, edition, process.argv.includes('--reset-guides'));
     if (untranslated) log(`${untranslated} description(s) de choix non traduite(s) dans les fichiers sources : repli sur l'anglais`);
     log(`terminé en ${((Date.now() - started) / 1000).toFixed(1)} s`);
   } finally {

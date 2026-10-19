@@ -8,6 +8,7 @@ import { Prisma } from '@prisma/client';
 import { api, exists, fr, Json, upsertAlias } from './client';
 import { COLLECTIONS, COMMON_FIELDS, ENUMS, FIELDS, MENU } from './labels';
 import { configureRoles } from './roles';
+import { configureGuideForms } from './guides';
 
 type Model = Prisma.DMMF.Model;
 type Field = Prisma.DMMF.Field;
@@ -123,7 +124,10 @@ function fieldMeta(m: Model, f: Field): Json | null {
   if (f.isId && f.type === 'Int') Object.assign(meta, { hidden: true, readonly: true });
   else if (f.name === 'createdAt' || f.name === 'updatedAt') Object.assign(meta, { hidden: true, readonly: true });
   else if (f.name === 'ownerId') Object.assign(meta, { hidden: true });
-  else if (parentOfTranslation || (isTranslation(m) && f.name === 'localeCode')) Object.assign(meta, { hidden: true });
+  // Lien vers le parent : pas obligatoire dans le formulaire, il n'existe pas encore
+  // quand on crée l'élément depuis un autre (partie créée depuis sa page)
+  else if (parentOfTranslation) Object.assign(meta, { hidden: true, required: false });
+  else if (isTranslation(m) && f.name === 'localeCode') Object.assign(meta, { hidden: true });
   else if (relation) {
     const target = byName.get(relation.type)!;
     Object.assign(meta, {
@@ -385,19 +389,31 @@ async function configureEquipmentForms(): Promise<void> {
   await api('PATCH', '/fields/WeaponStats/versatileDice', { meta: { note: 'Seulement pour les armes polyvalentes' } });
 }
 
+// Étapes, dans l'ordre ; `--only roles,forms` pour n'en relancer que certaines
+const STEPS = ['settings', 'menu', 'fields', 'translations', 'relations', 'forms', 'roles'] as const;
+
 async function main(): Promise<void> {
   const started = Date.now();
-  await configureSettings();
-  await configureMenu();
-  const fields = await configureFields();
-  const translations = await configureTranslations();
-  const relations = await configureRelations();
-  await configureClassForms();
-  await configureSpellForms();
-  await configureEquipmentForms();
-  await configureRaceForms();
-  await configureBackgroundForms();
-  const roles = await configureRoles(srdModels.map((m) => m.name), srdModels.filter(isTranslation).map((m) => m.name));
+  const i = process.argv.indexOf('--only');
+  const only = i >= 0 ? process.argv[i + 1]?.split(',') : undefined;
+  const unknown = only?.filter((s) => !(STEPS as readonly string[]).includes(s));
+  if (unknown?.length) throw new Error(`Étape inconnue : ${unknown.join(', ')} (étapes : ${STEPS.join(', ')})`);
+  const run = (step: (typeof STEPS)[number]) => !only || only.includes(step);
+
+  if (run('settings')) await configureSettings();
+  if (run('menu')) await configureMenu();
+  const fields = run('fields') ? await configureFields() : 0;
+  const translations = run('translations') ? await configureTranslations() : 0;
+  const relations = run('relations') ? await configureRelations() : 0;
+  if (run('forms')) {
+    await configureClassForms();
+    await configureSpellForms();
+    await configureEquipmentForms();
+    await configureRaceForms();
+    await configureBackgroundForms();
+    await configureGuideForms();
+  }
+  const roles = run('roles') ? await configureRoles(srdModels.map((m) => m.name), srdModels.filter(isTranslation).map((m) => m.name)) : 'rôles inchangés';
   console.log(`[directus] ${models.length} collections, ${fields} champs, ${translations} onglets de traduction, ${relations} listes liées, ${roles} ; ${((Date.now() - started) / 1000).toFixed(1)} s`);
 }
 

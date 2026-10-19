@@ -11,12 +11,19 @@ function translations(entry: Json, build: (t: Json) => Record<string, unknown>) 
 
 const style = (entry: Json) => ({ icon: entry.icon ?? null, accent: (entry.accent ?? null) as GuideAccent | null });
 
-export async function importGuides(prisma: PrismaClient, refs: Refs, edition: string): Promise<void> {
+// Les pages existantes ne sont pas réécrites : elles sont rédigées dans Directus.
+// `reset` (option --reset-guides du seed) les remet au contenu du fichier.
+export async function importGuides(prisma: PrismaClient, refs: Refs, edition: string, reset = false): Promise<void> {
   const { editionId } = refs;
   const { pages } = readJson(`${edition}/custom/guides.json`);
   await refs.preload('class', 'race', 'ruleSection');
   let cards = 0;
+  let kept = 0;
   for (const [position, page] of (pages as Json[]).entries()) {
+    if (!reset && (await prisma.guidePage.findUnique({ where: { editionId_index: { editionId, index: page.index } }, select: { id: true } }))) {
+      kept += 1;
+      continue;
+    }
     await prisma.$transaction(async (tx) => {
       const data = { position, published: page.published ?? true, ...style(page) };
       const row = await tx.guidePage.upsert({
@@ -30,7 +37,7 @@ export async function importGuides(prisma: PrismaClient, refs: Refs, edition: st
       cards += await writeSections(tx, row.id, page.sections, refs);
     }, TX_OPTIONS);
   }
-  log(`guides : ${pages.length} pages, ${cards} cartes`);
+  log(`guides : ${pages.length - kept} page(s) importée(s), ${cards} cartes` + (kept ? ` ; ${kept} déjà en base, laissée(s) telle(s) quelle(s) (--reset-guides pour les réécrire)` : ''));
 }
 
 async function writeSections(tx: Tx, pageId: number, sections: Json[], refs: Refs): Promise<number> {

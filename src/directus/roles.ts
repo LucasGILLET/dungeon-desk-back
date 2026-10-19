@@ -9,6 +9,11 @@ interface RoleDefinition {
   permissions: (srd: string[], translations: string[]) => { collection: string; action: string }[];
 }
 
+const GUIDE_COLLECTIONS = [
+  'GuidePage', 'GuidePageTranslation', 'GuideSection', 'GuideSectionTranslation',
+  'GuideCard', 'GuideCardTranslation', 'GuideCardList', 'GuideCardListTranslation',
+];
+
 const crud = (collections: string[], actions: string[]) => collections.flatMap((collection) => actions.map((action) => ({ collection, action })));
 
 const ROLES: RoleDefinition[] = [
@@ -19,6 +24,17 @@ const ROLES: RoleDefinition[] = [
     permissions: (srd, translations) => [
       ...crud(srd, ['read', 'create', 'update']),
       ...crud(translations, ['delete']),
+    ],
+  },
+  {
+    name: 'Rédacteur de la documentation',
+    icon: 'article',
+    description: 'Rédige les pages de documentation (guides) : création, modification et suppression. Lit les classes, races et règles pour y renvoyer.',
+    permissions: () => [
+      ...crud(GUIDE_COLLECTIONS, ['read', 'create', 'update', 'delete']),
+      ...crud(['RuleChapter', 'RuleChapterTranslation', 'RuleSection', 'RuleSectionTranslation', 'Class', 'ClassTranslation', 'Race', 'RaceTranslation', 'Locale', 'Edition'], ['read']),
+      // Images insérées dans les textes
+      ...crud(['directus_files'], ['read', 'create', 'update']),
     ],
   },
   {

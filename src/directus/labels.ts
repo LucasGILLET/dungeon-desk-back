@@ -3,11 +3,12 @@
 // Dossiers du menu → collections visibles, dans l'ordre. Les autres tables
 // (traductions, liaisons) sont masquées : elles s'éditent depuis leur parent.
 export const MENU: { folder: string; label: string; icon: string; collections: string[] }[] = [
+  { folder: 'menu_regles', label: 'Documentation et règles', icon: 'menu_book', collections: ['GuidePage', 'RuleChapter', 'RuleSection'] },
   { folder: 'menu_classes', label: 'Classes', icon: 'school', collections: ['Class', 'Subclass', 'ClassFeature', 'ClassLevel', 'ClassTableColumn', 'ClassSpellcasting', 'MulticlassRequirement'] },
   { folder: 'menu_races', label: 'Races et historiques', icon: 'diversity_3', collections: ['Race', 'Subrace', 'Trait', 'Background', 'Feat'] },
   { folder: 'menu_sorts', label: 'Sorts', icon: 'auto_awesome', collections: ['Spell'] },
   { folder: 'menu_bestiaire', label: 'Bestiaire et objets magiques', icon: 'pets', collections: ['Monster', 'MagicItem'] },
-  { folder: 'menu_regles', label: 'Règles et guides', icon: 'menu_book', collections: ['RuleChapter', 'RuleSection', 'GuidePage'] },
+
   { folder: 'menu_equipement', label: 'Équipement', icon: 'shield', collections: ['Equipment', 'EquipmentCategory', 'WeaponStats', 'ArmorStats', 'VehicleStats', 'WeaponProperty'] },
   { folder: 'menu_choix', label: 'Choix', icon: 'checklist', collections: ['Choice', 'ChoiceOption', 'ChoiceOptionItem'] },
   { folder: 'menu_referentiels', label: 'Référentiels', icon: 'menu_book', collections: ['AbilityScore', 'Skill', 'Proficiency', 'Language', 'Condition', 'Alignment', 'DamageType', 'MagicSchool', 'CreatureType', 'CreatureSubtype', 'Terrain'] },
@@ -93,8 +94,8 @@ export const COLLECTIONS: Record<string, [string, string]> = {
   MagicItem: ['Objet magique', 'Objets magiques'],
   RuleChapter: ['Chapitre de règles', 'Chapitres de règles'],
   RuleSection: ['Section de règles', 'Sections de règles'],
-  GuidePage: ['Page de guide', 'Guides'],
-  GuideSection: ['Section', 'Sections'],
+  GuidePage: ['Page de documentation', 'Pages de documentation'],
+  GuideSection: ['Partie', 'Parties'],
   GuideCard: ['Carte', 'Cartes'],
   GuideCardList: ['Liste à puces', 'Listes à puces'],
   Campaign: ['Campagne', 'Campagnes'],
