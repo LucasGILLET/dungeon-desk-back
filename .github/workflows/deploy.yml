@@ -23,7 +23,7 @@ jobs:
 
       # Étape de test : Empêche le déploiement si les tests échouent
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '20'
           cache: 'npm'
@@ -55,7 +55,7 @@ jobs:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v3
 
       - name: Configure Docker to use gcloud as a credential helper
         run: gcloud auth configure-docker europe-west9-docker.pkg.dev --quiet
@@ -66,7 +66,7 @@ jobs:
           docker push europe-west9-docker.pkg.dev/${{ env.PROJECT_ID }}/dungeon-desk-repo/${{ env.SERVICE_NAME }}:${{ github.sha }}
 
       - name: Deploy to Cloud Run
-        uses: google-github-actions/deploy-cloudrun@v2
+        uses: google-github-actions/deploy-cloudrun@v3
         with:
           service: ${{ env.SERVICE_NAME }}
           image: europe-west9-docker.pkg.dev/${{ env.PROJECT_ID }}/dungeon-desk-repo/${{ env.SERVICE_NAME }}:${{ github.sha }}
