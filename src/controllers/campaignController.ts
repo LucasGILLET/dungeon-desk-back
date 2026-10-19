@@ -81,7 +81,12 @@ export const getCampaigns = async (req: Request, res: Response) => {
     const campaigns = await prisma.campaign.findMany({
       where: { OR: [{ userId }, { members: { some: { userId } } }] },
       orderBy: { updatedAt: 'desc' },
-      include: { user: { select: { id: true, username: true } }, _count: { select: { members: true, sessions: true } } },
+      include: {
+        user: { select: { id: true, username: true } },
+        _count: { select: { members: true, sessions: true } },
+        // Personnage joué par l'utilisateur, s'il est joueur
+        members: { where: { userId }, select: { character: { select: { id: true, name: true } } } },
+      },
     });
     res.json(campaigns.map((c) => ({
       id: c.id,
@@ -92,6 +97,7 @@ export const getCampaigns = async (req: Request, res: Response) => {
       gm: displayName(c.user),
       memberCount: c._count.members,
       sessionCount: c._count.sessions,
+      myCharacter: c.members[0]?.character ?? null,
       updatedAt: c.updatedAt,
     })));
   } catch (error) {
