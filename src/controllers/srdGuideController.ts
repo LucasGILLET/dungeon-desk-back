@@ -13,8 +13,10 @@ type Named = { index: string; translations: { localeCode: string; name: string }
 const refOf = (ctx: LangContext) => (x: Named | null) => (x ? { index: x.index, name: pick(x.translations, ctx).name } : null);
 const editionWhere = (req: Request) => ({ edition: { code: req.params.edition } });
 
-function setCache(res: Response) {
-  res.set('Cache-Control', 'public, max-age=3600');
+// Règles du SRD : une heure ; guides : une minute, pour qu'un rédacteur voie vite
+// ses modifications faites dans Directus
+function setCache(res: Response, maxAge = 3600) {
+  res.set('Cache-Control', `public, max-age=${maxAge}`);
 }
 
 function fail(res: Response, what: string, error: unknown) {
@@ -66,7 +68,7 @@ export const getGuides = async (req: Request, res: Response) => {
   try {
     const ctx = await resolveLang(req);
     const pages = await prisma.guidePage.findMany({ where: { ...editionWhere(req), published: true }, orderBy: { position: 'asc' }, include: { translations: t } });
-    setCache(res);
+    setCache(res, 60);
     res.json(pages.map((p) => {
       const pt = pick(p.translations, ctx);
       return { index: p.index, title: pt.title, shortTitle: pt.shortTitle, icon: p.icon, accent: p.accent };
@@ -108,7 +110,7 @@ export const getGuide = async (req: Request, res: Response) => {
       return;
     }
     const pt = pick(page.translations, ctx);
-    setCache(res);
+    setCache(res, 60);
     res.json({
       index: page.index,
       lang: pt.lang,

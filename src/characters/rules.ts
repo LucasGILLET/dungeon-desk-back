@@ -131,6 +131,10 @@ export interface CharacterSheet {
     abilityScoreImprovements: { class: string; level: number }[];
     choices: { choiceId: number; kind: ChoiceKind; remaining: number }[];
   };
+  // Capacités et traits accordés par une option choisie (« Tueur de colosses »,
+  // ascendance draconique), en plus de ceux de la classe et de la race : index
+  grantedFeatures: string[];
+  grantedTraits: string[];
 }
 
 export interface Analysis {
@@ -493,6 +497,8 @@ export function analyse(input: CharacterInput, ctx: RulesContext): Analysis {
     maxHitPoints,
     abilityScores: sheetScores,
     pending: { subclasses: pendingSubclasses, abilityScoreImprovements: pendingAsi, choices: pendingChoices },
+    grantedFeatures: [...ctx.classes.values()].flatMap((r) => [...r.features].filter(([id]) => grantedFeatures.has(id)).map(([, f]) => f.index)),
+    grantedTraits: [...ctx.traits].filter(([, id]) => grantedTraits.has(id)).map(([index]) => index),
   };
 
   if (errors.length || !ctx.race) return { plan: null, errors, sheet, availableChoices };

@@ -53,11 +53,11 @@ Le seed accepte `--only <domaines>` (par exemple `npx prisma db seed -- --only m
 
 Directus sert à éditer les données de jeu et les pages de documentation. En local :
 ```bash
-docker compose -f docker-compose.directus.yml up -d   # http://localhost:8055
+docker compose -f docker-compose.yml -f docker-compose.directus.yml up -d   # http://localhost:8055
 npm run directus:config                               # menus, formulaires, rôles, flows (idempotent, ~3 min)
 ```
 
-Les secrets (`SECRET`, compte admin, `ADMIN_TOKEN`, licence) sont dans `.env.directus`, non versionné : partir de [`.env.directus.example`](.env.directus.example). `npm run directus:config -- --only roles,forms` ne relance que certaines étapes (`settings, menu, fields, translations, relations, forms, roles`).
+Après une modification de `.env.directus`, relancer la même commande (un simple `restart` ne relit pas le fichier). Les secrets (`SECRET`, compte admin, `ADMIN_TOKEN`, licence) sont dans `.env.directus`, non versionné : partir de [`.env.directus.example`](.env.directus.example). `npm run directus:config -- --only roles,forms` ne relance que certaines étapes (`settings, menu, fields, translations, relations, forms, roles`).
 
 Rôles fournis : éditeur des données de jeu, traducteur, rédacteur de la documentation.
 

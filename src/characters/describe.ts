@@ -434,3 +434,17 @@ export async function describeFeatureResources(
   }
   return result;
 }
+
+// Traits raciaux accordés par un choix (ascendance draconique) : rattachés à
+// aucune race, le front ne les trouve pas dans la liste des races
+export async function describeGrantedTraits(db: Db, ctx: RulesContext, sheet: { grantedTraits: string[] }, lang: LangContext) {
+  if (!sheet.grantedTraits.length) return [];
+  const traits = await db.trait.findMany({
+    where: { editionId: ctx.edition?.id, index: { in: sheet.grantedTraits } },
+    select: { index: true, translations: t },
+  });
+  return traits.map((trait) => {
+    const tt = pick(trait.translations, lang);
+    return { index: trait.index, name: tt.name, description: tt.description };
+  });
+}

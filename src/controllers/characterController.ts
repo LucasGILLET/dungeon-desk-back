@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { ZodError } from 'zod';
 import prisma from '../prismaClient';
 import { loadRulesContext } from '../characters/context';
-import { describeArmorClass, describeChoices, describeFeatureResources, describeProficiencies, describeResources } from '../characters/describe';
+import { describeArmorClass, describeChoices, describeFeatureResources, describeGrantedTraits, describeProficiencies, describeResources } from '../characters/describe';
 import { CharacterInput, CharacterInputSchema } from '../characters/input';
 import { analyse, Issue } from '../characters/rules';
 import { CHARACTER_INCLUDE, createCharacter as insertCharacter, displayNames, findCharacter, replaceCharacter, StoredCharacter, toInput } from '../characters/store';
@@ -49,6 +49,7 @@ async function sheet(req: Request, character: StoredCharacter) {
             ...(await describeResources(prisma, ctx, input, analysis.sheet)),
             armorClass: await describeArmorClass(prisma, ctx, input, analysis.sheet, lang),
             featureResources: await describeFeatureResources(prisma, ctx, input, analysis.sheet, lang),
+            grantedTraitDetails: await describeGrantedTraits(prisma, ctx, analysis.sheet, lang),
         },
         warnings: analysis.errors,
         createdAt: character.createdAt,
