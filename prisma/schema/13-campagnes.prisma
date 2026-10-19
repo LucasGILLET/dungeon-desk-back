@@ -1,0 +1,159 @@
+// ============================================================================
+// CAMPAGNES (données applicatives, propres à un MJ)
+// ----------------------------------------------------------------------------
+// Une campagne appartient à son MJ (userId). Les joueurs la rejoignent avec un
+// lien d'invitation (inviteCode) et y rattachent un de leurs personnages : le
+// MJ peut alors consulter leur fiche, sans la modifier.
+//
+// Visibilité côté joueurs : la campagne, ses membres, le résumé des séances
+// et les quêtes révélées. Les notes du MJ, les PNJ et les rencontres restent
+// réservés au MJ.
+// ============================================================================
+
+enum CampaignStatus {
+  PREPARATION
+  ACTIVE
+  PAUSED
+  FINISHED
+}
+
+model Campaign {
+  id          Int            @id @default(autoincrement())
+  userId      Int // MJ
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  editionId   Int
+  edition     Edition        @relation(fields: [editionId], references: [id])
+  name        String
+  description String?        @db.Text // Markdown
+  theme       String? // "Horreur gothique", "Exploration"
+  status      CampaignStatus @default(PREPARATION)
+  // Code du lien d'invitation, régénérable par le MJ (l'ancien lien cesse de fonctionner)
+  inviteCode  String         @unique
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  members    CampaignMember[]
+  sessions   CampaignSession[]
+  quests     Quest[]
+  npcs       CampaignNpc[]
+  encounters Encounter[]
+
+  @@index([userId])
+}
+
+// Joueur de la campagne, avec le personnage qu'il y joue (facultatif le temps de le créer)
+model CampaignMember {
+  id          Int        @id @default(autoincrement())
+  campaignId  Int
+  campaign    Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  characterId Int?
+  character   Character? @relation(fields: [characterId], references: [id], onDelete: SetNull)
+  joinedAt    DateTime   @default(now())
+
+  @@unique([campaignId, userId])
+  @@index([userId])
+}
+
+model CampaignSession {
+  id         Int       @id @default(autoincrement())
+  campaignId Int
+  campaign   Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  number     Int // séance n°
+  playedOn   DateTime? @db.Date
+  title      String?
+  summary    String?   @db.Text // Markdown, visible des joueurs
+  gmNotes    String?   @db.Text // Markdown, réservé au MJ
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  encounters Encounter[]
+
+  @@unique([campaignId, number])
+}
+
+enum QuestStatus {
+  ACTIVE
+  COMPLETED
+  FAILED
+  PAUSED
+}
+
+enum QuestDifficulty {
+  EASY
+  MEDIUM
+  HARD
+  DEADLY
+}
+
+model Quest {
+  id          Int              @id @default(autoincrement())
+  campaignId  Int
+  campaign    Campaign         @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  position    Int
+  title       String
+  description String?          @db.Text // Markdown
+  status      QuestStatus      @default(ACTIVE)
+  difficulty  QuestDifficulty?
+  reward      String?
+  // PNJ qui a confié la quête (un PNJ du MJ)
+  giverNpcId  Int?
+  giverNpc    Npc?             @relation(fields: [giverNpcId], references: [id], onDelete: SetNull)
+  // Visible des joueurs
+  revealed    Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([campaignId, position])
+}
+
+// PNJ du MJ utilisé dans la campagne, avec son rôle et son lieu
+model CampaignNpc {
+  id         Int      @id @default(autoincrement())
+  campaignId Int
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  npcId      Int
+  npc        Npc      @relation(fields: [npcId], references: [id], onDelete: Cascade)
+  role       String? // "Aubergiste, informateur"
+  location   String? // "Phandaline"
+  notes      String?  @db.Text
+
+  @@unique([campaignId, npcId])
+}
+
+enum EncounterStatus {
+  PLANNED
+  DONE
+}
+
+// Rencontre préparée avec des monstres du bestiaire ; la difficulté est
+// calculée par l'API d'après le niveau des personnages de la campagne.
+model Encounter {
+  id          Int              @id @default(autoincrement())
+  campaignId  Int
+  campaign    Campaign         @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  sessionId   Int?
+  session     CampaignSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  position    Int
+  name        String
+  description String?          @db.Text // Markdown
+  status      EncounterStatus  @default(PLANNED)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  monsters EncounterMonster[]
+
+  @@index([campaignId, position])
+}
+
+model EncounterMonster {
+  id          Int       @id @default(autoincrement())
+  encounterId Int
+  encounter   Encounter @relation(fields: [encounterId], references: [id], onDelete: Cascade)
+  monsterId   Int
+  monster     Monster   @relation(fields: [monsterId], references: [id], onDelete: Restrict)
+  count       Int
+
+  @@unique([encounterId, monsterId])
+}

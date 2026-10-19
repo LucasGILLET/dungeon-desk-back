@@ -122,9 +122,15 @@ export const getCharacter = async (req: Request, res: Response) => {
         const userId = userIdOf(req);
         if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
-        const character = await findCharacter(prisma, Number(req.params.id), userId);
+        const id = Number(req.params.id);
+        const own = await findCharacter(prisma, id, userId);
+        // Le MJ d'une campagne lit (sans pouvoir les modifier) les personnages de ses joueurs
+        const character = own ?? await prisma.character.findFirst({
+            where: { id, campaignMembers: { some: { campaign: { userId } } } },
+            include: CHARACTER_INCLUDE,
+        });
         if (!character) return res.status(404).json({ message: 'Character not found' });
-        res.json(await sheet(req, character));
+        res.json({ ...(await sheet(req, character)), access: own ? 'OWNER' : 'GAME_MASTER' });
     } catch (error) {
         logger.error(`Error fetching character: ${error instanceof Error ? error.message : error}`);
         res.status(500).json({ message: 'Error fetching character' });

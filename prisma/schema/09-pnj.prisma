@@ -55,6 +55,8 @@ model Npc {
   updatedAt DateTime @updatedAt
 
   abilityScores NpcAbilityScore[]
+  quests        Quest[]
+  campaignNpcs  CampaignNpc[]
 
   @@index([userId])
 }

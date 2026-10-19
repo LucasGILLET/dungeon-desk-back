@@ -166,6 +166,7 @@ model Edition {
   ruleChapters RuleChapter[]
   ruleSections RuleSection[]
   guidePages   GuidePage[]
+  campaigns    Campaign[]
 }
 
 model EditionTranslation {

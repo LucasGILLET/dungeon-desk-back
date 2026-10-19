@@ -63,16 +63,17 @@ model Character {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  abilityScores  CharacterAbilityScore[]
-  classes        CharacterClass[]
-  choices        CharacterChoice[]
-  spells         CharacterSpell[]
-  items          CharacterItem[]
-  currencies     CharacterCurrency[]
-  personality    CharacterPersonality[]
-  conditions     CharacterCondition[]
-  spellSlotUsage CharacterSpellSlotUsage[]
-  featureUsage   CharacterFeatureUsage[]
+  abilityScores   CharacterAbilityScore[]
+  classes         CharacterClass[]
+  choices         CharacterChoice[]
+  spells          CharacterSpell[]
+  items           CharacterItem[]
+  currencies      CharacterCurrency[]
+  personality     CharacterPersonality[]
+  conditions      CharacterCondition[]
+  spellSlotUsage  CharacterSpellSlotUsage[]
+  featureUsage    CharacterFeatureUsage[]
+  campaignMembers CampaignMember[]
 
   @@index([userId])
 }

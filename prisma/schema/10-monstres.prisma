@@ -76,6 +76,7 @@ model Monster {
   spellcasting        MonsterSpellcasting[]
   forms               MonsterForm[]              @relation("MonsterForms")
   formOf              MonsterForm[]              @relation("MonsterFormTarget")
+  encounterMonsters   EncounterMonster[]
 
   @@unique([editionId, index])
   @@index([editionId, challengeRating])

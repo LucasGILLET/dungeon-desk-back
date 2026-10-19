@@ -19,7 +19,8 @@ const enumValues = new Map(enums.map((e) => [e.name, e.values.map((v) => v.name)
 // Tables applicatives : visibles, mais hors des données de jeu (ni rôles ni formulaires soignés)
 // Données de l'application (utilisateurs, personnages, PNJ), hors rôles des données de jeu
 export const isAppModel = (name: string) =>
-  name === 'User' || name.startsWith('Character') || (name.startsWith('Npc') && !name.startsWith('NpcTable'));
+  name === 'User' || name.startsWith('Character') || (name.startsWith('Npc') && !name.startsWith('NpcTable'))
+  || name.startsWith('Campaign') || name === 'Quest' || name.startsWith('Encounter');
 export const srdModels = models.filter((m) => !isAppModel(m.name));
 export const isTranslation = (m: Model) => m.name.endsWith('Translation') && byName.has(m.name.slice(0, -'Translation'.length));
 
@@ -46,6 +47,11 @@ function displayTemplate(m: Model): string | null {
   if (m.name === 'Edition') return '{{code}}';
   if (m.name === 'ClassLevel') return 'Niveau {{level}}';
   if (m.name === 'Character') return '{{name}}';
+  if (['Campaign', 'Quest', 'Encounter'].includes(m.name)) return m.name === 'Quest' ? '{{title}}' : '{{name}}';
+  if (m.name === 'CampaignSession') return 'Séance {{number}} {{title}}';
+  if (m.name === 'CampaignMember') return '{{userId.username}} ({{characterId.name}})';
+  if (m.name === 'CampaignNpc') return '{{npcId.name}}';
+  if (m.name === 'EncounterMonster') return '{{count}} × {{monsterId.index}}';
   if (m.name === 'CharacterClass') return '{{classId.index}} {{subclassId.index}}';
   if (m.name === 'CharacterLevel') return 'Niveau {{characterLevel}} (classe {{classLevel}})';
   if (m.name === 'CharacterItem') return '{{quantity}} × {{equipmentId.index}}{{name}}';
