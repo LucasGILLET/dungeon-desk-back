@@ -40,6 +40,15 @@ Données de jeu en base (branche `feat/srd-database`).
 - L'adresse Auth0 utilisée pour récupérer l'e-mail d'un utilisateur vient
   de `AUTH0_ISSUER` (elle était écrite en dur).
 
+### Sécurité
+- Express 4.22.1 → 4.22.3 (avec `proxy-addr` 2.0.8, `path-to-regexp`
+  0.1.13, `body-parser` 1.20.8, `qs` 6.16), `express-rate-limit` 8.2.1 →
+  8.7.0 (avec `ip-address` 10.7.3), `compression` 1.8.2, `morgan` 1.12.1,
+  `js-yaml` 4.3.2 et `minimatch` 3.1.5 (via `swagger-jsdoc`) : corrige les
+  12 vulnérabilités de production signalées par `npm audit` (dont
+  l'usurpation d'IP de `proxy-addr`, critique, et le contournement du rate
+  limiting par adresses IPv4 mappées en IPv6), sans passer à Express 5.
+
 ### Supprimé
 - Ancienne connexion par e-mail et mot de passe (`/api/auth/register`,
   `/api/auth/login`, JWT et bcrypt) : plus appelée depuis le front, qui
