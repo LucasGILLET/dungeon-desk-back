@@ -46,7 +46,8 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
         if (!email) {
             // Fetch user info from Auth0
             try {
-                const userInfoRes = await fetch(`https://dev-mvx3b7ah7u0lggj0.us.auth0.com/userinfo`, {
+                // Même tenant Auth0 que les jetons (AUTH0_ISSUER), en dev comme en prod
+                const userInfoRes = await fetch(new URL('userinfo', process.env.AUTH0_ISSUER), {
                     headers: { Authorization: req.headers.authorization as string }
                 });
                 if (userInfoRes.ok) {

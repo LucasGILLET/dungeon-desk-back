@@ -216,6 +216,91 @@ Enum NpcTableKind {
   HISTORY_EVENT
 }
 
+Enum ArmorClassSource {
+  NATURAL
+  ARMOR
+  DEXTERITY
+  SPELL
+  CONDITION
+}
+
+Enum DamageModifierKind {
+  VULNERABILITY
+  RESISTANCE
+  IMMUNITY
+}
+
+Enum MonsterActionKind {
+  TRAIT
+  ACTION
+  BONUS_ACTION
+  REACTION
+  LEGENDARY
+  LAIR
+}
+
+Enum MonsterAttackType {
+  MELEE_WEAPON
+  RANGED_WEAPON
+  MELEE_OR_RANGED_WEAPON
+  MELEE_SPELL
+  RANGED_SPELL
+}
+
+Enum MagicItemRarity {
+  COMMON
+  UNCOMMON
+  RARE
+  VERY_RARE
+  LEGENDARY
+  ARTIFACT
+  VARIES
+}
+
+Enum GuideAccent {
+  NEUTRAL
+  SLATE
+  ZINC
+  RED
+  ORANGE
+  AMBER
+  YELLOW
+  EMERALD
+  TEAL
+  CYAN
+  SKY
+  BLUE
+  VIOLET
+  FUCHSIA
+  ROSE
+}
+
+Enum CampaignStatus {
+  PREPARATION
+  ACTIVE
+  PAUSED
+  FINISHED
+}
+
+Enum QuestStatus {
+  ACTIVE
+  COMPLETED
+  FAILED
+  PAUSED
+}
+
+Enum QuestDifficulty {
+  EASY
+  MEDIUM
+  HARD
+  DEADLY
+}
+
+Enum EncounterStatus {
+  PLANNED
+  DONE
+}
+
 Table Locale {
   code varchar [pk, note: '"fr", "en"']
   name varchar [not null, note: 'nom dans sa propre langue : "Français", "English"']
@@ -347,6 +432,21 @@ Table CreatureTypeTranslation {
   pluralName varchar [not null, note: '"Dragons", "Morts-vivants" (ennemi juré du rôdeur)']
   indexes {
     (creatureTypeId, localeCode) [unique]
+  }
+}
+
+Table CreatureSubtype {
+  id int [pk, increment]
+  index varchar [unique, not null, note: '"demon", "shapechanger", "any-race"']
+}
+
+Table CreatureSubtypeTranslation {
+  id int [pk, increment]
+  creatureSubtypeId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"démon", "métamorphe"']
+  indexes {
+    (creatureSubtypeId, localeCode) [unique]
   }
 }
 
@@ -1390,6 +1490,497 @@ Table NpcTableEntryTranslation {
   }
 }
 
+Table Monster {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"aboleth"']
+  size Size [not null]
+  creatureTypeId int [not null]
+  swarmOfSize Size
+  isUnaligned boolean [not null, default: false]
+  hitPoints int [not null]
+  hitDiceCount int [not null, note: '18 (18d10)']
+  hitDieSize int [not null, note: '10']
+  hitPointBonus int [not null, default: 0, note: '+36']
+  speeds jsonb [not null]
+  strength int [not null]
+  dexterity int [not null]
+  constitution int [not null]
+  intelligence int [not null]
+  wisdom int [not null]
+  charisma int [not null]
+  senses jsonb [not null]
+  passivePerception int [not null]
+  telepathyFt int
+  initiativeBonus int [note: 'affiché séparément en 2024']
+  challengeRating decimal [not null, note: '0.125, 0.25, 0.5, 1…30']
+  xp int [not null]
+  legendaryActionsPerRound int
+  imageUrl varchar
+  source ContentSource [not null, default: 'SRD']
+  ownerId int
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table MonsterTranslation {
+  id int [pk, increment]
+  monsterId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Aboleth"']
+  description varchar
+  languagesText varchar
+  indexes {
+    (monsterId, localeCode) [unique]
+  }
+}
+
+Table MonsterSubtype {
+  id int [pk, increment]
+  monsterId int [not null]
+  creatureSubtypeId int [not null]
+  indexes {
+    (monsterId, creatureSubtypeId) [unique]
+  }
+}
+
+Table MonsterAlignment {
+  id int [pk, increment]
+  monsterId int [not null]
+  alignmentId int [not null]
+  indexes {
+    (monsterId, alignmentId) [unique]
+  }
+}
+
+Table MonsterArmorClass {
+  id int [pk, increment]
+  monsterId int [not null]
+  position int [not null]
+  value int [not null]
+  sourceType ArmorClassSource [not null]
+  spellId int
+  conditionId int
+}
+
+Table MonsterArmorClassTranslation {
+  id int [pk, increment]
+  armorClassId int [not null]
+  localeCode varchar [not null]
+  note varchar [not null]
+  indexes {
+    (armorClassId, localeCode) [unique]
+  }
+}
+
+Table MonsterArmorClassEquipment {
+  id int [pk, increment]
+  armorClassId int [not null]
+  equipmentId int [not null]
+  indexes {
+    (armorClassId, equipmentId) [unique]
+  }
+}
+
+Table MonsterSavingThrow {
+  id int [pk, increment]
+  monsterId int [not null]
+  abilityScoreId int [not null]
+  bonus int [not null]
+  indexes {
+    (monsterId, abilityScoreId) [unique]
+  }
+}
+
+Table MonsterSkill {
+  id int [pk, increment]
+  monsterId int [not null]
+  skillId int [not null]
+  bonus int [not null]
+  indexes {
+    (monsterId, skillId) [unique]
+  }
+}
+
+Table MonsterDamageModifier {
+  id int [pk, increment]
+  monsterId int [not null]
+  kind DamageModifierKind [not null]
+  damageTypeId int
+  nonMagicalOnly boolean [not null, default: false]
+}
+
+Table MonsterDamageModifierTranslation {
+  id int [pk, increment]
+  damageModifierId int [not null]
+  localeCode varchar [not null]
+  note varchar [not null, note: '"dégâts des sorts", "(grâce à peau de pierre)"']
+  indexes {
+    (damageModifierId, localeCode) [unique]
+  }
+}
+
+Table MonsterConditionImmunity {
+  id int [pk, increment]
+  monsterId int [not null]
+  conditionId int [not null]
+  indexes {
+    (monsterId, conditionId) [unique]
+  }
+}
+
+Table MonsterLanguage {
+  id int [pk, increment]
+  monsterId int [not null]
+  languageId int [not null]
+  understandOnly boolean [not null, default: false, note: '"comprend le commun mais ne peut pas parler"']
+  indexes {
+    (monsterId, languageId) [unique]
+  }
+}
+
+Table MonsterAction {
+  id int [pk, increment]
+  monsterId int [not null]
+  kind MonsterActionKind [not null]
+  position int [not null]
+  attackType MonsterAttackType
+  attackBonus int
+  reachFt int
+  normalRangeFt int
+  longRangeFt int
+  saveAbilityId int
+  saveDc int
+  saveSuccess SaveSuccess
+  usage jsonb
+  legendaryCost int
+}
+
+Table MonsterActionTranslation {
+  id int [pk, increment]
+  actionId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Tentacule"']
+  description varchar [not null]
+  indexes {
+    (actionId, localeCode) [unique]
+  }
+}
+
+Table MonsterActionDamage {
+  id int [pk, increment]
+  actionId int [not null]
+  position int [not null]
+  dice varchar [not null, note: '"2d6+5" (regex Zod)']
+  damageTypeId int [not null]
+  alternativeGroup int
+}
+
+Table MonsterMultiattackStep {
+  id int [pk, increment]
+  position int [not null]
+  multiattackId int [not null]
+  targetActionId int [not null]
+  count int [not null]
+  alternativeGroup int [not null, default: 1]
+}
+
+Table MonsterSpellcasting {
+  id int [pk, increment]
+  monsterId int [not null]
+  actionId int [unique, not null]
+  abilityScoreId int [not null]
+  saveDc int
+  attackBonus int
+  casterLevel int
+  classId int
+  slots jsonb
+}
+
+Table MonsterSpell {
+  id int [pk, increment]
+  spellcastingId int [not null]
+  spellId int [not null]
+  usage jsonb
+  indexes {
+    (spellcastingId, spellId) [unique]
+  }
+}
+
+Table MonsterForm {
+  id int [pk, increment]
+  monsterId int [not null]
+  formMonsterId int [not null]
+  indexes {
+    (monsterId, formMonsterId) [unique]
+  }
+}
+
+Table MagicItem {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"bag-of-holding"']
+  equipmentCategoryId int [not null]
+  rarity MagicItemRarity [not null]
+  requiresAttunement boolean [not null, default: false]
+  parentId int
+  imageUrl varchar
+  source ContentSource [not null, default: 'SRD']
+  ownerId int
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table MagicItemTranslation {
+  id int [pk, increment]
+  magicItemId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Sac sans fond"']
+  subtitle varchar
+  description varchar [not null]
+  indexes {
+    (magicItemId, localeCode) [unique]
+  }
+}
+
+Table RuleChapter {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"combat"']
+  position int [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table RuleChapterTranslation {
+  id int [pk, increment]
+  ruleChapterId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Combat"']
+  description varchar
+  indexes {
+    (ruleChapterId, localeCode) [unique]
+  }
+}
+
+Table RuleSection {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, note: '"cover"']
+  chapterId int [not null]
+  position int [not null]
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table RuleSectionTranslation {
+  id int [pk, increment]
+  ruleSectionId int [not null]
+  localeCode varchar [not null]
+  name varchar [not null, note: '"Abri"']
+  description varchar [not null, note: 'Markdown, titres compris']
+  indexes {
+    (ruleSectionId, localeCode) [unique]
+  }
+}
+
+Table GuidePage {
+  id int [pk, increment]
+  editionId int [not null]
+  index varchar [not null, default: `dbgenerated("(gen_random_uuid()`, note: '"classes", "combat-cheat-sheet"']
+  position int [not null, default: 0]
+  published boolean [not null, default: true]
+  icon varchar
+  accent GuideAccent
+  indexes {
+    (editionId, index) [unique]
+  }
+}
+
+Table GuidePageTranslation {
+  id int [pk, increment]
+  guidePageId int [not null]
+  localeCode varchar [not null]
+  title varchar [not null, note: '"Choix de classe" (navigation)']
+  shortTitle varchar [note: '"Classes" (badge)']
+  eyebrow varchar [note: '"Choix de la classe"']
+  heading varchar [note: '"Choisir sa classe, sans se perdre"']
+  intro varchar [note: 'Markdown']
+  indexes {
+    (guidePageId, localeCode) [unique]
+  }
+}
+
+Table GuideSection {
+  id int [pk, increment]
+  pageId int [not null]
+  index varchar [not null, default: `dbgenerated("(gen_random_uuid()`, note: '"martial-melee", "action"']
+  position int [not null, default: 0]
+  level int [not null, default: 1]
+  icon varchar
+  accent GuideAccent
+  indexes {
+    (pageId, index) [unique]
+  }
+}
+
+Table GuideSectionTranslation {
+  id int [pk, increment]
+  guideSectionId int [not null]
+  localeCode varchar [not null]
+  title varchar [note: '"Les classes martiales"']
+  subtitle varchar [note: '"Action principale"']
+  body varchar [note: 'Markdown']
+  indexes {
+    (guideSectionId, localeCode) [unique]
+  }
+}
+
+Table GuideCard {
+  id int [pk, increment]
+  sectionId int [not null]
+  index varchar [not null, default: `dbgenerated("(gen_random_uuid()`, note: '"fighter", "dodge"']
+  position int [not null, default: 0]
+  icon varchar
+  accent GuideAccent
+  classId int
+  raceId int
+  ruleSectionId int
+  detailSectionId int
+  indexes {
+    (sectionId, index) [unique]
+  }
+}
+
+Table GuideCardTranslation {
+  id int [pk, increment]
+  guideCardId int [not null]
+  localeCode varchar [not null]
+  title varchar [not null, note: '"Guerrier", "Esquiver"']
+  eyebrow varchar [note: '"Le spécialiste du combat"']
+  summary varchar [note: 'Markdown']
+  advice varchar [note: 'encadré « À retenir »']
+  indexes {
+    (guideCardId, localeCode) [unique]
+  }
+}
+
+Table GuideCardList {
+  id int [pk, increment]
+  cardId int [not null]
+  position int [not null, default: 0]
+  indexes {
+    (cardId, position) [unique]
+  }
+}
+
+Table GuideCardListTranslation {
+  id int [pk, increment]
+  guideCardListId int [not null]
+  localeCode varchar [not null]
+  label varchar [note: '"Talents raciaux"']
+  items varchar [not null, note: 'une puce par ligne']
+  indexes {
+    (guideCardListId, localeCode) [unique]
+  }
+}
+
+Table Campaign {
+  id int [pk, increment]
+  userId int [not null, note: 'MJ']
+  editionId int [not null]
+  name varchar [not null]
+  description varchar [note: 'Markdown']
+  theme varchar [note: '"Horreur gothique", "Exploration"']
+  status CampaignStatus [not null, default: 'PREPARATION']
+  inviteCode varchar [unique, not null]
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+}
+
+Table CampaignMember {
+  id int [pk, increment]
+  campaignId int [not null]
+  userId int [not null]
+  characterId int
+  joinedAt timestamp [not null, default: `now()`]
+  indexes {
+    (campaignId, userId) [unique]
+  }
+}
+
+Table CampaignSession {
+  id int [pk, increment]
+  campaignId int [not null]
+  number int [not null, note: 'séance n°']
+  playedOn timestamp
+  title varchar
+  summary varchar [note: 'Markdown, visible des joueurs']
+  gmNotes varchar [note: 'Markdown, réservé au MJ']
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+  indexes {
+    (campaignId, number) [unique]
+  }
+}
+
+Table Quest {
+  id int [pk, increment]
+  campaignId int [not null]
+  position int [not null]
+  title varchar [not null]
+  description varchar [note: 'Markdown']
+  status QuestStatus [not null, default: 'ACTIVE']
+  difficulty QuestDifficulty
+  reward varchar
+  giverNpcId int
+  revealed boolean [not null, default: false]
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+}
+
+Table CampaignNpc {
+  id int [pk, increment]
+  campaignId int [not null]
+  npcId int [not null]
+  role varchar [note: '"Aubergiste, informateur"']
+  location varchar [note: '"Phandaline"']
+  notes varchar
+  indexes {
+    (campaignId, npcId) [unique]
+  }
+}
+
+Table Encounter {
+  id int [pk, increment]
+  campaignId int [not null]
+  sessionId int
+  position int [not null]
+  name varchar [not null]
+  description varchar [note: 'Markdown']
+  status EncounterStatus [not null, default: 'PLANNED']
+  createdAt timestamp [not null, default: `now()`]
+  updatedAt timestamp [not null]
+}
+
+Table EncounterMonster {
+  id int [pk, increment]
+  encounterId int [not null]
+  monsterId int [not null]
+  count int [not null]
+  indexes {
+    (encounterId, monsterId) [unique]
+  }
+}
+
 Ref: AbilityScoreTranslation.abilityScoreId > AbilityScore.id
 Ref: Skill.abilityScoreId > AbilityScore.id
 Ref: SkillTranslation.skillId > Skill.id
@@ -1397,6 +1988,7 @@ Ref: AlignmentTranslation.alignmentId > Alignment.id
 Ref: DamageTypeTranslation.damageTypeId > DamageType.id
 Ref: MagicSchoolTranslation.magicSchoolId > MagicSchool.id
 Ref: CreatureTypeTranslation.creatureTypeId > CreatureType.id
+Ref: CreatureSubtypeTranslation.creatureSubtypeId > CreatureSubtype.id
 Ref: TerrainTranslation.terrainId > Terrain.id
 Ref: ConditionTranslation.conditionId > Condition.id
 Ref: Language.scriptId > Language.id
@@ -1558,6 +2150,72 @@ Ref: NpcAbilityScore.npcId > Npc.id
 Ref: NpcAbilityScore.abilityScoreId > AbilityScore.id
 Ref: NpcTableEntry.raceId > Race.id
 Ref: NpcTableEntryTranslation.entryId > NpcTableEntry.id
+Ref: Monster.creatureTypeId > CreatureType.id
+Ref: MonsterTranslation.monsterId > Monster.id
+Ref: MonsterSubtype.monsterId > Monster.id
+Ref: MonsterSubtype.creatureSubtypeId > CreatureSubtype.id
+Ref: MonsterAlignment.monsterId > Monster.id
+Ref: MonsterAlignment.alignmentId > Alignment.id
+Ref: MonsterArmorClass.monsterId > Monster.id
+Ref: MonsterArmorClass.spellId > Spell.id
+Ref: MonsterArmorClass.conditionId > Condition.id
+Ref: MonsterArmorClassTranslation.armorClassId > MonsterArmorClass.id
+Ref: MonsterArmorClassEquipment.armorClassId > MonsterArmorClass.id
+Ref: MonsterArmorClassEquipment.equipmentId > Equipment.id
+Ref: MonsterSavingThrow.monsterId > Monster.id
+Ref: MonsterSavingThrow.abilityScoreId > AbilityScore.id
+Ref: MonsterSkill.monsterId > Monster.id
+Ref: MonsterSkill.skillId > Skill.id
+Ref: MonsterDamageModifier.monsterId > Monster.id
+Ref: MonsterDamageModifier.damageTypeId > DamageType.id
+Ref: MonsterDamageModifierTranslation.damageModifierId > MonsterDamageModifier.id
+Ref: MonsterConditionImmunity.monsterId > Monster.id
+Ref: MonsterConditionImmunity.conditionId > Condition.id
+Ref: MonsterLanguage.monsterId > Monster.id
+Ref: MonsterLanguage.languageId > Language.id
+Ref: MonsterAction.monsterId > Monster.id
+Ref: MonsterAction.saveAbilityId > AbilityScore.id
+Ref: MonsterActionTranslation.actionId > MonsterAction.id
+Ref: MonsterActionDamage.actionId > MonsterAction.id
+Ref: MonsterActionDamage.damageTypeId > DamageType.id
+Ref: MonsterMultiattackStep.multiattackId > MonsterAction.id
+Ref: MonsterMultiattackStep.targetActionId > MonsterAction.id
+Ref: MonsterSpellcasting.monsterId > Monster.id
+Ref: MonsterSpellcasting.actionId - MonsterAction.id
+Ref: MonsterSpellcasting.abilityScoreId > AbilityScore.id
+Ref: MonsterSpellcasting.classId > Class.id
+Ref: MonsterSpell.spellcastingId > MonsterSpellcasting.id
+Ref: MonsterSpell.spellId > Spell.id
+Ref: MonsterForm.monsterId > Monster.id
+Ref: MonsterForm.formMonsterId > Monster.id
+Ref: MagicItem.equipmentCategoryId > EquipmentCategory.id
+Ref: MagicItem.parentId > MagicItem.id
+Ref: MagicItemTranslation.magicItemId > MagicItem.id
+Ref: RuleChapterTranslation.ruleChapterId > RuleChapter.id
+Ref: RuleSection.chapterId > RuleChapter.id
+Ref: RuleSectionTranslation.ruleSectionId > RuleSection.id
+Ref: GuidePageTranslation.guidePageId > GuidePage.id
+Ref: GuideSection.pageId > GuidePage.id
+Ref: GuideSectionTranslation.guideSectionId > GuideSection.id
+Ref: GuideCard.sectionId > GuideSection.id
+Ref: GuideCard.classId > Class.id
+Ref: GuideCard.raceId > Race.id
+Ref: GuideCard.ruleSectionId > RuleSection.id
+Ref: GuideCard.detailSectionId > GuideSection.id
+Ref: GuideCardTranslation.guideCardId > GuideCard.id
+Ref: GuideCardList.cardId > GuideCard.id
+Ref: GuideCardListTranslation.guideCardListId > GuideCardList.id
+Ref: CampaignMember.campaignId > Campaign.id
+Ref: CampaignMember.characterId > Character.id
+Ref: CampaignSession.campaignId > Campaign.id
+Ref: Quest.campaignId > Campaign.id
+Ref: Quest.giverNpcId > Npc.id
+Ref: CampaignNpc.campaignId > Campaign.id
+Ref: CampaignNpc.npcId > Npc.id
+Ref: Encounter.campaignId > Campaign.id
+Ref: Encounter.sessionId > CampaignSession.id
+Ref: EncounterMonster.encounterId > Encounter.id
+Ref: EncounterMonster.monsterId > Monster.id
 
 TableGroup "Socle des données de jeu" [color: #7F8C8D] {
   Locale
@@ -1578,6 +2236,8 @@ TableGroup "Référentiels" [color: #3498DB] {
   MagicSchoolTranslation
   CreatureType
   CreatureTypeTranslation
+  CreatureSubtype
+  CreatureSubtypeTranslation
   Terrain
   TerrainTranslation
   Condition
@@ -1692,4 +2352,57 @@ TableGroup "Pnj et générateur de pnj" [color: #7F8C8D] {
   NpcAbilityScore
   NpcTableEntry
   NpcTableEntryTranslation
+}
+
+TableGroup "Monstres" [color: #3498DB] {
+  Monster
+  MonsterTranslation
+  MonsterSubtype
+  MonsterAlignment
+  MonsterArmorClass
+  MonsterArmorClassTranslation
+  MonsterArmorClassEquipment
+  MonsterSavingThrow
+  MonsterSkill
+  MonsterDamageModifier
+  MonsterDamageModifierTranslation
+  MonsterConditionImmunity
+  MonsterLanguage
+  MonsterAction
+  MonsterActionTranslation
+  MonsterActionDamage
+  MonsterMultiattackStep
+  MonsterSpellcasting
+  MonsterSpell
+  MonsterForm
+}
+
+TableGroup "Objets magiques" [color: #D35400] {
+  MagicItem
+  MagicItemTranslation
+}
+
+TableGroup "Règles du srd et guides" [color: #2C3E50] {
+  RuleChapter
+  RuleChapterTranslation
+  RuleSection
+  RuleSectionTranslation
+  GuidePage
+  GuidePageTranslation
+  GuideSection
+  GuideSectionTranslation
+  GuideCard
+  GuideCardTranslation
+  GuideCardList
+  GuideCardListTranslation
+}
+
+TableGroup "Campagnes" [color: #24BAB1] {
+  Campaign
+  CampaignMember
+  CampaignSession
+  Quest
+  CampaignNpc
+  Encounter
+  EncounterMonster
 }

@@ -9,6 +9,41 @@ et ce projet suit le [Semantic Versioning](https://semver.org/lang/fr/).
 > de l'historique Git (aucun tag n'existait avant juillet 2026) afin de
 > documenter l'évolution du projet pour le dossier de certification.
 
+## [Non publié]
+
+Données de jeu en base (branche `feat/srd-database`).
+
+### Ajouté
+- Base relationnelle des données du SRD 5.1, multi-édition et traduite
+  (une table `*Translation` par entité) : référentiels, équipement,
+  classes et sous-classes, races, historiques, dons, sorts, monstres,
+  objets magiques, règles du SRD ; seed idempotent depuis
+  `prisma/data/2014/` (`npx prisma db seed`).
+- Routes publiques `/api/srd/:edition/…` (classes, races, historiques,
+  sorts, monstres, objets magiques, règles, guides, règles de création,
+  tables du générateur de PNJ).
+- Personnages au format relationnel : création, aperçu, fiche calculée
+  (CA, PV, emplacements de sorts, ressources), montée de niveau et
+  multiclassage, inventaire, sorts connus et préparés.
+- Campagnes : invitation des joueurs par lien, séances, quêtes, PNJ,
+  rencontres avec calcul de difficulté (Guide du maître 2014) ; le MJ lit
+  la fiche des personnages de ses joueurs.
+- Guides de l'application (pages de documentation, aide-mémoire de
+  combat) en base, rédigeables dans Directus.
+- Back-office Directus configuré par script (`npm run directus:config`) :
+  menus, formulaires, rôles (éditeur, traducteur, rédacteur), flow de
+  remplissage automatique des guides.
+
+### Modifié
+- PNJ : traits en colonnes (plus de JSON), race, classe et alignement
+  référencés.
+- L'adresse Auth0 utilisée pour récupérer l'e-mail d'un utilisateur vient
+  de `AUTH0_ISSUER` (elle était écrite en dur).
+
+### Supprimé
+- Colonne JSON `data` des personnages : la migration
+  `20261017100000_character_model` supprime les personnages existants.
+
 ## [1.0.0] - 2026-07-07
 
 Version de référence pour la certification RNCP39583.

@@ -72,8 +72,6 @@ export const TraitActionSchema = z
   })
   .strict();
 
-export type DiceScaling = z.infer<typeof DiceScalingSchema>;
-export type Speeds = z.infer<typeof SpeedsSchema>;
 export type TraitAction = z.infer<typeof TraitActionSchema>;
 
 // --- Monstres ------------------------------------------------------------------
@@ -103,6 +101,4 @@ export const MonsterUsageSchema = z.discriminatedUnion('type', [
 // Emplacements de sorts par niveau : { "1": 4, "2": 3 }
 export const SpellSlotsSchema = z.record(z.string().regex(/^[1-9]$/, 'Niveau invalide'), z.number().int().positive());
 
-export type MonsterSpeeds = z.infer<typeof MonsterSpeedsSchema>;
-export type Senses = z.infer<typeof SensesSchema>;
 export type MonsterUsage = z.infer<typeof MonsterUsageSchema>;

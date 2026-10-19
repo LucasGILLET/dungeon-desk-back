@@ -54,8 +54,4 @@ export const encounterInputSchema = z.object({
 // Rejoindre une campagne, ou changer de personnage
 export const membershipInputSchema = z.object({ characterId: id.nullish() });
 
-export type CampaignInput = z.infer<typeof campaignInputSchema>;
-export type SessionInput = z.infer<typeof sessionInputSchema>;
-export type QuestInput = z.infer<typeof questInputSchema>;
-export type CampaignNpcInput = z.infer<typeof campaignNpcInputSchema>;
 export type EncounterInput = z.infer<typeof encounterInputSchema>;
