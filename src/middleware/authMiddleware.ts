@@ -72,7 +72,6 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
                          auth0Id: auth0Id as string,
                          email,
                          username: email.split('@')[0],
-                         password: '', // Placeholder since password is required but unused for Auth0
                      },
                  });
              }

@@ -41,6 +41,9 @@ Données de jeu en base (branche `feat/srd-database`).
   de `AUTH0_ISSUER` (elle était écrite en dur).
 
 ### Supprimé
+- Ancienne connexion par e-mail et mot de passe (`/api/auth/register`,
+  `/api/auth/login`, JWT et bcrypt) : plus appelée depuis le front, qui
+  passe uniquement par Auth0 ; `JWT_SECRET` n'est plus utilisé.
 - Colonne JSON `data` des personnages : la migration
   `20261017100000_character_model` supprime les personnages existants.
 

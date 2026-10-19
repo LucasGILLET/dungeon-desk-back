@@ -9,7 +9,6 @@ import helmet from 'helmet';
 
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './swagger';
-import authRoutes from './routes/authRoutes';
 import npcRoutes from './routes/npcRoutes';
 import characterRoutes from './routes/characterRoutes';
 import campaignRoutes from './routes/campaignRoutes';
@@ -65,8 +64,8 @@ app.get('/metrics', async (req, res) => {
   }
 });
 
-// Limite stricte sur l'authentification (force brute), large ailleurs : le
-// créateur de personnage interroge l'API à chaque étape.
+// Limite large : le créateur de personnage interroge l'API à chaque étape.
+// (L'authentification est déléguée à Auth0.)
 const limit = (max: number) => rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max, // requêtes par fenêtre et par IP
@@ -75,7 +74,6 @@ const limit = (max: number) => rateLimit({
   message: 'Trop de requêtes, veuillez réessayer plus tard.'
 });
 
-app.use('/api/auth', limit(50));
 app.use(limit(1000));
 
 app.use(cors({
@@ -93,7 +91,6 @@ app.get('/openapi.json', (req, res) => {
 });
 
 // Routes
-app.use('/api/auth', authRoutes);
 app.use('/api/npcs', npcRoutes);
 app.use('/api/characters', characterRoutes);
 app.use('/api/campaigns', campaignRoutes);
