@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import {
-  campaignNpcs, createCampaign, deleteCampaign, encounters, getCampaign, getCampaigns, getInvite, joinCampaign, quests, regenerateInvite,
-  removeMember, sessions, updateCampaign, updateMembership,
+  addGmCharacter, campaignNpcs, createCampaign, deleteCampaign, encounters, getCampaign, getCampaigns, getInvite, joinCampaign, quests, regenerateInvite,
+  removeGmCharacter, removeMember, sessions, updateCampaign, updateMembership,
 } from '../controllers/campaignController';
 import { protect } from '../middleware/authMiddleware';
 
@@ -140,10 +140,33 @@ router.delete('/:id', deleteCampaign);
  *       - { in: path, name: userId, required: true, schema: { type: integer } }
  *     responses:
  *       200: { description: Removed }
+ * /campaigns/{id}/gm-characters:
+ *   post:
+ *     summary: Add one of the game master's characters to the party
+ *     operationId: addCampaignGmCharacter
+ *     tags: [Campaigns]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: integer } }
+ *     responses:
+ *       201: { description: Added }
+ * /campaigns/{id}/gm-characters/{characterId}:
+ *   delete:
+ *     summary: Remove a game master's character from the party
+ *     operationId: removeCampaignGmCharacter
+ *     tags: [Campaigns]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: integer } }
+ *       - { in: path, name: characterId, required: true, schema: { type: integer } }
+ *     responses:
+ *       200: { description: Removed }
  */
 router.post('/:id/invite', regenerateInvite);
 router.put('/:id/membership', updateMembership);
 router.delete('/:id/members/:userId', removeMember);
+router.post('/:id/gm-characters', addGmCharacter);
+router.delete('/:id/gm-characters/:characterId', removeGmCharacter);
 
 /**
  * @swagger

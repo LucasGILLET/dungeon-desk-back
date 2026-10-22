@@ -53,5 +53,6 @@ export const encounterInputSchema = z.object({
 
 // Rejoindre une campagne, ou changer de personnage
 export const membershipInputSchema = z.object({ characterId: id.nullish() });
+export const gmCharacterInputSchema = z.object({ characterId: id });
 
 export type EncounterInput = z.infer<typeof encounterInputSchema>;

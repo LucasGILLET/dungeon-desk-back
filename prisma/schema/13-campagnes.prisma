@@ -32,11 +32,13 @@ model Campaign {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
-  members    CampaignMember[]
-  sessions   CampaignSession[]
-  quests     Quest[]
-  npcs       CampaignNpc[]
-  encounters Encounter[]
+  members      CampaignMember[]
+  // Personnages du MJ lui-même dans le groupe (plusieurs possibles)
+  gmCharacters CampaignGmCharacter[]
+  sessions     CampaignSession[]
+  quests       Quest[]
+  npcs         CampaignNpc[]
+  encounters   Encounter[]
 
   @@index([userId])
 }
@@ -54,6 +56,20 @@ model CampaignMember {
 
   @@unique([campaignId, userId])
   @@index([userId])
+}
+
+// Personnage du MJ ajouté au groupe de sa campagne (PJ qu'il joue lui-même,
+// compagnon, partie en solo) : membre du groupe sans être un joueur invité
+model CampaignGmCharacter {
+  id          Int       @id @default(autoincrement())
+  campaignId  Int
+  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  characterId Int
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  addedAt     DateTime  @default(now())
+
+  @@unique([campaignId, characterId])
+  @@index([characterId])
 }
 
 model CampaignSession {

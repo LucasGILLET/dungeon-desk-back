@@ -74,6 +74,7 @@ model Character {
   spellSlotUsage  CharacterSpellSlotUsage[]
   featureUsage    CharacterFeatureUsage[]
   campaignMembers CampaignMember[]
+  gmCampaigns     CampaignGmCharacter[]
 
   @@index([userId])
 }

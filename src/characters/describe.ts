@@ -310,10 +310,15 @@ export interface ArmorClass {
   detail: string; // "Cotte de mailles 16 + Bouclier 2", "10 + 2 (DEX) + 3 (SAG)"
 }
 
-// Armure équipée (+ DEX selon l'armure), sinon 10 + DEX, ou la défense sans
-// armure du moine (+ SAG, sans bouclier) et du barbare (+ CON) ; + bouclier.
+// Style de combat « Défense » : +1 tant que le personnage porte une armure
+const DEFENSE_STYLES = ['fighter-fighting-style-defense', 'fighting-style-defense', 'ranger-fighting-style-defense'];
+
+// Armure équipée (+ DEX selon l'armure, + 1 avec le style Défense), sinon
+// 10 + DEX, ou la défense sans armure du moine (+ SAG, sans bouclier), du
+// barbare (+ CON) ou la résilience draconique (13 + DEX) ; + bouclier.
 export async function describeArmorClass(
-  db: Db, ctx: RulesContext, input: CharacterInput, sheet: { abilityScores: Record<string, { modifier: number }> }, lang: LangContext,
+  db: Db, ctx: RulesContext, input: CharacterInput,
+  sheet: { abilityScores: Record<string, { modifier: number }>; grantedFeatures: string[] }, lang: LangContext,
 ): Promise<ArmorClass> {
   const mod = (a: string) => sheet.abilityScores[a]?.modifier ?? 0;
   const equipped = input.items.filter((i) => i.equipped && i.equipment).map((i) => i.equipment!);
@@ -328,6 +333,16 @@ export async function describeArmorClass(
   const shield = armors.find((a) => a.armor!.category === 'SHIELD');
   const signed = (n: number) => (n >= 0 ? `+ ${n}` : `− ${-n}`);
   const classes = new Set(input.classes.map((c) => c.class));
+  const defenseStyle = DEFENSE_STYLES.find((f) => sheet.grantedFeatures.includes(f));
+  const draconic = input.classes.some((c) => c.class === 'sorcerer' && c.subclass === 'draconic');
+  const wanted = [defenseStyle, draconic && 'draconic-resilience'].filter((f): f is string => !!f);
+  const features = wanted.length
+    ? await db.classFeature.findMany({ where: { editionId: ctx.edition?.id, index: { in: wanted } }, select: { index: true, translations: t } })
+    : [];
+  const featureName = (index: string) => {
+    const f = features.find((x) => x.index === index);
+    return f ? pick(f.translations, lang).name : index;
+  };
 
   let value: number;
   let detail: string;
@@ -335,10 +350,15 @@ export async function describeArmorClass(
     const dex = body.armor!.addsDexModifier ? Math.min(mod('dex'), body.armor!.maxDexModifier ?? Infinity) : 0;
     value = body.armor!.baseArmorClass + dex;
     detail = `${name(body)} ${body.armor!.baseArmorClass}${body.armor!.addsDexModifier ? ` ${signed(dex)} (DEX)` : ''}`;
+    if (defenseStyle) {
+      value += 1;
+      detail += ` + 1 (${featureName(defenseStyle)})`;
+    }
   } else {
     const options = [{ value: 10 + mod('dex'), detail: `10 ${signed(mod('dex'))} (DEX)` }];
     if (classes.has('monk') && !shield) options.push({ value: 10 + mod('dex') + mod('wis'), detail: `10 ${signed(mod('dex'))} (DEX) ${signed(mod('wis'))} (SAG)` });
     if (classes.has('barbarian')) options.push({ value: 10 + mod('dex') + mod('con'), detail: `10 ${signed(mod('dex'))} (DEX) ${signed(mod('con'))} (CON)` });
+    if (draconic) options.push({ value: 13 + mod('dex'), detail: `13 ${signed(mod('dex'))} (DEX, ${featureName('draconic-resilience')})` });
     ({ value, detail } = options.reduce((a, b) => (b.value > a.value ? b : a)));
   }
   if (shield) {

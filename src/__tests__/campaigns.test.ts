@@ -17,6 +17,7 @@ vi.mock('../prismaClient', () => ({
     locale: { findMany: vi.fn().mockResolvedValue([{ code: 'en', isDefault: true }, { code: 'fr', isDefault: false }]) },
     campaign: { findUnique: vi.fn(), findUniqueOrThrow: vi.fn(), findMany: vi.fn(), update: vi.fn(), create: vi.fn() },
     campaignMember: { upsert: vi.fn(), deleteMany: vi.fn() },
+    campaignGmCharacter: { upsert: vi.fn(), deleteMany: vi.fn() },
     character: { findFirst: vi.fn() },
     quest: { findFirst: vi.fn() },
     npc: { findFirst: vi.fn() },
@@ -34,6 +35,7 @@ const stored = (questsForRole: object[]) => ({
     character: { id: 9, name: 'Test moine', race: { index: 'human', translations: [{ localeCode: 'fr', name: 'Humain' }] },
       classes: [{ class: { index: 'monk', translations: [{ localeCode: 'fr', name: 'Moine' }] }, _count: { levels: 3 } }] },
   }],
+  gmCharacters: [] as object[],
   sessions: [{ id: 1, number: 1, playedOn: new Date('2026-10-10T00:00:00Z'), title: 'Départ', summary: 'Résumé', gmNotes: 'Secret du MJ' }],
   quests: questsForRole,
   npcs: [],
@@ -100,5 +102,55 @@ describe('Campaign access', () => {
   it('refuses that the game master joins their own campaign', async () => {
     (prisma.campaign.findUnique as any).mockResolvedValue({ id: 5, userId: 1 });
     expect((await request(app).post('/api/campaigns/invite/secret-code/join').send({})).status).toBe(400);
+  });
+});
+
+describe('Game master characters', () => {
+  const gmOf = (gmId: number) => ({ userId: gmId, editionId: 1, members: [] });
+
+  it('shows the game master characters to the players and counts them in the party', async () => {
+    (prisma.campaign.findUnique as any).mockResolvedValue({ userId: 2, editionId: 1, members: [{ id: 3 }] });
+    const campaign = stored([]);
+    campaign.gmCharacters = [{ character: { id: 12, name: 'Compagnon', race: { index: 'elf', translations: [{ localeCode: 'fr', name: 'Elfe' }] },
+      classes: [{ class: { index: 'ranger', translations: [{ localeCode: 'fr', name: 'Rôdeur' }] }, _count: { levels: 2 } }] } }];
+    (prisma.campaign.findUniqueOrThrow as any).mockResolvedValue(campaign);
+
+    const res = await request(app).get('/api/campaigns/5?lang=fr');
+
+    expect(res.body.gmCharacters).toEqual([{ id: 12, name: 'Compagnon', level: 2, race: 'Elfe', classes: [{ name: 'Rôdeur', level: 2 }] }]);
+    expect(res.body.partyLevels).toEqual([3, 2]);
+  });
+
+  it('lets the game master add one of their own characters', async () => {
+    (prisma.campaign.findUnique as any).mockResolvedValue(gmOf(1));
+    (prisma.character.findFirst as any).mockResolvedValue({ id: 12 });
+
+    const res = await request(app).post('/api/campaigns/5/gm-characters').send({ characterId: 12 });
+
+    expect(res.status).toBe(201);
+    // Le personnage est cherché parmi ceux du MJ connecté
+    expect((prisma.character.findFirst as any).mock.calls[0][0].where).toEqual({ id: 12, userId: 1 });
+    expect(prisma.campaignGmCharacter.upsert).toHaveBeenCalledWith(expect.objectContaining({ create: { campaignId: 5, characterId: 12 } }));
+  });
+
+  it("refuses another user's character, and a player who adds a character", async () => {
+    (prisma.campaign.findUnique as any).mockResolvedValue(gmOf(1));
+    (prisma.character.findFirst as any).mockResolvedValue(null);
+    const foreign = await request(app).post('/api/campaigns/5/gm-characters').send({ characterId: 99 });
+    expect(foreign.status).toBe(400);
+
+    (prisma.campaign.findUnique as any).mockResolvedValue({ userId: 2, editionId: 1, members: [{ id: 3 }] });
+    const player = await request(app).post('/api/campaigns/5/gm-characters').send({ characterId: 12 });
+    expect(player.status).toBe(403);
+    expect(prisma.campaignGmCharacter.upsert).not.toHaveBeenCalled();
+  });
+
+  it('removes a game master character, 404 when it is not in the campaign', async () => {
+    (prisma.campaign.findUnique as any).mockResolvedValue(gmOf(1));
+    (prisma.campaignGmCharacter.deleteMany as any).mockResolvedValueOnce({ count: 1 }).mockResolvedValueOnce({ count: 0 });
+
+    expect((await request(app).delete('/api/campaigns/5/gm-characters/12')).status).toBe(200);
+    expect((await request(app).delete('/api/campaigns/5/gm-characters/12')).status).toBe(404);
+    expect((prisma.campaignGmCharacter.deleteMany as any).mock.calls[0][0].where).toEqual({ campaignId: 5, characterId: 12 });
   });
 });

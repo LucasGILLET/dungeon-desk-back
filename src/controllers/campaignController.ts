@@ -7,7 +7,7 @@ import { evaluateEncounter } from '../campaigns/encounter';
 import { LangContext, pick, resolveLang } from '../srd/lang';
 import { logger } from '../utils/logger';
 import {
-  campaignInputSchema, campaignNpcInputSchema, encounterInputSchema, EncounterInput, membershipInputSchema, questInputSchema, sessionInputSchema,
+  campaignInputSchema, campaignNpcInputSchema, encounterInputSchema, EncounterInput, gmCharacterInputSchema, membershipInputSchema, questInputSchema, sessionInputSchema,
 } from '../validators/campaignValidator';
 
 // Campagnes : le MJ (propriétaire) gère tout ; un membre (joueur invité) lit
@@ -131,6 +131,7 @@ export const getCampaign = async (req: Request, res: Response) => {
         edition: { select: { code: true } },
         user: { select: { id: true, username: true } },
         members: { orderBy: { joinedAt: 'asc' }, include: { user: { select: { id: true, username: true } }, character: characterSummary } },
+        gmCharacters: { orderBy: { addedAt: 'asc' }, include: { character: characterSummary } },
         sessions: { orderBy: { number: 'asc' } },
         quests: { where: gm ? {} : { revealed: true }, orderBy: [{ position: 'asc' }, { id: 'asc' }], include: { giverNpc: { select: { id: true, name: true } } } },
         // PNJ et rencontres : lus pour le MJ seulement (aucune ligne pour un joueur)
@@ -144,25 +145,24 @@ export const getCampaign = async (req: Request, res: Response) => {
     });
 
     // Niveau de chaque personnage : nombre de niveaux pris dans ses classes
-    const members = c.members.map((m) => {
-      const level = m.character?.classes.reduce((sum, cl) => sum + cl._count.levels, 0) ?? null;
-      return {
-        userId: m.user.id,
-        name: displayName(m.user),
-        isMe: m.user.id === userId,
-        joinedAt: m.joinedAt,
-        character: m.character
-          ? {
-            id: m.character.id,
-            name: m.character.name,
-            level,
-            race: name(m.character.race),
-            classes: m.character.classes.map((cl) => ({ name: name(cl.class), level: cl._count.levels })),
-          }
-          : null,
-      };
+    type Summary = NonNullable<(typeof c.members)[number]['character']>;
+    const describe = (ch: Summary) => ({
+      id: ch.id,
+      name: ch.name,
+      level: ch.classes.reduce((sum, cl) => sum + cl._count.levels, 0),
+      race: name(ch.race),
+      classes: ch.classes.map((cl) => ({ name: name(cl.class), level: cl._count.levels })),
     });
-    const partyLevels = members.map((m) => m.character?.level ?? 0).filter((l) => l > 0);
+    const members = c.members.map((m) => ({
+      userId: m.user.id,
+      name: displayName(m.user),
+      isMe: m.user.id === userId,
+      joinedAt: m.joinedAt,
+      character: m.character ? describe(m.character) : null,
+    }));
+    // Personnages joués par le MJ : membres du groupe, visibles par tous
+    const gmCharacters = c.gmCharacters.map((g) => describe(g.character));
+    const partyLevels = [...members.map((m) => m.character?.level ?? 0), ...gmCharacters.map((g) => g.level)].filter((l) => l > 0);
 
     res.json({
       id: c.id,
@@ -175,6 +175,7 @@ export const getCampaign = async (req: Request, res: Response) => {
       gm: { id: c.user.id, name: displayName(c.user) },
       inviteCode: gm ? c.inviteCode : null,
       members,
+      gmCharacters,
       partyLevels,
       sessions: c.sessions.map((s) => ({
         id: s.id, number: s.number, playedOn: s.playedOn?.toISOString().slice(0, 10) ?? null, title: s.title, summary: s.summary,
@@ -349,6 +350,39 @@ export const removeMember = async (req: Request, res: Response) => {
     res.json({ message: 'Member removed' });
   } catch (error) {
     fail(res, 'removing member', error);
+  }
+};
+
+// Le MJ ajoute un de ses personnages au groupe, ou l'en retire
+export const addGmCharacter = async (req: Request, res: Response) => {
+  try {
+    const campaign = await asGm(req, res);
+    if (!campaign) return;
+    const input = parse(gmCharacterInputSchema, req, res);
+    if (!input) return;
+    const characterId = await ownCharacter(req, res, input.characterId);
+    if (!characterId) return;
+    await prisma.campaignGmCharacter.upsert({
+      where: { campaignId_characterId: { campaignId: campaign.id, characterId } },
+      create: { campaignId: campaign.id, characterId },
+      update: {},
+    });
+    res.status(201).json({ campaignId: campaign.id, characterId });
+  } catch (error) {
+    fail(res, 'adding game master character', error);
+  }
+};
+
+export const removeGmCharacter = async (req: Request, res: Response) => {
+  try {
+    const campaign = await asGm(req, res);
+    const characterId = campaign && param(req, res, 'characterId');
+    if (!campaign || !characterId) return;
+    const deleted = await prisma.campaignGmCharacter.deleteMany({ where: { campaignId: campaign.id, characterId } });
+    if (!deleted.count) return res.status(404).json({ message: 'Character not in campaign' });
+    res.json({ message: 'Character removed' });
+  } catch (error) {
+    fail(res, 'removing game master character', error);
   }
 };
 
