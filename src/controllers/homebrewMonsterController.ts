@@ -26,8 +26,9 @@ const modifier = (score: number) => Math.floor((score - 10) / 2);
 
 // Index du formulaire → id de la base ; erreurs avec leur chemin
 async function resolveReferences(input: HomebrewMonsterInput) {
-  const actions = [...input.traits, ...input.actions, ...input.bonusActions, ...input.reactions, ...input.legendaryActions];
-  const damageIndexes = [...input.damageVulnerabilities, ...input.damageResistances, ...input.damageImmunities, ...actions.flatMap((a) => a.damages.map((d) => d.damageType))];
+  const actions = [...input.traits, ...input.actions, ...input.bonusActions, ...input.reactions, ...input.legendaryActions, ...input.lairActions];
+  const damageIndexes = [...input.damageVulnerabilities, ...input.damageResistances, ...input.damageImmunities].map((d) => d.damageType)
+    .concat(actions.flatMap((a) => a.damages.map((d) => d.damageType)));
   const abilityIndexes = [...input.savingThrows.map((s) => s.ability), ...actions.flatMap((a) => (a.save ? [a.save.ability] : []))];
   const [edition, types, alignments, abilities, skills, damageTypes, conditions] = await Promise.all([
     prisma.edition.findFirst({ where: { isDefault: true }, select: { id: true } }),
@@ -76,14 +77,15 @@ function monsterData(input: HomebrewMonsterInput, ids: Awaited<ReturnType<typeof
     translations: { create: [{ localeCode: lang, name: a.name, description: a.description }] },
     damages: { create: a.damages.map((d, j) => ({ position: j, dice: d.dice, damageTypeId: ids.damageType(d.damageType, `${path}[${i}].damages[${j}].damageType`) })) },
   });
-  const modifiers = (kind: 'VULNERABILITY' | 'RESISTANCE' | 'IMMUNITY', list: string[], path: string) =>
-    list.map((d, i) => ({ kind, damageTypeId: ids.damageType(d, `${path}[${i}]`) }));
+  const modifiers = (kind: 'VULNERABILITY' | 'RESISTANCE' | 'IMMUNITY', list: HomebrewMonsterInput['damageResistances'], path: string) =>
+    list.map((d, i) => ({ kind, damageTypeId: ids.damageType(d.damageType, `${path}[${i}].damageType`), nonMagicalOnly: d.nonMagicalOnly }));
   const actions = [
     ...input.traits.map(action('TRAIT', 'traits')),
     ...input.actions.map(action('ACTION', 'actions')),
     ...input.bonusActions.map(action('BONUS_ACTION', 'bonusActions')),
     ...input.reactions.map(action('REACTION', 'reactions')),
     ...input.legendaryActions.map(action('LEGENDARY', 'legendaryActions')),
+    ...input.lairActions.map(action('LAIR', 'lairActions')),
   ];
   return {
     scalars: {
@@ -176,14 +178,15 @@ export const getMonsterOptions = async (req: Request, res: Response) => {
       prisma.creatureType.findMany({ ...named, orderBy: { index: 'asc' } }),
       prisma.alignment.findMany({ ...named, orderBy: { id: 'asc' } }),
       prisma.abilityScore.findMany({ ...named, orderBy: { position: 'asc' } }),
-      prisma.skill.findMany({ ...named, orderBy: { index: 'asc' } }),
+      prisma.skill.findMany({ select: { ...named.select, abilityScore: { select: { index: true } } }, orderBy: { index: 'asc' } }),
       prisma.damageType.findMany({ ...named, orderBy: { index: 'asc' } }),
       prisma.condition.findMany({ ...named, orderBy: { index: 'asc' } }),
     ]);
     res.set('Cache-Control', 'private, max-age=3600');
     res.json({
       creatureTypes: types.map(ref), alignments: alignments.map(ref), abilities: abilities.map(ref),
-      skills: skills.map(ref), damageTypes: damageTypes.map(ref), conditions: conditions.map(ref),
+      // Compétences avec leur caractéristique (valeur affichée sans maîtrise)
+      skills: skills.map((k) => ({ ...ref(k), ability: k.abilityScore.index })), damageTypes: damageTypes.map(ref), conditions: conditions.map(ref),
       challengeRatings: Object.keys(CR_XP).map(Number).sort((a, b) => a - b).map((cr) => ({ value: cr, xp: CR_XP[String(cr)] })),
     });
   } catch (error) {

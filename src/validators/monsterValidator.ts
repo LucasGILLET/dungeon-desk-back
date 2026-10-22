@@ -33,6 +33,14 @@ const actionSchema = z.object({
   legendaryCost: z.number().int().min(1).max(3).nullish(),
 });
 
+// Résistance, immunité ou vulnérabilité ; nonMagicalOnly : seulement contre les
+// attaques non magiques (« contondant, perforant et tranchant d'attaques non
+// magiques »). Un simple index reste accepté.
+const damageModifier = z.union([
+  index.transform((damageType) => ({ damageType, nonMagicalOnly: false })),
+  z.object({ damageType: index, nonMagicalOnly: z.boolean().default(false) }),
+]);
+
 export const homebrewMonsterSchema = z.object({
   name: text(120).min(1),
   description: text(20000).nullish(),
@@ -52,9 +60,9 @@ export const homebrewMonsterSchema = z.object({
   abilityScores: z.object({ str: score, dex: score, con: score, int: score, wis: score, cha: score }),
   savingThrows: z.array(z.object({ ability: index, bonus })).max(6).default([]),
   skills: z.array(z.object({ skill: index, bonus })).max(18).default([]),
-  damageVulnerabilities: z.array(index).max(13).default([]),
-  damageResistances: z.array(index).max(13).default([]),
-  damageImmunities: z.array(index).max(13).default([]),
+  damageVulnerabilities: z.array(damageModifier).max(13).default([]),
+  damageResistances: z.array(damageModifier).max(13).default([]),
+  damageImmunities: z.array(damageModifier).max(13).default([]),
   conditionImmunities: z.array(index).max(15).default([]),
   senses: SensesSchema.default({}),
   // Absent : 10 + modificateur de Sagesse
@@ -67,6 +75,8 @@ export const homebrewMonsterSchema = z.object({
   bonusActions: z.array(actionSchema).max(15).default([]),
   reactions: z.array(actionSchema).max(15).default([]),
   legendaryActions: z.array(actionSchema).max(15).default([]),
+  // Actions de repaire (à l'initiative 20, dans l'antre de la créature)
+  lairActions: z.array(actionSchema).max(15).default([]),
 });
 
 export type HomebrewMonsterInput = z.infer<typeof homebrewMonsterSchema>;

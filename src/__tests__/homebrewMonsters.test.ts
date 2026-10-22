@@ -80,7 +80,22 @@ describe('Homebrew monsters', () => {
     expect(data.translations.create).toEqual([{ localeCode: 'fr', name: 'Gobelin des marais', description: null, languagesText: null }]);
     expect(data.actions.create[0]).toMatchObject({ kind: 'ACTION', attackType: 'MELEE_WEAPON', attackBonus: 4, reachFt: 5, saveAbilityId: null, saveDc: null });
     expect(data.actions.create[0].damages.create).toEqual([{ position: 0, dice: '1d6+2', damageTypeId: 'slashing'.length }]);
-    expect(data.damageModifiers.create).toEqual([{ kind: 'RESISTANCE', damageTypeId: 'poison'.length }]);
+    expect(data.damageModifiers.create).toEqual([{ kind: 'RESISTANCE', damageTypeId: 'poison'.length, nonMagicalOnly: false }]);
+  });
+
+  it('keeps resistances to non-magical attacks only, and lair actions', async () => {
+    (prisma.monster.create as any).mockResolvedValue({ index: 'golem-abc123' });
+    await request(app).post('/api/monsters').send({
+      ...goblin,
+      damageResistances: [{ damageType: 'slashing', nonMagicalOnly: true }, 'poison'],
+      lairActions: [{ name: 'Éboulement', description: 'Des pierres tombent.', save: { ability: 'dex', dc: 13 }, damages: [{ dice: '2d6', damageType: 'bludgeoning' }] }],
+    });
+    const data = (prisma.monster.create as any).mock.calls[0][0].data;
+    expect(data.damageModifiers.create).toEqual([
+      { kind: 'RESISTANCE', damageTypeId: 'slashing'.length, nonMagicalOnly: true },
+      { kind: 'RESISTANCE', damageTypeId: 'poison'.length, nonMagicalOnly: false },
+    ]);
+    expect(data.actions.create.at(-1)).toMatchObject({ kind: 'LAIR', saveDc: 13, legendaryCost: null });
   });
 
   it('refuses stats outside the bounds of the database and unknown references', async () => {
