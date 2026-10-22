@@ -26,7 +26,7 @@
   },
   {
     "index": "light",
-    "name": "Lumière",
+    "name": "Légère",
     "desc": [
       "Une arme légère est petite et facile à manier, ce qui la rend idéale pour les combats à deux armes."
     ],
@@ -42,7 +42,7 @@
   },
   {
     "index": "reach",
-    "name": "Portée",
+    "name": "Allonge",
     "desc": [
       "Une arme qui peut être utilisée pour effectuer une attaque à distance a une portée indiquée entre parenthèses après les propriétés munitions ou lancer."
     ],

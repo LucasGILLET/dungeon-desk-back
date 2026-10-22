@@ -29,7 +29,7 @@
     "properties": [
       {
         "index": "light",
-        "name": "Lumière",
+        "name": "Légère",
         "url": "/api/2014/weapon-properties/light"
       },
       {
@@ -75,7 +75,7 @@
       },
       {
         "index": "light",
-        "name": "Lumière",
+        "name": "Légère",
         "url": "/api/2014/weapon-properties/light"
       },
       {
@@ -161,7 +161,7 @@
     "properties": [
       {
         "index": "light",
-        "name": "Lumière",
+        "name": "Légère",
         "url": "/api/2014/weapon-properties/light"
       },
       {
@@ -256,7 +256,7 @@
     "properties": [
       {
         "index": "light",
-        "name": "Lumière",
+        "name": "Légère",
         "url": "/api/2014/weapon-properties/light"
       },
       {
@@ -391,7 +391,7 @@
     "properties": [
       {
         "index": "light",
-        "name": "Lumière",
+        "name": "Légère",
         "url": "/api/2014/weapon-properties/light"
       },
       {
@@ -741,7 +741,7 @@
       },
       {
         "index": "reach",
-        "name": "Portée",
+        "name": "Allonge",
         "url": "/api/2014/weapon-properties/reach"
       },
       {
@@ -869,7 +869,7 @@
       },
       {
         "index": "reach",
-        "name": "Portée",
+        "name": "Allonge",
         "url": "/api/2014/weapon-properties/reach"
       },
       {
@@ -910,7 +910,7 @@
     "properties": [
       {
         "index": "reach",
-        "name": "Portée",
+        "name": "Allonge",
         "url": "/api/2014/weapon-properties/reach"
       },
       {
@@ -1074,7 +1074,7 @@
       },
       {
         "index": "reach",
-        "name": "Portée",
+        "name": "Allonge",
         "url": "/api/2014/weapon-properties/reach"
       },
       {
@@ -1156,7 +1156,7 @@
       },
       {
         "index": "light",
-        "name": "Lumière",
+        "name": "Légère",
         "url": "/api/2014/weapon-properties/light"
       }
     ],
@@ -1197,7 +1197,7 @@
       },
       {
         "index": "light",
-        "name": "Lumière",
+        "name": "Légère",
         "url": "/api/2014/weapon-properties/light"
       },
       {
@@ -1370,7 +1370,7 @@
       },
       {
         "index": "reach",
-        "name": "Portée",
+        "name": "Allonge",
         "url": "/api/2014/weapon-properties/reach"
       }
     ],
@@ -1454,7 +1454,7 @@
       },
       {
         "index": "light",
-        "name": "Lumière",
+        "name": "Légère",
         "url": "/api/2014/weapon-properties/light"
       },
       {
