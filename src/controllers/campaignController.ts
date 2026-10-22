@@ -58,7 +58,7 @@ async function roleIn(campaignId: number, userId: number): Promise<{ role: Role;
 }
 
 // Campagne du MJ connecté pour une modification ; null (réponse envoyée) sinon
-async function asGm(req: Request, res: Response): Promise<{ id: number; editionId: number } | null> {
+async function asGm(req: Request, res: Response): Promise<{ id: number; editionId: number; gmId: number } | null> {
   const id = param(req, res, 'id');
   if (!id) return null;
   const access = await roleIn(id, userIdOf(req));
@@ -70,7 +70,7 @@ async function asGm(req: Request, res: Response): Promise<{ id: number; editionI
     res.status(403).json({ message: 'Only the game master can change this campaign' });
     return null;
   }
-  return { id, editionId: access.editionId };
+  return { id, editionId: access.editionId, gmId: userIdOf(req) };
 }
 
 // --- Lecture ------------------------------------------------------------------------
@@ -139,7 +139,7 @@ export const getCampaign = async (req: Request, res: Response) => {
         encounters: {
           where: gm ? {} : { id: -1 },
           orderBy: [{ position: 'asc' }, { id: 'asc' }],
-          include: { monsters: { orderBy: { id: 'asc' }, include: { monster: { select: { index: true, xp: true, challengeRating: true, translations: { orderBy: { localeCode: 'asc' } } } } } } },
+          include: { monsters: { orderBy: { id: 'asc' }, include: { monster: { select: { index: true, ownerId: true, xp: true, challengeRating: true, translations: { orderBy: { localeCode: 'asc' } } } } } } },
         },
       },
     });
@@ -195,6 +195,8 @@ export const getCampaign = async (req: Request, res: Response) => {
         ? c.encounters.map((e) => {
           const monsters = e.monsters.map((em) => ({
             index: em.monster.index, name: pick(em.monster.translations, lang).name, count: em.count, xp: em.monster.xp,
+            // Monstre maison du MJ : sa fiche est dans /api/monsters
+            homebrew: em.monster.ownerId != null,
             challengeRating: Number(em.monster.challengeRating),
           }));
           return {
@@ -394,9 +396,9 @@ function child<S extends ZodTypeAny, M extends 'campaignSession' | 'quest' | 'ca
   what: string
   schema: S
   // Données à écrire ; un tableau = erreurs de validation
-  data: (input: z.infer<S>, campaign: { id: number; editionId: number }, existingId: number | null) => Promise<Record<string, unknown> | Issue[]>
+  data: (input: z.infer<S>, campaign: { id: number; editionId: number; gmId: number }, existingId: number | null) => Promise<Record<string, unknown> | Issue[]>
   // Écritures liées (monstres d'une rencontre), dans la même transaction
-  after?: (tx: Prisma.TransactionClient, id: number, input: z.infer<S>, campaign: { id: number; editionId: number }) => Promise<void>
+  after?: (tx: Prisma.TransactionClient, id: number, input: z.infer<S>, campaign: { id: number; editionId: number; gmId: number }) => Promise<void>
 }) {
   const delegate = (db: Prisma.TransactionClient | typeof prisma) => (db as any)[options.model];
   const touch = (db: Prisma.TransactionClient, id: number) => db.campaign.update({ where: { id }, data: { updatedAt: new Date() } });
@@ -501,9 +503,13 @@ export const campaignNpcs = child({
 });
 
 // Monstres de la rencontre : index → id dans l'édition de la campagne
-async function resolveMonsters(input: EncounterInput, editionId: number): Promise<{ monsterId: number; count: number }[] | Issue[]> {
+// Monstres du SRD ou monstres maison du MJ (jamais ceux d'un autre utilisateur)
+async function resolveMonsters(input: EncounterInput, editionId: number, userId: number): Promise<{ monsterId: number; count: number }[] | Issue[]> {
   const indexes = [...new Set(input.monsters.map((m) => m.monster))];
-  const found = await prisma.monster.findMany({ where: { editionId, index: { in: indexes } }, select: { id: true, index: true } });
+  const found = await prisma.monster.findMany({
+    where: { editionId, index: { in: indexes }, OR: [{ ownerId: null }, { ownerId: userId }] },
+    select: { id: true, index: true },
+  });
   const ids = new Map(found.map((m) => [m.index, m.id]));
   const missing = indexes.filter((i) => !ids.has(i));
   if (missing.length) return missing.map((i) => ({ path: 'monsters', message: `Unknown monster "${i}"` }));
@@ -522,7 +528,7 @@ export const encounters = child({
     if (input.sessionId && !(await prisma.campaignSession.findFirst({ where: { id: input.sessionId, campaignId: campaign.id }, select: { id: true } }))) {
       errors.push({ path: 'sessionId', message: 'Session not found' });
     }
-    const monsters = await resolveMonsters(input, campaign.editionId);
+    const monsters = await resolveMonsters(input, campaign.editionId, campaign.gmId);
     if (monsters.length && 'path' in monsters[0]) errors.push(...(monsters as Issue[]));
     if (errors.length) return errors;
     const { position, monsters: _m, ...fields } = input;
@@ -533,7 +539,7 @@ export const encounters = child({
     };
   },
   after: async (tx, id, input, campaign) => {
-    const monsters = (await resolveMonsters(input, campaign.editionId)) as { monsterId: number; count: number }[];
+    const monsters = (await resolveMonsters(input, campaign.editionId, campaign.gmId)) as { monsterId: number; count: number }[];
     await tx.encounterMonster.deleteMany({ where: { encounterId: id } });
     await tx.encounterMonster.createMany({ data: monsters.map((m) => ({ ...m, encounterId: id })) });
   },

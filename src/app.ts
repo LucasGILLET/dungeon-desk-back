@@ -12,6 +12,7 @@ import { swaggerSpec } from './swagger';
 import npcRoutes from './routes/npcRoutes';
 import characterRoutes from './routes/characterRoutes';
 import campaignRoutes from './routes/campaignRoutes';
+import monsterRoutes from './routes/monsterRoutes';
 import srdRoutes from './routes/srdRoutes';
 import prisma from './prismaClient';
 import { logger } from './utils/logger';
@@ -94,6 +95,7 @@ app.get('/openapi.json', (req, res) => {
 app.use('/api/npcs', npcRoutes);
 app.use('/api/characters', characterRoutes);
 app.use('/api/campaigns', campaignRoutes);
+app.use('/api/monsters', monsterRoutes);
 app.use('/api/srd', srdRoutes);
 
 
