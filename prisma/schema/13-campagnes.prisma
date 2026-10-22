@@ -39,6 +39,7 @@ model Campaign {
   quests       Quest[]
   npcs         CampaignNpc[]
   encounters   Encounter[]
+  combats      Combat[]
 
   @@index([userId])
 }
@@ -159,6 +160,7 @@ model Encounter {
   updatedAt   DateTime         @updatedAt
 
   monsters EncounterMonster[]
+  combats  Combat[]
 
   @@index([campaignId, position])
 }

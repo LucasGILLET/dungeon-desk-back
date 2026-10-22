@@ -75,6 +75,7 @@ model Character {
   featureUsage    CharacterFeatureUsage[]
   campaignMembers CampaignMember[]
   gmCampaigns     CampaignGmCharacter[]
+  combatants      Combatant[]
 
   @@index([userId])
 }

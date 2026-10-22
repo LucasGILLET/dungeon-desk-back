@@ -24,22 +24,22 @@ const nameOf = (lang: LangContext) => (x: { translations: { localeCode: string; 
 const displayName = (user: { id: number; username: string | null }) => user.username ?? `Joueur ${user.id}`;
 const newInviteCode = () => randomBytes(9).toString('base64url');
 
-function fail(res: Response, what: string, error: unknown) {
+export function fail(res: Response, what: string, error: unknown) {
   logger.error(`Error ${what}: ${error instanceof Error ? error.message : error}`);
   res.status(500).json({ message: 'Server error' });
 }
 
-function parse<S extends ZodTypeAny>(schema: S, req: Request, res: Response): z.infer<S> | null {
+export function parse<S extends ZodTypeAny>(schema: S, req: Request, res: Response): z.infer<S> | null {
   const parsed = schema.safeParse(req.body);
   if (parsed.success) return parsed.data;
   res.status(400).json({ message: 'Invalid data', errors: parsed.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })) });
   return null;
 }
 
-const invalid = (res: Response, errors: Issue[]) => res.status(400).json({ message: 'Invalid data', errors });
+export const invalid = (res: Response, errors: Issue[]) => res.status(400).json({ message: 'Invalid data', errors });
 
 // Paramètre de route entier positif ; null (réponse 400 envoyée) sinon
-function param(req: Request, res: Response, name: string): number | null {
+export function param(req: Request, res: Response, name: string): number | null {
   const value = Number(req.params[name]);
   if (Number.isInteger(value) && value > 0) return value;
   res.status(400).json({ message: `Invalid ${name}` });
@@ -58,7 +58,7 @@ async function roleIn(campaignId: number, userId: number): Promise<{ role: Role;
 }
 
 // Campagne du MJ connecté pour une modification ; null (réponse envoyée) sinon
-async function asGm(req: Request, res: Response): Promise<{ id: number; editionId: number; gmId: number } | null> {
+export async function asGm(req: Request, res: Response): Promise<{ id: number; editionId: number; gmId: number } | null> {
   const id = param(req, res, 'id');
   if (!id) return null;
   const access = await roleIn(id, userIdOf(req));

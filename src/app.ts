@@ -13,6 +13,7 @@ import npcRoutes from './routes/npcRoutes';
 import characterRoutes from './routes/characterRoutes';
 import campaignRoutes from './routes/campaignRoutes';
 import monsterRoutes from './routes/monsterRoutes';
+import combatViewRoutes from './routes/combatViewRoutes';
 import srdRoutes from './routes/srdRoutes';
 import prisma from './prismaClient';
 import { logger } from './utils/logger';
@@ -96,6 +97,7 @@ app.use('/api/npcs', npcRoutes);
 app.use('/api/characters', characterRoutes);
 app.use('/api/campaigns', campaignRoutes);
 app.use('/api/monsters', monsterRoutes);
+app.use('/api/combat-view', combatViewRoutes);
 app.use('/api/srd', srdRoutes);
 
 

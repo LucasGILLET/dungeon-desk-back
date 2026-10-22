@@ -56,3 +56,35 @@ export const membershipInputSchema = z.object({ characterId: id.nullish() });
 export const gmCharacterInputSchema = z.object({ characterId: id });
 
 export type EncounterInput = z.infer<typeof encounterInputSchema>;
+
+// Gestionnaire de combat : création (depuis une rencontre ou vide), puis état
+// complet renvoyé à chaque changement (ordre du tableau = ordre d'initiative)
+export const combatCreateSchema = z.object({
+  name: title.optional(),
+  encounterId: id.nullish(),
+});
+
+const hp = z.number().int().min(0).max(10000);
+export const combatStateSchema = z.object({
+  name: title,
+  round: z.number().int().min(1).max(10000),
+  turn: z.number().int().min(0).max(500),
+  finished: z.boolean().default(false),
+  combatants: z.array(z.object({
+    kind: z.enum(['CHARACTER', 'MONSTER', 'OTHER']),
+    characterId: id.nullish(),
+    monster: z.string().trim().min(1).max(100).nullish(),
+    name: z.string().trim().min(1).max(120),
+    initiative: z.number().int().min(-20).max(100).nullish(),
+    initiativeBonus: z.number().int().min(-20).max(40).default(0),
+    armorClass: z.number().int().min(0).max(60).nullish(),
+    maxHitPoints: z.number().int().min(1).max(10000).nullish(),
+    hitPoints: hp.nullish(),
+    tempHitPoints: hp.default(0),
+    conditions: z.array(z.string().trim().min(1).max(100)).max(20).default([]),
+    note: short,
+    hidden: z.boolean().default(false),
+  })).max(100),
+});
+
+export type CombatState = z.infer<typeof combatStateSchema>;

@@ -3,6 +3,7 @@ import {
   addGmCharacter, campaignNpcs, createCampaign, deleteCampaign, encounters, getCampaign, getCampaigns, getInvite, joinCampaign, quests, regenerateInvite,
   removeGmCharacter, removeMember, sessions, updateCampaign, updateMembership,
 } from '../controllers/campaignController';
+import { createCombat, deleteCombat, getCombat, getCombats, saveCombat, shareCombat } from '../controllers/combatController';
 import { protect } from '../middleware/authMiddleware';
 
 const router = Router();
@@ -167,6 +168,90 @@ router.put('/:id/membership', updateMembership);
 router.delete('/:id/members/:userId', removeMember);
 router.post('/:id/gm-characters', addGmCharacter);
 router.delete('/:id/gm-characters/:characterId', removeGmCharacter);
+
+/**
+ * @swagger
+ * /campaigns/{id}/combats:
+ *   get:
+ *     summary: Combats of the campaign (game master)
+ *     operationId: getCampaignCombats
+ *     tags: [Campaigns]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: integer } }
+ *     responses:
+ *       200: { description: Combat summaries }
+ *   post:
+ *     summary: Start a combat with the party, and the monsters of an encounter if given
+ *     operationId: createCampaignCombat
+ *     tags: [Campaigns]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: integer } }
+ *     requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+ *     responses:
+ *       201: { description: Created }
+ * /campaigns/{id}/combats/{combatId}:
+ *   get:
+ *     summary: Full state of a combat (game master)
+ *     operationId: getCampaignCombat
+ *     tags: [Campaigns]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: integer } }
+ *       - { in: path, name: combatId, required: true, schema: { type: integer } }
+ *     responses:
+ *       200: { description: Combat }
+ *   put:
+ *     summary: Save the full state of a combat (order, round, turn, combatants)
+ *     operationId: saveCampaignCombat
+ *     tags: [Campaigns]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: integer } }
+ *       - { in: path, name: combatId, required: true, schema: { type: integer } }
+ *     requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+ *     responses:
+ *       200: { description: Saved combat }
+ *   delete:
+ *     summary: Delete a combat
+ *     operationId: deleteCampaignCombat
+ *     tags: [Campaigns]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: integer } }
+ *       - { in: path, name: combatId, required: true, schema: { type: integer } }
+ *     responses:
+ *       200: { description: Deleted }
+ * /campaigns/{id}/combats/{combatId}/share:
+ *   post:
+ *     summary: Create or renew the link of the players' view (the previous one stops working)
+ *     operationId: shareCampaignCombat
+ *     tags: [Campaigns]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: integer } }
+ *       - { in: path, name: combatId, required: true, schema: { type: integer } }
+ *     responses:
+ *       200: { description: Share code }
+ *   delete:
+ *     summary: Stop sharing the players' view
+ *     operationId: unshareCampaignCombat
+ *     tags: [Campaigns]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: integer } }
+ *       - { in: path, name: combatId, required: true, schema: { type: integer } }
+ *     responses:
+ *       200: { description: No longer shared }
+ */
+router.get('/:id/combats', getCombats);
+router.post('/:id/combats', createCombat);
+router.get('/:id/combats/:combatId', getCombat);
+router.put('/:id/combats/:combatId', saveCombat);
+router.delete('/:id/combats/:combatId', deleteCombat);
+router.post('/:id/combats/:combatId/share', shareCombat);
+router.delete('/:id/combats/:combatId/share', shareCombat);
 
 /**
  * @swagger

@@ -1,0 +1,59 @@
+// ============================================================================
+// Gestionnaire de combat (MJ) : ordre d'initiative, tours, points de vie et
+// états des combattants. Lancé depuis une rencontre ou à la volée.
+// ============================================================================
+
+model Combat {
+  id          Int        @id @default(autoincrement())
+  campaignId  Int
+  campaign    Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  // Rencontre d'origine (facultative)
+  encounterId Int?
+  encounter   Encounter? @relation(fields: [encounterId], references: [id], onDelete: SetNull)
+  name        String
+  round       Int        @default(1)
+  // Position, dans l'ordre d'initiative, du combattant dont c'est le tour
+  turn        Int        @default(0)
+  finished    Boolean    @default(false)
+  // Code du lien de la vue des joueurs (version censurée) ; null = non partagée
+  shareCode   String?    @unique
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  combatants Combatant[]
+
+  @@index([campaignId])
+}
+
+enum CombatantKind {
+  CHARACTER // personnage d'un joueur ou du MJ
+  MONSTER // monstre du bestiaire (SRD ou maison)
+  OTHER // PNJ ou créature saisie à la main
+}
+
+model Combatant {
+  id              Int           @id @default(autoincrement())
+  combatId        Int
+  combat          Combat        @relation(fields: [combatId], references: [id], onDelete: Cascade)
+  // Ordre d'initiative (0 = premier)
+  position        Int
+  kind            CombatantKind
+  characterId     Int?
+  character       Character?    @relation(fields: [characterId], references: [id], onDelete: SetNull)
+  monsterId       Int?
+  monster         Monster?      @relation(fields: [monsterId], references: [id], onDelete: SetNull)
+  name            String
+  initiative      Int?
+  initiativeBonus Int           @default(0)
+  armorClass      Int?
+  maxHitPoints    Int?
+  hitPoints       Int?
+  tempHitPoints   Int           @default(0)
+  // JSONB : index des états (« poisoned », « prone ») : neutre en langue
+  conditions      Json          @default("[]")
+  note            String?
+  // Vue des joueurs : masqué (embuscade) jusqu'à ce que le MJ le révèle
+  hidden          Boolean       @default(false)
+
+  @@index([combatId, position])
+}
