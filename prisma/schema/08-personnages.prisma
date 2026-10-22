@@ -34,6 +34,8 @@ model Character {
   editionId Int
   edition   Edition @relation(fields: [editionId], references: [id])
   name      String
+  // Code du lien de partage en lecture seule ; null = non partagé
+  shareCode String? @unique
 
   raceId       Int
   race         Race        @relation(fields: [raceId], references: [id], onDelete: Restrict)

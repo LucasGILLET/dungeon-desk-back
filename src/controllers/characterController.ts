@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import { Request, Response } from 'express';
 import { ZodError } from 'zod';
 import prisma from '../prismaClient';
@@ -139,7 +140,8 @@ export const getCharacter = async (req: Request, res: Response) => {
             include: CHARACTER_INCLUDE,
         });
         if (!character) return res.status(404).json({ message: 'Character not found' });
-        res.json({ ...(await sheet(req, character)), access: own ? 'OWNER' : 'GAME_MASTER' });
+        // Lien de partage : connu du seul propriétaire
+        res.json({ ...(await sheet(req, character)), access: own ? 'OWNER' : 'GAME_MASTER', shareCode: own ? character.shareCode : null });
     } catch (error) {
         logger.error(`Error fetching character: ${error instanceof Error ? error.message : error}`);
         res.status(500).json({ message: 'Error fetching character' });
@@ -177,5 +179,69 @@ export const updateCharacter = async (req: Request, res: Response) => {
     } catch (error) {
         logger.error(`Error updating character: ${error instanceof Error ? error.message : error}`);
         res.status(500).json({ message: 'Error updating character' });
+    }
+};
+
+// --- Partage par lien -----------------------------------------------------------------
+
+// Le propriétaire crée (ou renouvelle : l'ancien lien cesse de marcher) ou retire le lien
+export const shareCharacter = async (req: Request, res: Response) => {
+    try {
+        const userId = userIdOf(req);
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+        const shareCode = req.method === 'DELETE' ? null : randomBytes(9).toString('base64url');
+        const updated = await prisma.character.updateMany({ where: { id: Number(req.params.id), userId }, data: { shareCode } });
+        if (!updated.count) return res.status(404).json({ message: 'Character not found' });
+        res.json({ shareCode });
+    } catch (error) {
+        logger.error(`Error sharing character: ${error instanceof Error ? error.message : error}`);
+        res.status(500).json({ message: 'Error sharing character' });
+    }
+};
+
+const findShared = (code: string) => prisma.character.findUnique({
+    where: { shareCode: code },
+    include: { ...CHARACTER_INCLUDE, user: { select: { id: true, username: true } } },
+});
+
+// Fiche en lecture seule, pour toute personne qui a le lien (sans connexion)
+export const getSharedCharacter = async (req: Request, res: Response) => {
+    try {
+        const character = await findShared(String(req.params.code));
+        if (!character) return res.status(404).json({ message: 'Character not found' });
+        res.set('Cache-Control', 'no-store');
+        res.json({
+            ...(await sheet(req, character)),
+            access: 'SHARED',
+            shareCode: null,
+            sharedBy: character.user.username ?? `Joueur ${character.user.id}`,
+        });
+    } catch (error) {
+        logger.error(`Error fetching shared character: ${error instanceof Error ? error.message : error}`);
+        res.status(500).json({ message: 'Error fetching character' });
+    }
+};
+
+// « Copier dans mes personnages » : un nouveau personnage de l'utilisateur
+// connecté, mêmes choix, état de partie remis à zéro
+export const copySharedCharacter = async (req: Request, res: Response) => {
+    try {
+        const userId = userIdOf(req);
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+        const character = await findShared(String(req.params.code));
+        if (!character) return res.status(404).json({ message: 'Character not found' });
+        const { state: _state, conditions: _conditions, ...input } = toInput(character);
+        const copy = CharacterInputSchema.parse({
+            ...input,
+            name: `${input.name} (copie)`.slice(0, 100),
+            classes: input.classes.map((c) => ({ ...c, hitDiceUsed: 0 })),
+        });
+        const analysis = analyse(copy, await loadRulesContext(prisma, copy));
+        if (!analysis.plan) return res.status(400).json({ message: 'Invalid character data', errors: analysis.errors });
+        const id = await prisma.$transaction((tx) => insertCharacter(tx, userId, analysis.plan!));
+        res.status(201).json({ id });
+    } catch (error) {
+        logger.error(`Error copying character: ${error instanceof Error ? error.message : error}`);
+        res.status(500).json({ message: 'Error copying character' });
     }
 };

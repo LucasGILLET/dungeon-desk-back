@@ -16,7 +16,7 @@ vi.mock('../prismaClient', () => ({
   default: {
     edition: { findUnique: vi.fn() },
     abilityScore: { findMany: vi.fn() },
-    character: { findFirst: vi.fn(), findMany: vi.fn(), deleteMany: vi.fn() },
+    character: { findFirst: vi.fn(), findMany: vi.fn(), deleteMany: vi.fn(), findUnique: vi.fn(), updateMany: vi.fn() },
     $transaction: vi.fn(),
   },
 }));
@@ -102,6 +102,26 @@ describe('Character Controller', () => {
       const res = await request(app).delete('/api/characters/42');
 
       expect(res.status).toBe(404);
+    });
+  });
+
+  describe('Sharing', () => {
+    it("only lets the owner share a character, with a new code each time", async () => {
+      (prisma.character.updateMany as any).mockResolvedValueOnce({ count: 1 }).mockResolvedValueOnce({ count: 1 }).mockResolvedValueOnce({ count: 0 });
+      const first = (await request(app).post('/api/characters/7/share')).body.shareCode;
+      const second = (await request(app).post('/api/characters/7/share')).body.shareCode;
+      expect(first).not.toBe(second);
+      expect((prisma.character.updateMany as any).mock.calls[0][0].where).toEqual({ id: 7, userId: 1 });
+      expect((await request(app).post('/api/characters/8/share')).status).toBe(404);
+    });
+
+    it('stops sharing, and answers 404 for an unknown link', async () => {
+      (prisma.character.updateMany as any).mockResolvedValue({ count: 1 });
+      const res = await request(app).delete('/api/characters/7/share');
+      expect(res.body).toEqual({ shareCode: null });
+      (prisma.character.findUnique as any).mockResolvedValue(null);
+      expect((await request(app).get('/api/characters/shared/inconnu')).status).toBe(404);
+      expect((await request(app).post('/api/characters/shared/inconnu/copy')).status).toBe(404);
     });
   });
 });

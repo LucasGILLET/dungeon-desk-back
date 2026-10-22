@@ -1,5 +1,7 @@
 import express from 'express';
-import { createCharacter, getCharacters, getCharacter, deleteCharacter, updateCharacter, previewCharacter } from '../controllers/characterController';
+import {
+  copySharedCharacter, createCharacter, getCharacters, getCharacter, getSharedCharacter, deleteCharacter, updateCharacter, previewCharacter, shareCharacter,
+} from '../controllers/characterController';
 import { protect } from '../middleware/authMiddleware';
 import { validateIdParam } from '../middleware/validateIdParam';
 
@@ -36,7 +38,57 @@ const router = express.Router();
  */
 router.post('/preview', previewCharacter);
 
+/**
+ * @swagger
+ * /characters/shared/{code}:
+ *   get:
+ *     summary: Character shared by its owner with a link (read-only, no account needed)
+ *     operationId: getSharedCharacter
+ *     tags: [Characters]
+ *     security: []
+ *     parameters:
+ *       - { in: path, name: code, required: true, schema: { type: string } }
+ *       - { in: query, name: lang, schema: { type: string } }
+ *     responses:
+ *       200: { description: Character with its computed sheet }
+ *       404: { description: Unknown or no longer shared }
+ * /characters/shared/{code}/copy:
+ *   post:
+ *     summary: Copy a shared character into the user's characters (game state reset)
+ *     operationId: copySharedCharacter
+ *     tags: [Characters]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: code, required: true, schema: { type: string } }
+ *     responses:
+ *       201: { description: Id of the new character }
+ * /characters/{id}/share:
+ *   post:
+ *     summary: Create or renew the share link of a character (the previous one stops working)
+ *     operationId: shareCharacter
+ *     tags: [Characters]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: integer } }
+ *     responses:
+ *       200: { description: Share code }
+ *   delete:
+ *     summary: Stop sharing a character
+ *     operationId: unshareCharacter
+ *     tags: [Characters]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: integer } }
+ *     responses:
+ *       200: { description: No longer shared }
+ */
+router.get('/shared/:code', getSharedCharacter);
+router.post('/shared/:code/copy', protect, copySharedCharacter);
+
 router.use(protect); // Protect all other character routes
+
+router.post('/:id/share', validateIdParam, shareCharacter);
+router.delete('/:id/share', validateIdParam, shareCharacter);
 
 /**
  * @swagger
