@@ -68,6 +68,7 @@ export interface RulesContext {
   feats: Map<string, { id: number; prerequisites: { abilityScoreId: number; minimumScore: number; alternativeGroup: number }[] }>;
   spells: Map<string, { id: number; level: number }>;
   equipment: Map<string, number>;
+  magicItems: Map<string, number>;
   languages: Map<string, number>;
   conditions: Map<string, number>;
   traits: Map<string, number>;
@@ -108,7 +109,7 @@ export interface CharacterPlan {
   // level : montée de niveau à laquelle le choix a été fait (classe, niveau de classe)
   choices: { choiceId: number; optionId: number | null; languageId: number | null; equipmentId: number | null; level: { classId: number; classLevel: number } | null }[];
   spells: { classId: number; spellId: number; prepared: boolean }[];
-  items: { equipmentId: number | null; name: string | null; description: string | null; quantity: number; equipped: boolean; attuned: boolean; position: number }[];
+  items: { equipmentId: number | null; magicItemId: number | null; name: string | null; description: string | null; quantity: number; equipped: boolean; attuned: boolean; position: number }[];
   currencies: { currency: Currency; amount: number }[];
   personality: { kind: PersonalityKind; optionId: number | null; customText: string | null }[];
   conditionIds: number[];
@@ -438,8 +439,10 @@ export function analyse(input: CharacterInput, ctx: RulesContext): Analysis {
   const items: CharacterPlan['items'] = [];
   for (const [i, item] of input.items.entries()) {
     const equipmentId = item.equipment ? lookup(ctx.equipment, item.equipment, `items[${i}].equipment`, 'equipment') ?? null : null;
-    if (!item.equipment && !item.name) fail(`items[${i}]`, 'An item needs an equipment index or a name');
-    items.push({ equipmentId, name: item.name ?? null, description: item.description ?? null, quantity: item.quantity, equipped: item.equipped, attuned: item.attuned, position: i });
+    const magicItemId = item.magicItem ? lookup(ctx.magicItems, item.magicItem, `items[${i}].magicItem`, 'magic item') ?? null : null;
+    if (!item.equipment && !item.magicItem && !item.name) fail(`items[${i}]`, 'An item needs an equipment index, a magic item index or a name');
+    if (item.equipment && item.magicItem) fail(`items[${i}]`, 'An item is either equipment or a magic item');
+    items.push({ equipmentId, magicItemId, name: item.name ?? null, description: item.description ?? null, quantity: item.quantity, equipped: item.equipped, attuned: item.attuned, position: i });
   }
   if (items.filter((i) => i.attuned).length > MAX_ATTUNED) fail('items', `At most ${MAX_ATTUNED} attuned items`);
 

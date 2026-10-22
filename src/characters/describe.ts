@@ -368,6 +368,127 @@ export async function describeArmorClass(
   return { value, detail };
 }
 
+// --- Attaques ----------------------------------------------------------------------------
+
+export interface Attack {
+  kind: 'WEAPON' | 'SPELL';
+  index: string;
+  name: string;
+  // Jet d'attaque (+5), ou null pour un sort à sauvegarde
+  attackBonus: number | null;
+  // Sort à sauvegarde : « DD 13 DEX »
+  save: { dc: number; ability: string } | null;
+  damage: string | null; // « 1d8 + 3 tranchant »
+  versatileDamage: string | null; // à deux mains
+  range: string | null; // « 24 / 96 m »
+  properties: string[];
+  equipped: boolean;
+}
+
+const ARCHERY = ['fighter-fighting-style-archery', 'ranger-fighting-style-archery'];
+const DUELING = ['fighter-fighting-style-dueling', 'fighting-style-dueling', 'ranger-fighting-style-dueling'];
+
+const meters = (ft: number) => String(Math.round(ft * 0.3 * 10) / 10).replace('.', ',');
+const withMod = (dice: string, mod: number) => (mod ? `${dice} ${mod > 0 ? '+' : '−'} ${Math.abs(mod)}` : dice);
+
+// Armes de l'inventaire et sorts mineurs offensifs, comme sur la fiche papier :
+// jet d'attaque (caractéristique + maîtrise + style de combat) et dégâts
+export async function describeAttacks(
+  db: Db, ctx: RulesContext, input: CharacterInput,
+  sheet: { level: number; proficiencyBonus: number; abilityScores: Record<string, { modifier: number }>; grantedFeatures: string[] },
+  known: { proficiencies: { index: string }[] }, spellcasting: Resources['spellcasting'], lang: LangContext,
+): Promise<Attack[]> {
+  const mod = (a: string) => sheet.abilityScores[a]?.modifier ?? 0;
+  const has = (list: string[]) => list.some((f) => sheet.grantedFeatures.includes(f));
+  const archery = has(ARCHERY);
+  const dueling = has(DUELING);
+  const monk = input.classes.some((c) => c.class === 'monk');
+
+  const weaponIndexes = [...new Set(input.items.map((i) => i.equipment).filter((e): e is string => !!e))];
+  const cantrips = input.spells.filter((s) => ctx.spells.get(s.spell)?.level === 0);
+  const [weapons, proficiencies, spells] = await Promise.all([
+    weaponIndexes.length
+      ? db.equipment.findMany({
+        where: { editionId: ctx.edition?.id, index: { in: weaponIndexes }, weapon: { isNot: null } },
+        select: {
+          id: true, index: true, translations: t, categories: { select: { categoryId: true } },
+          weapon: { include: { damageType: named, properties: { include: { property: named } } } },
+        },
+      })
+      : [],
+    db.proficiency.findMany({
+      where: { editionId: ctx.edition?.id, type: 'WEAPON', index: { in: known.proficiencies.map((p) => p.index) } },
+      select: { equipmentId: true, equipmentCategoryId: true },
+    }),
+    cantrips.length
+      ? db.spell.findMany({
+        where: { editionId: ctx.edition?.id, index: { in: cantrips.map((s) => s.spell) }, damageScaling: { not: Prisma.DbNull } },
+        select: { index: true, attackType: true, rangeFt: true, damageScaling: true, translations: t, damageTypes: { select: { damageType: named } }, saveAbility: { select: { index: true } } },
+      })
+      : [],
+  ]);
+  const name = (x: { translations: { localeCode: string; name: string }[] }) => pick(x.translations, lang).name;
+  const proficientIn = (w: (typeof weapons)[number]) =>
+    proficiencies.some((p) => p.equipmentId === w.id || (p.equipmentCategoryId != null && w.categories.some((c) => c.categoryId === p.equipmentCategoryId)));
+
+  const equippedWeapons = new Set(input.items.filter((i) => i.equipped && i.equipment).map((i) => i.equipment!));
+  const meleeEquipped = weapons.filter((w) => equippedWeapons.has(w.index) && w.weapon!.range === 'MELEE');
+  const attacks: Attack[] = [];
+
+  for (const w of weapons) {
+    const stats = w.weapon!;
+    const props = new Set(stats.properties.map((p) => p.property.index));
+    const ranged = stats.range === 'RANGED';
+    const ability = props.has('finesse') || (monk && props.has('monk'))
+      ? (mod('dex') >= mod('str') ? 'dex' : 'str')
+      : ranged ? 'dex' : 'str';
+    const proficient = proficientIn(w);
+    const attackBonus = mod(ability) + (proficient ? sheet.proficiencyBonus : 0) + (archery && ranged ? 2 : 0);
+    // Duel : une seule arme de corps à corps tenue (à une main), pas d'autre arme
+    const duel = dueling && !ranged && !props.has('two-handed') && meleeEquipped.length === 1 && meleeEquipped[0]!.index === w.index;
+    const damageMod = mod(ability) + (duel ? 2 : 0);
+    const type = stats.damageType ? ` ${name(stats.damageType).toLowerCase()}` : '';
+    attacks.push({
+      kind: 'WEAPON',
+      index: w.index,
+      name: name(w),
+      attackBonus,
+      save: null,
+      damage: stats.damageDice ? `${withMod(stats.damageDice, damageMod)}${type}` : null,
+      versatileDamage: stats.versatileDice ? `${withMod(stats.versatileDice, mod(ability))}${type}` : null,
+      range: stats.normalRangeFt ? `${meters(stats.normalRangeFt)}${stats.longRangeFt ? ` / ${meters(stats.longRangeFt)}` : ''} m` : null,
+      properties: stats.properties.filter((p) => p.property.index !== 'monk').map((p) => name(p.property)),
+      equipped: equippedWeapons.has(w.index),
+    });
+  }
+  // Armes équipées d'abord
+  attacks.sort((a, b) => Number(b.equipped) - Number(a.equipped));
+
+  for (const s of spells) {
+    const scaling = s.damageScaling as { by?: string; values?: Record<string, string> } | null;
+    if (scaling?.by !== 'character_level' || !scaling.values) continue;
+    const reached = Object.keys(scaling.values).map(Number).filter((l) => l <= sheet.level).sort((a, b) => b - a)[0];
+    const dice = reached != null ? scaling.values[String(reached)] : undefined;
+    if (!dice) continue;
+    const caster = spellcasting.find((c) => c.class === cantrips.find((x) => x.spell === s.index)?.class) ?? spellcasting[0];
+    if (!caster) continue;
+    const type = s.damageTypes.map((d) => name(d.damageType).toLowerCase()).join(' ou ');
+    attacks.push({
+      kind: 'SPELL',
+      index: s.index,
+      name: name(s),
+      attackBonus: s.attackType ? caster.attackBonus : null,
+      save: !s.attackType && s.saveAbility ? { dc: caster.saveDC, ability: s.saveAbility.index } : null,
+      damage: `${dice}${type ? ` ${type}` : ''}`,
+      versatileDamage: null,
+      range: s.rangeFt ? `${meters(s.rangeFt)} m` : null,
+      properties: [],
+      equipped: false,
+    });
+  }
+  return attacks;
+}
+
 // --- Capacités à utilisations limitées ----------------------------------------------------
 
 export interface FeatureResource {

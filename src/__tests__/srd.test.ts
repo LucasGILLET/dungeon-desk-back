@@ -11,6 +11,7 @@ vi.mock('../prismaClient', () => ({
     race: { findMany: vi.fn() },
     background: { findMany: vi.fn() },
     spell: { findMany: vi.fn() },
+    equipment: { findFirst: vi.fn() },
   },
 }));
 
@@ -366,6 +367,37 @@ describe('SRD Controller', () => {
       const res = await request(app).get('/api/srd/2014/classes/wizard?lang=fr');
 
       expect(res.body).toMatchObject({ difficulty: 'HARD', recommendedAbilities: [{ index: 'int', name: 'Intelligence' }] });
+    });
+  });
+
+  describe('GET /api/srd/:edition/equipment/:index', () => {
+    it('should return the weapon stats with the rule of each property', async () => {
+      (prisma.equipment.findFirst as any).mockResolvedValue({
+        index: 'greatsword', kind: 'WEAPON', source: 'SRD', costAmount: 50, costCurrency: 'GP', weightLb: '6.00',
+        translations: tr({ name: 'Greatsword', description: null }, { name: 'Épée à deux mains', description: null }),
+        categories: [{ category: { index: 'martial-weapons', translations: tr({ name: 'Martial Weapons' }, { name: 'Armes de guerre' }) } }],
+        weapon: {
+          category: 'MARTIAL', range: 'MELEE', damageDice: '2d6', versatileDice: null, normalRangeFt: null, longRangeFt: null,
+          damageType: { index: 'slashing', translations: tr({ name: 'Slashing' }, { name: 'Tranchant' }) },
+          properties: [{ property: { index: 'heavy', translations: tr({ name: 'Heavy', description: 'Small creatures…' }, { name: 'Lourde', description: 'Les petites créatures…' }) } }],
+        },
+        armor: null,
+      });
+
+      const res = await request(app).get('/api/srd/2014/equipment/greatsword?lang=fr');
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        name: 'Épée à deux mains', cost: { amount: 50, currency: 'GP' }, weightLb: 6,
+        categories: [{ index: 'martial-weapons', name: 'Armes de guerre' }],
+        weapon: { damage: '2d6', damageType: { name: 'Tranchant' }, properties: [{ index: 'heavy', name: 'Lourde', description: 'Les petites créatures…' }] },
+        armor: null,
+      });
+    });
+
+    it('should return 404 for unknown equipment', async () => {
+      (prisma.equipment.findFirst as any).mockResolvedValue(null);
+      expect((await request(app).get('/api/srd/2014/equipment/lightsaber')).status).toBe(404);
     });
   });
 });

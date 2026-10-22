@@ -231,6 +231,9 @@ model CharacterItem {
   character   Character  @relation(fields: [characterId], references: [id], onDelete: Cascade)
   equipmentId Int?
   equipment   Equipment? @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+  // Ou un objet magique (bâton de pouvoir, cape elfique…)
+  magicItemId Int?
+  magicItem   MagicItem? @relation(fields: [magicItemId], references: [id], onDelete: Restrict)
   name        String? // objet libre, ou nom personnalisé d'un objet du catalogue
   description String?    @db.Text
   quantity    Int        @default(1)

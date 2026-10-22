@@ -238,6 +238,64 @@ export const getEquipment = async (req: Request, res: Response) => {
   }
 };
 
+// Fiche complète d'un objet : description, catégories, statistiques d'arme
+// (dégâts, propriétés et leur règle) ou d'armure
+export const getEquipmentByIndex = async (req: Request, res: Response) => {
+  try {
+    const ctx = await resolveLang(req);
+    const ref = refOf(ctx);
+    const e = await prisma.equipment.findFirst({
+      where: { ...editionWhere(req), index: req.params.index },
+      include: {
+        translations: t,
+        categories: { include: { category: named } },
+        weapon: { include: { damageType: named, properties: { include: { property: named } } } },
+        armor: true,
+      },
+    });
+    if (!e) {
+      res.status(404).json({ message: 'Equipment not found' });
+      return;
+    }
+    const et = pick(e.translations, ctx);
+    const w = e.weapon;
+    setCache(res);
+    res.json({
+      index: e.index,
+      name: et.name,
+      description: et.description ?? null,
+      kind: e.kind,
+      source: e.source,
+      cost: e.costAmount != null ? { amount: e.costAmount, currency: e.costCurrency } : null,
+      weightLb: e.weightLb != null ? Number(e.weightLb) : null,
+      categories: e.categories.map((c) => ref(c.category)),
+      weapon: w && {
+        category: w.category,
+        range: w.range,
+        damage: w.damageDice,
+        damageType: ref(w.damageType),
+        versatileDamage: w.versatileDice,
+        normalRangeFt: w.normalRangeFt,
+        longRangeFt: w.longRangeFt,
+        properties: w.properties.map((p) => {
+          const pt = pick(p.property.translations, ctx);
+          return { index: p.property.index, name: pt.name, description: pt.description };
+        }),
+      },
+      armor: e.armor && {
+        category: e.armor.category,
+        baseArmorClass: e.armor.baseArmorClass,
+        addsDexModifier: e.armor.addsDexModifier,
+        maxDexModifier: e.armor.maxDexModifier,
+        strengthMinimum: e.armor.strengthMinimum,
+        stealthDisadvantage: e.armor.stealthDisadvantage,
+      },
+    });
+  } catch (error) {
+    fail(res, 'equipment item', error);
+  }
+};
+
 export const getFeats = async (req: Request, res: Response) => {
   try {
     const ctx = await resolveLang(req);

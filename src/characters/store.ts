@@ -88,7 +88,7 @@ export const CHARACTER_INCLUDE = {
     },
   },
   choices: { orderBy: { id: 'asc' }, include: { language: indexOnly, equipment: indexOnly } },
-  items: { orderBy: { position: 'asc' }, include: { equipment: indexOnly } },
+  items: { orderBy: { position: 'asc' }, include: { equipment: indexOnly, magicItem: indexOnly } },
   currencies: true,
   personality: { orderBy: { id: 'asc' } },
   conditions: { include: { condition: indexOnly } },
@@ -128,7 +128,7 @@ export function toInput(c: StoredCharacter): CharacterInput {
     choices: c.choices.map((ch) => ({ choiceId: ch.choiceId, optionId: ch.optionId, language: ch.language?.index ?? null, equipment: ch.equipment?.index ?? null })),
     spells: c.classes.flatMap((cc) => cc.spells.map((s) => ({ spell: s.spell.index, class: cc.class.index, prepared: s.prepared }))),
     items: c.items.map((i) => ({
-      equipment: i.equipment?.index ?? null, name: i.name, description: i.description, quantity: i.quantity, equipped: i.equipped, attuned: i.attuned,
+      equipment: i.equipment?.index ?? null, magicItem: i.magicItem?.index ?? null, name: i.name, description: i.description, quantity: i.quantity, equipped: i.equipped, attuned: i.attuned,
     })),
     currencies: Object.fromEntries(c.currencies.map((m) => [m.currency, m.amount])),
     personality: c.personality.map((p) => ({ kind: p.kind, optionId: p.optionId, text: p.customText })),

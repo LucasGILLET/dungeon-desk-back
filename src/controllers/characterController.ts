@@ -2,11 +2,11 @@ import { Request, Response } from 'express';
 import { ZodError } from 'zod';
 import prisma from '../prismaClient';
 import { loadRulesContext } from '../characters/context';
-import { describeArmorClass, describeChoices, describeFeatureResources, describeGrantedTraits, describeProficiencies, describeResources } from '../characters/describe';
+import { describeArmorClass, describeAttacks, describeChoices, describeFeatureResources, describeGrantedTraits, describeProficiencies, describeResources } from '../characters/describe';
 import { CharacterInput, CharacterInputSchema } from '../characters/input';
-import { analyse, Issue } from '../characters/rules';
+import { analyse, CharacterSheet, Issue, RulesContext } from '../characters/rules';
 import { CHARACTER_INCLUDE, createCharacter as insertCharacter, displayNames, findCharacter, replaceCharacter, StoredCharacter, toInput } from '../characters/store';
-import { resolveLang } from '../srd/lang';
+import { LangContext, resolveLang } from '../srd/lang';
 import { logger } from '../utils/logger';
 
 // Personnages : le client envoie toujours le personnage complet (création,
@@ -32,6 +32,21 @@ async function validate(req: Request, res: Response) {
     return analysis.plan;
 }
 
+// Valeurs calculées de la fiche : maîtrises, ressources, CA, attaques…
+async function describeSheet(ctx: RulesContext, input: CharacterInput, sheet: CharacterSheet, lang: LangContext) {
+    const known = await describeProficiencies(prisma, ctx, input, lang);
+    const resources = await describeResources(prisma, ctx, input, sheet);
+    return {
+        ...sheet,
+        ...known,
+        ...resources,
+        armorClass: await describeArmorClass(prisma, ctx, input, sheet, lang),
+        attacks: await describeAttacks(prisma, ctx, input, sheet, known, resources.spellcasting, lang),
+        featureResources: await describeFeatureResources(prisma, ctx, input, sheet, lang),
+        grantedTraitDetails: await describeGrantedTraits(prisma, ctx, sheet, lang),
+    };
+}
+
 // Fiche complète : format d'échange, noms traduits, valeurs calculées. Les
 // erreurs éventuelles (donnée de jeu modifiée depuis) sont renvoyées en warnings.
 async function sheet(req: Request, character: StoredCharacter) {
@@ -43,14 +58,7 @@ async function sheet(req: Request, character: StoredCharacter) {
         id: character.id,
         ...input,
         names: displayNames(character, lang),
-        sheet: analysis.sheet && {
-            ...analysis.sheet,
-            ...(await describeProficiencies(prisma, ctx, input, lang)),
-            ...(await describeResources(prisma, ctx, input, analysis.sheet)),
-            armorClass: await describeArmorClass(prisma, ctx, input, analysis.sheet, lang),
-            featureResources: await describeFeatureResources(prisma, ctx, input, analysis.sheet, lang),
-            grantedTraitDetails: await describeGrantedTraits(prisma, ctx, analysis.sheet, lang),
-        },
+        sheet: analysis.sheet && await describeSheet(ctx, input, analysis.sheet, lang),
         warnings: analysis.errors,
         createdAt: character.createdAt,
         updatedAt: character.updatedAt,

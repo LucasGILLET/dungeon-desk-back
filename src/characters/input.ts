@@ -53,6 +53,7 @@ export const CharacterInputSchema = z.object({
 
   items: z.array(z.object({
     equipment: index.nullish(),
+    magicItem: index.nullish(),
     name: z.string().trim().min(1).max(200).nullish(),
     description: longText,
     quantity: count.default(1),

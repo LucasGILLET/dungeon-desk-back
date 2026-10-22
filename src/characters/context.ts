@@ -45,7 +45,7 @@ export async function loadRulesContext(db: Db, input: CharacterInput): Promise<R
   const empty: RulesContext = {
     edition, abilities: ids(abilities), constitutionId: abilities.find((a) => a.index === 'con')?.id,
     race: null, subrace: null, background: null, alignmentId: null, classes: new Map(), subclassSpells: new Map(),
-    feats: new Map(), spells: new Map(), equipment: new Map(), languages: new Map(), conditions: new Map(), traits: new Map(),
+    feats: new Map(), spells: new Map(), equipment: new Map(), magicItems: new Map(), languages: new Map(), conditions: new Map(), traits: new Map(),
     choices: new Map(), categoryMembers: new Map(),
   };
   if (!edition) return empty;
@@ -91,11 +91,12 @@ export async function loadRulesContext(db: Db, input: CharacterInput): Promise<R
   const featureIds = classRows.flatMap((c) => c.features.map((f) => f.id));
 
   const levels = input.classes.flatMap((c) => c.levels);
-  const [subclassSpells, feats, spells, equipment, languages, conditions, traits] = await Promise.all([
+  const [subclassSpells, feats, spells, equipment, magicItems, languages, conditions, traits] = await Promise.all([
     db.subclassSpell.findMany({ where: { subclassId: { in: subclassIds } }, select: { subclassId: true, spellId: true } }),
     db.feat.findMany({ where: inEdition(levels.map((l) => l.feat)), include: { prerequisites: true } }),
     db.spell.findMany({ where: inEdition(input.spells.map((s) => s.spell)), select: { id: true, index: true, level: true } }),
     db.equipment.findMany({ where: inEdition([...input.items.map((i) => i.equipment), ...input.choices.map((c) => c.equipment)]), select: { id: true, index: true } }),
+    db.magicItem.findMany({ where: inEdition(input.items.map((i) => i.magicItem)), select: { id: true, index: true } }),
     db.language.findMany({ where: inEdition(input.choices.map((c) => c.language)), select: { id: true, index: true } }),
     db.condition.findMany({ where: inEdition(input.conditions), select: { id: true, index: true } }),
     db.trait.findMany({ where: inEdition(input.state.featureUsage.map((u) => u.trait)), select: { id: true, index: true } }),
@@ -151,6 +152,7 @@ export async function loadRulesContext(db: Db, input: CharacterInput): Promise<R
     feats: byIndex(feats),
     spells: byIndex(spells),
     equipment: ids(equipment),
+    magicItems: ids(magicItems),
     languages: ids(languages),
     conditions: ids(conditions),
     traits: ids(traits),

@@ -69,7 +69,8 @@ export const characterCreateInputSchema = {
         type: 'object',
         properties: {
           equipment: nullableIndex('dagger'),
-          name: { type: 'string', nullable: true, description: 'Objet libre (objet magique, butin…)' },
+          magicItem: { ...nullableIndex('cloak-of-elvenkind'), description: 'Objet magique du SRD (à la place de equipment)' },
+          name: { type: 'string', nullable: true, description: 'Objet libre (butin…), ou nom personnalisé' },
           description: { type: 'string', nullable: true },
           quantity: { type: 'integer', default: 1 },
           equipped: { type: 'boolean' },

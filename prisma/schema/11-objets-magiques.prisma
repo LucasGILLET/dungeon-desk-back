@@ -39,7 +39,8 @@ model MagicItem {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
-  translations MagicItemTranslation[]
+  translations   MagicItemTranslation[]
+  characterItems CharacterItem[]
 
   @@unique([editionId, index])
   @@index([editionId, rarity])

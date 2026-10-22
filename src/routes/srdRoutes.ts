@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { getClasses, getClassByIndex } from '../controllers/srdController';
 import {
-  getAbilityScores, getAlignments, getBackgrounds, getConditions, getCreationRules, getEquipment, getFeats, getNpcTables, getRaces, getSkills, getSpells,
+  getAbilityScores, getAlignments, getBackgrounds, getConditions, getCreationRules, getEquipment, getEquipmentByIndex, getFeats, getNpcTables, getRaces, getSkills, getSpells,
 } from '../controllers/srdContentController';
 import { getGuide, getGuides, getRuleChapters, getRuleSection } from '../controllers/srdGuideController';
 import { getMagicItemByIndex, getMagicItems, getMonsterByIndex, getMonsters } from '../controllers/srdBestiaryController';
@@ -147,6 +147,23 @@ router.get('/:edition/conditions', getConditions);
  *       200: { description: Equipment }
  */
 router.get('/:edition/equipment', getEquipment);
+
+/**
+ * @swagger
+ * /srd/{edition}/equipment/{index}:
+ *   get:
+ *     summary: One piece of equipment with its weapon or armor stats and property rules (translated)
+ *     operationId: getSrdEquipmentByIndex
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: path, name: index, required: true, schema: { type: string, example: greatsword } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: Equipment }
+ *       404: { description: Unknown equipment }
+ */
+router.get('/:edition/equipment/:index', getEquipmentByIndex);
 
 /**
  * @swagger
