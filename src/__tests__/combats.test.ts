@@ -17,6 +17,7 @@ vi.mock('../prismaClient', () => ({
     campaign: { findUnique: vi.fn(), findUniqueOrThrow: vi.fn() },
     combat: { findUnique: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
     combatant: { deleteMany: vi.fn() },
+    character: { update: vi.fn((args: unknown) => args) },
     monster: { findMany: vi.fn() },
     condition: { findMany: vi.fn() },
     $transaction: vi.fn(),
@@ -88,5 +89,22 @@ describe('Combat', () => {
       { path: 'combatants[1].conditions', message: 'Unknown condition "flying"' },
     ]);
     expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("writes to the character sheet only the hit points the game master changed", async () => {
+    (prisma.campaign.findUnique as any).mockResolvedValue({ userId: 1, editionId: 1, members: [] });
+    (prisma.combat.findFirst as any).mockResolvedValueOnce({ id: 3 }).mockResolvedValue(null);
+    (prisma.campaign.findUniqueOrThrow as any).mockResolvedValue({ members: [{ characterId: 9 }, { characterId: 10 }], gmCharacters: [] });
+    (prisma.monster.findMany as any).mockResolvedValue([]);
+    (prisma.condition.findMany as any).mockResolvedValue([]);
+    const pc = (characterId: number, hitPoints: number, syncedHitPoints: number) => ({
+      kind: 'CHARACTER', characterId, name: `PJ ${characterId}`, maxHitPoints: 30, hitPoints, syncedHitPoints, tempHitPoints: 0, syncedTempHitPoints: 0, conditions: [],
+    });
+
+    await request(app).put('/api/campaigns/5/combats/3').send({ name: 'C', round: 1, turn: 0, combatants: [pc(9, 22, 30), pc(10, 18, 18)] });
+
+    // PJ 9 : 30 → 22 par le MJ, reporté ; PJ 10 : inchangé, sa fiche fait foi
+    expect(prisma.character.update).toHaveBeenCalledTimes(1);
+    expect(prisma.character.update).toHaveBeenCalledWith({ where: { id: 9 }, data: { currentHitPoints: 22 } });
   });
 });

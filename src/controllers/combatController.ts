@@ -15,7 +15,8 @@ const combatInclude = {
   combatants: {
     orderBy: { position: 'asc' as const },
     include: {
-      character: { select: { id: true, name: true } },
+      // PV de la fiche : ceux du combat pour un personnage
+      character: { select: { id: true, name: true, currentHitPoints: true, temporaryHitPoints: true } },
       monster: { select: { index: true, ownerId: true, translations } },
     },
   },
@@ -36,22 +37,29 @@ function describe(c: StoredCombat, lang: Awaited<ReturnType<typeof resolveLang>>
     finished: c.finished,
     shareCode: c.shareCode,
     updatedAt: c.updatedAt,
-    combatants: c.combatants.map((x) => ({
+    combatants: c.combatants.map((x) => {
+      // Personnage : PV lus sur sa fiche (null = au maximum)
+      const hitPoints = x.character ? x.character.currentHitPoints ?? x.maxHitPoints : x.hitPoints;
+      const tempHitPoints = x.character ? x.character.temporaryHitPoints : x.tempHitPoints;
+      return {
       id: x.id,
       kind: x.kind,
-      character: x.character,
+      character: x.character && { id: x.character.id, name: x.character.name },
       monster: x.monster ? { index: x.monster.index, name: pick(x.monster.translations, lang).name, homebrew: x.monster.ownerId != null } : null,
       name: x.name,
       initiative: x.initiative,
       initiativeBonus: x.initiativeBonus,
       armorClass: x.armorClass,
       maxHitPoints: x.maxHitPoints,
-      hitPoints: x.hitPoints,
-      tempHitPoints: x.tempHitPoints,
+      hitPoints,
+      tempHitPoints,
+      syncedHitPoints: x.character ? hitPoints : null,
+      syncedTempHitPoints: x.character ? tempHitPoints : null,
       conditions: x.conditions as string[],
       note: x.note,
       hidden: x.hidden,
-    })),
+      };
+    }),
   };
 }
 
@@ -175,7 +183,19 @@ export const saveCombat = async (req: Request, res: Response) => {
     const { rows, errors } = await resolveState(state, campaign);
     if (errors.length) return invalid(res, errors);
     const turn = rows.length ? Math.min(state.turn, rows.length - 1) : 0;
+    // PV des personnages : reportés sur la fiche s'ils ont changé dans le combat
+    const characterUpdates = state.combatants.flatMap((c, i) => {
+      const row = rows[i]!;
+      if (row.kind !== 'CHARACTER' || row.characterId == null) return [];
+      const data: { currentHitPoints?: number | null; temporaryHitPoints?: number } = {};
+      if (c.syncedHitPoints === undefined || row.hitPoints !== (c.syncedHitPoints ?? null)) {
+        data.currentHitPoints = row.hitPoints == null || (row.maxHitPoints != null && row.hitPoints >= row.maxHitPoints) ? null : row.hitPoints;
+      }
+      if (c.syncedTempHitPoints === undefined || row.tempHitPoints !== (c.syncedTempHitPoints ?? 0)) data.temporaryHitPoints = row.tempHitPoints;
+      return Object.keys(data).length ? [prisma.character.update({ where: { id: row.characterId }, data })] : [];
+    });
     await prisma.$transaction([
+      ...characterUpdates,
       prisma.combatant.deleteMany({ where: { combatId } }),
       prisma.combat.update({
         where: { id: combatId },
@@ -226,7 +246,10 @@ export const getCombatView = async (req: Request, res: Response) => {
   try {
     const combat = await prisma.combat.findUnique({
       where: { shareCode: String(req.params.code) },
-      include: { campaign: { select: { name: true } }, combatants: { orderBy: { position: 'asc' } } },
+      include: {
+        campaign: { select: { name: true } },
+        combatants: { orderBy: { position: 'asc' }, include: { character: { select: { currentHitPoints: true, temporaryHitPoints: true } } } },
+      },
     });
     if (!combat) return res.status(404).json({ message: 'Combat not found' });
     const current = combat.combatants[combat.turn];
@@ -241,16 +264,19 @@ export const getCombatView = async (req: Request, res: Response) => {
       currentId: current && !current.hidden ? current.id : null,
       combatants: visible.map((c) => {
         const pc = c.kind === 'CHARACTER';
+        // Personnage lié : PV de sa fiche
+        const hitPoints = c.character ? c.character.currentHitPoints ?? c.maxHitPoints : c.hitPoints;
+        const tempHitPoints = c.character ? c.character.temporaryHitPoints : c.tempHitPoints;
         return {
           id: c.id,
           name: c.name,
           kind: c.kind,
           initiative: c.initiative,
           conditions: c.conditions as string[],
-          hitPoints: pc ? c.hitPoints : null,
+          hitPoints: pc ? hitPoints : null,
           maxHitPoints: pc ? c.maxHitPoints : null,
-          tempHitPoints: pc ? c.tempHitPoints : null,
-          health: healthLabel(c.hitPoints, c.maxHitPoints),
+          tempHitPoints: pc ? tempHitPoints : null,
+          health: healthLabel(hitPoints, c.maxHitPoints),
         };
       }),
       updatedAt: combat.updatedAt,

@@ -81,6 +81,11 @@ export const combatStateSchema = z.object({
     maxHitPoints: z.number().int().min(1).max(10000).nullish(),
     hitPoints: hp.nullish(),
     tempHitPoints: hp.default(0),
+    // Personnage : PV reçus du serveur au dernier chargement. Seuls les PV que le MJ
+    // a changés depuis sont reportés sur la fiche (sinon la fiche, peut-être plus
+    // récente, l'emporte)
+    syncedHitPoints: hp.nullish(),
+    syncedTempHitPoints: hp.nullish(),
     conditions: z.array(z.string().trim().min(1).max(100)).max(20).default([]),
     note: short,
     hidden: z.boolean().default(false),
