@@ -114,8 +114,14 @@ describe('Homebrew monsters', () => {
     expect((await request(app).get('/api/monsters/autre-ogre')).status).toBe(404);
     expect((prisma.monster.findFirst as any).mock.calls[0][0].where).toMatchObject({ ownerId: 1, index: 'autre-ogre' });
 
-    (prisma.monster.findFirst as any).mockResolvedValueOnce({ id: 4, _count: { encounterMonsters: 2 } });
-    expect((await request(app).delete('/api/monsters/gobelin')).status).toBe(409);
+    (prisma.monster.findFirst as any).mockResolvedValueOnce({ id: 4, _count: { encounterMonsters: 2, combatants: 0 } });
+    expect((await request(app).delete('/api/monsters/gobelin')).body).toMatchObject({ reason: 'ENCOUNTER' });
+    // Dans un combat en cours seulement (ajouté à la volée) : refusé aussi
+    (prisma.monster.findFirst as any).mockResolvedValueOnce({ id: 4, _count: { encounterMonsters: 0, combatants: 1 } });
+    const inCombat = await request(app).delete('/api/monsters/gobelin');
+    expect(inCombat.status).toBe(409);
+    expect(inCombat.body).toMatchObject({ reason: 'COMBAT' });
+    expect((prisma.monster.findFirst as any).mock.calls.at(-1)[0].select._count.select.combatants).toEqual({ where: { combat: { finished: false } } });
     expect(prisma.monster.delete).not.toHaveBeenCalled();
   });
 });

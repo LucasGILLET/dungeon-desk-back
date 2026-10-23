@@ -239,10 +239,12 @@ export const deleteMonster = async (req: Request, res: Response) => {
   try {
     const existing = await prisma.monster.findFirst({
       where: { ...mine(req), index: String(req.params.index) },
-      select: { id: true, _count: { select: { encounterMonsters: true } } },
+      // Combats en cours : le combattant perdrait sa fiche (bloc de statistiques, attaques)
+      select: { id: true, _count: { select: { encounterMonsters: true, combatants: { where: { combat: { finished: false } } } } } },
     });
     if (!existing) return res.status(404).json({ message: 'Monster not found' });
-    if (existing._count.encounterMonsters) return res.status(409).json({ message: 'This monster is used in an encounter' });
+    if (existing._count.encounterMonsters) return res.status(409).json({ message: 'This monster is used in an encounter', reason: 'ENCOUNTER' });
+    if (existing._count.combatants) return res.status(409).json({ message: 'This monster is in an ongoing combat', reason: 'COMBAT' });
     await prisma.monster.delete({ where: { id: existing.id } });
     res.json({ message: 'Monster deleted' });
   } catch (error) {
