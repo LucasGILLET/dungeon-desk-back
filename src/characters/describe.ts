@@ -310,6 +310,21 @@ export interface ArmorClass {
   detail: string; // "Cotte de mailles 16 + Bouclier 2", "10 + 2 (DEX) + 3 (SAG)"
 }
 
+// Objets magiques posés sur un objet de base (arme, armure, munitions, bâton)
+const BASE_CATEGORIES = new Set(['weapon', 'armor', 'ammunition', 'staff']);
+const magicSelect = {
+  index: true, weaponBonus: true, armorBonus: true, requiresAttunement: true, translations: t, equipmentCategory: { select: { index: true } },
+} as const;
+type MagicRow = { index: string; weaponBonus: number | null; armorBonus: number | null; translations: { localeCode: string; name: string }[] };
+// « Épée longue +1 » pour les variantes génériques (« Arme, +1 »), sinon le nom
+// de l'objet magique avec celui de l'objet de base (« Épée ardente (épée longue) »)
+function magicName(baseName: string, magic: MagicRow | undefined, lang: LangContext): string {
+  if (!magic) return baseName;
+  const bonus = magic.weaponBonus ?? magic.armorBonus;
+  if (/^(weapon|armor|ammunition)-\d$/.test(magic.index) && bonus) return `${baseName} +${bonus}`;
+  return `${pick(magic.translations, lang).name} (${baseName.toLowerCase()})`;
+}
+
 // Style de combat « Défense » : +1 tant que le personnage porte une armure
 const DEFENSE_STYLES = ['fighter-fighting-style-defense', 'fighting-style-defense', 'ranger-fighting-style-defense'];
 
@@ -321,17 +336,27 @@ export async function describeArmorClass(
   sheet: { abilityScores: Record<string, { modifier: number }>; grantedFeatures: string[] }, lang: LangContext,
 ): Promise<ArmorClass> {
   const mod = (a: string) => sheet.abilityScores[a]?.modifier ?? 0;
-  const equipped = input.items.filter((i) => i.equipped && i.equipment).map((i) => i.equipment!);
-  const armors = equipped.length
-    ? await db.equipment.findMany({
-      where: { editionId: ctx.edition?.id, index: { in: equipped }, armor: { isNot: null } },
-      select: { translations: t, armor: true },
-    })
-    : [];
-  const name = (a: (typeof armors)[number]) => pick(a.translations, lang).name;
-  const body = armors.filter((a) => a.armor!.category !== 'SHIELD').sort((a, b) => b.armor!.baseArmorClass - a.armor!.baseArmorClass)[0];
-  const shield = armors.find((a) => a.armor!.category === 'SHIELD');
+  const equippedItems = input.items.filter((i) => i.equipped);
+  const armorIndexes = equippedItems.flatMap((i) => (i.equipment ? [i.equipment] : []));
+  const magicIndexes = equippedItems.flatMap((i) => (i.magicItem ? [i.magicItem] : []));
+  const [armors, magicItems] = await Promise.all([
+    armorIndexes.length
+      ? db.equipment.findMany({ where: { editionId: ctx.edition?.id, index: { in: armorIndexes }, armor: { isNot: null } }, select: { index: true, translations: t, armor: true } })
+      : [],
+    magicIndexes.length ? db.magicItem.findMany({ where: { editionId: ctx.edition?.id, index: { in: magicIndexes } }, select: magicSelect }) : [],
+  ]);
   const signed = (n: number) => (n >= 0 ? `+ ${n}` : `− ${-n}`);
+  // Armures et boucliers portés, avec le bonus de l'objet magique posé dessus
+  const worn = equippedItems.flatMap((item) => {
+    const armor = armors.find((a) => a.index === item.equipment);
+    if (!armor) return [];
+    const magic = magicItems.find((m) => m.index === item.magicItem);
+    const bonus = magic?.armorBonus ?? 0;
+    return [{ stats: armor.armor!, bonus, name: magicName(pick(armor.translations, lang).name, magic, lang) }];
+  });
+  const body = worn.filter((a) => a.stats.category !== 'SHIELD').sort((a, b) => b.stats.baseArmorClass + b.bonus - (a.stats.baseArmorClass + a.bonus))[0];
+  const shield = worn.filter((a) => a.stats.category === 'SHIELD').sort((a, b) => b.bonus - a.bonus)[0];
+
   const classes = new Set(input.classes.map((c) => c.class));
   const defenseStyle = DEFENSE_STYLES.find((f) => sheet.grantedFeatures.includes(f));
   const draconic = input.classes.some((c) => c.class === 'sorcerer' && c.subclass === 'draconic');
@@ -347,9 +372,9 @@ export async function describeArmorClass(
   let value: number;
   let detail: string;
   if (body) {
-    const dex = body.armor!.addsDexModifier ? Math.min(mod('dex'), body.armor!.maxDexModifier ?? Infinity) : 0;
-    value = body.armor!.baseArmorClass + dex;
-    detail = `${name(body)} ${body.armor!.baseArmorClass}${body.armor!.addsDexModifier ? ` ${signed(dex)} (DEX)` : ''}`;
+    const dex = body.stats.addsDexModifier ? Math.min(mod('dex'), body.stats.maxDexModifier ?? Infinity) : 0;
+    value = body.stats.baseArmorClass + body.bonus + dex;
+    detail = `${body.name} ${body.stats.baseArmorClass + body.bonus}${body.stats.addsDexModifier ? ` ${signed(dex)} (DEX)` : ''}`;
     if (defenseStyle) {
       value += 1;
       detail += ` + 1 (${featureName(defenseStyle)})`;
@@ -362,8 +387,18 @@ export async function describeArmorClass(
     ({ value, detail } = options.reduce((a, b) => (b.value > a.value ? b : a)));
   }
   if (shield) {
-    value += shield.armor!.baseArmorClass;
-    detail += ` + ${name(shield)} ${shield.armor!.baseArmorClass}`;
+    value += shield.stats.baseArmorClass + shield.bonus;
+    detail += ` + ${shield.name} ${shield.stats.baseArmorClass + shield.bonus}`;
+  }
+  // Objets portés qui protègent (anneau, cape de protection…), harmonisés s'ils
+  // demandent un lien ; bracelets de défense : sans armure ni bouclier
+  for (const item of equippedItems) {
+    const magic = !item.equipment ? magicItems.find((m) => m.index === item.magicItem) : undefined;
+    if (!magic?.armorBonus || BASE_CATEGORIES.has(magic.equipmentCategory.index)) continue;
+    if (magic.requiresAttunement && !item.attuned) continue;
+    if (magic.index === 'bracers-of-defense' && (body || shield)) continue;
+    value += magic.armorBonus;
+    detail += ` + ${magic.armorBonus} (${pick(magic.translations, lang).name})`;
   }
   return { value, detail };
 }
@@ -393,6 +428,16 @@ const withMod = (dice: string, mod: number) => (mod ? `${dice} ${mod > 0 ? '+' :
 
 // Armes de l'inventaire et sorts mineurs offensifs, comme sur la fiche papier :
 // jet d'attaque (caractéristique + maîtrise + style de combat) et dégâts
+// Dé d'arts martiaux du moine selon son niveau de moine (SRD 5.1)
+const martialArtsDie = (monkLevel: number) => (monkLevel >= 17 ? 10 : monkLevel >= 11 ? 8 : monkLevel >= 5 ? 6 : 4);
+const average = (dice: string) => {
+  const m = /^(\d+)d(\d+)$/.exec(dice);
+  return m ? (Number(m[1]) * (Number(m[2]) + 1)) / 2 : Number(dice) || 0;
+};
+// Décharge occulte : un rayon de plus aux niveaux 5, 11 et 17 du personnage
+const eldritchBeams = (level: number) => 1 + [5, 11, 17].filter((l) => level >= l).length;
+const AGONIZING_BLAST = 'eldritch-invocation-agonizing-blast';
+
 export async function describeAttacks(
   db: Db, ctx: RulesContext, input: CharacterInput,
   sheet: { level: number; proficiencyBonus: number; abilityScores: Record<string, { modifier: number }>; grantedFeatures: string[] },
@@ -402,20 +447,23 @@ export async function describeAttacks(
   const has = (list: string[]) => list.some((f) => sheet.grantedFeatures.includes(f));
   const archery = has(ARCHERY);
   const dueling = has(DUELING);
-  const monk = input.classes.some((c) => c.class === 'monk');
+  const monkLevel = input.classes.find((c) => c.class === 'monk')?.levels.length ?? 0;
 
-  const weaponIndexes = [...new Set(input.items.map((i) => i.equipment).filter((e): e is string => !!e))];
+  // Une attaque par objet de l'inventaire (une épée longue +1 et une épée longue ordinaire en font deux)
+  const weaponItems = input.items.filter((i) => i.equipment);
   const cantrips = input.spells.filter((s) => ctx.spells.get(s.spell)?.level === 0);
-  const [weapons, proficiencies, spells] = await Promise.all([
-    weaponIndexes.length
+  const magicIndexes = [...new Set(weaponItems.flatMap((i) => (i.magicItem ? [i.magicItem] : [])))];
+  const [weapons, magicItems, proficiencies, spells] = await Promise.all([
+    weaponItems.length
       ? db.equipment.findMany({
-        where: { editionId: ctx.edition?.id, index: { in: weaponIndexes }, weapon: { isNot: null } },
+        where: { editionId: ctx.edition?.id, index: { in: [...new Set(weaponItems.map((i) => i.equipment!))] }, weapon: { isNot: null } },
         select: {
           id: true, index: true, translations: t, categories: { select: { categoryId: true } },
           weapon: { include: { damageType: named, properties: { include: { property: named } } } },
         },
       })
       : [],
+    magicIndexes.length ? db.magicItem.findMany({ where: { editionId: ctx.edition?.id, index: { in: magicIndexes } }, select: magicSelect }) : [],
     db.proficiency.findMany({
       where: { editionId: ctx.edition?.id, type: 'WEAPON', index: { in: known.proficiencies.map((p) => p.index) } },
       select: { equipmentId: true, equipmentCategoryId: true },
@@ -431,34 +479,59 @@ export async function describeAttacks(
   const proficientIn = (w: (typeof weapons)[number]) =>
     proficiencies.some((p) => p.equipmentId === w.id || (p.equipmentCategoryId != null && w.categories.some((c) => c.categoryId === p.equipmentCategoryId)));
 
-  const equippedWeapons = new Set(input.items.filter((i) => i.equipped && i.equipment).map((i) => i.equipment!));
-  const meleeEquipped = weapons.filter((w) => equippedWeapons.has(w.index) && w.weapon!.range === 'MELEE');
+  const entries = new Map<string, { weapon: (typeof weapons)[number]; magic: (typeof magicItems)[number] | undefined; equipped: boolean }>();
+  for (const item of weaponItems) {
+    const weapon = weapons.find((w) => w.index === item.equipment);
+    if (!weapon) continue;
+    // Arme ordinaire : son index ; arme magique : « longsword|weapon-1 »
+    const key = item.magicItem ? `${item.equipment}|${item.magicItem}` : item.equipment!;
+    const magic = magicItems.find((m) => m.index === item.magicItem);
+    entries.set(key, { weapon, magic, equipped: (entries.get(key)?.equipped ?? false) || !!item.equipped });
+  }
+  const meleeEquipped = [...entries.values()].filter((e) => e.equipped && e.weapon.weapon!.range === 'MELEE');
   const attacks: Attack[] = [];
 
-  for (const w of weapons) {
+  for (const [key, { weapon: w, magic, equipped }] of entries) {
     const stats = w.weapon!;
     const props = new Set(stats.properties.map((p) => p.property.index));
     const ranged = stats.range === 'RANGED';
-    const ability = props.has('finesse') || (monk && props.has('monk'))
+    const monkWeapon = monkLevel > 0 && props.has('monk');
+    const ability = props.has('finesse') || monkWeapon
       ? (mod('dex') >= mod('str') ? 'dex' : 'str')
       : ranged ? 'dex' : 'str';
-    const proficient = proficientIn(w);
-    const attackBonus = mod(ability) + (proficient ? sheet.proficiencyBonus : 0) + (archery && ranged ? 2 : 0);
+    const magicBonus = magic?.weaponBonus ?? 0;
+    const attackBonus = mod(ability) + (proficientIn(w) ? sheet.proficiencyBonus : 0) + (archery && ranged ? 2 : 0) + magicBonus;
     // Duel : une seule arme de corps à corps tenue (à une main), pas d'autre arme
-    const duel = dueling && !ranged && !props.has('two-handed') && meleeEquipped.length === 1 && meleeEquipped[0]!.index === w.index;
-    const damageMod = mod(ability) + (duel ? 2 : 0);
+    const duel = dueling && !ranged && !props.has('two-handed') && meleeEquipped.length === 1 && meleeEquipped[0]!.weapon.index === w.index;
+    const damageMod = mod(ability) + (duel ? 2 : 0) + magicBonus;
+    // Arme de moine : le dé d'arts martiaux s'il est meilleur que celui de l'arme
+    const martial = monkWeapon ? `1d${martialArtsDie(monkLevel)}` : null;
+    const dice = stats.damageDice && martial && average(martial) > average(stats.damageDice) ? martial : stats.damageDice;
     const type = stats.damageType ? ` ${name(stats.damageType).toLowerCase()}` : '';
     attacks.push({
       kind: 'WEAPON',
-      index: w.index,
-      name: name(w),
+      index: key,
+      name: magicName(name(w), magic, lang),
       attackBonus,
       save: null,
-      damage: stats.damageDice ? `${withMod(stats.damageDice, damageMod)}${type}` : null,
-      versatileDamage: stats.versatileDice ? `${withMod(stats.versatileDice, mod(ability))}${type}` : null,
+      damage: dice ? `${withMod(dice, damageMod)}${type}` : null,
+      versatileDamage: stats.versatileDice ? `${withMod(stats.versatileDice, mod(ability) + magicBonus)}${type}` : null,
       range: stats.normalRangeFt ? `${meters(stats.normalRangeFt)}${stats.longRangeFt ? ` / ${meters(stats.longRangeFt)}` : ''} m` : null,
-      properties: stats.properties.filter((p) => p.property.index !== 'monk').map((p) => name(p.property)),
-      equipped: equippedWeapons.has(w.index),
+      properties: [
+        ...(magic ? ['Magique'] : []),
+        ...(dice === martial && martial ? ['Arts martiaux'] : []),
+        ...stats.properties.filter((p) => p.property.index !== 'monk').map((p) => name(p.property)),
+      ],
+      equipped,
+    });
+  }
+  // Moine : attaque à mains nues avec le dé d'arts martiaux
+  if (monkLevel > 0) {
+    const ability = mod('dex') >= mod('str') ? 'dex' : 'str';
+    attacks.push({
+      kind: 'WEAPON', index: 'unarmed-strike', name: 'Attaque à mains nues', attackBonus: mod(ability) + sheet.proficiencyBonus, save: null,
+      damage: `${withMod(`1d${martialArtsDie(monkLevel)}`, mod(ability))} contondant`, versatileDamage: null, range: null,
+      properties: ['Arts martiaux'], equipped: true,
     });
   }
   // Armes équipées d'abord
@@ -468,11 +541,18 @@ export async function describeAttacks(
     const scaling = s.damageScaling as { by?: string; values?: Record<string, string> } | null;
     if (scaling?.by !== 'character_level' || !scaling.values) continue;
     const reached = Object.keys(scaling.values).map(Number).filter((l) => l <= sheet.level).sort((a, b) => b - a)[0];
-    const dice = reached != null ? scaling.values[String(reached)] : undefined;
+    let dice = reached != null ? scaling.values[String(reached)] : undefined;
     if (!dice) continue;
     const caster = spellcasting.find((c) => c.class === cantrips.find((x) => x.spell === s.index)?.class) ?? spellcasting[0];
     if (!caster) continue;
     const type = s.damageTypes.map((d) => name(d.damageType).toLowerCase()).join(' ou ');
+    const properties: string[] = [];
+    // Décharge occulte : plusieurs rayons, + CHA à chacun avec Explosion agonisante
+    if (s.index === 'eldritch-blast') {
+      if (has([AGONIZING_BLAST])) dice = withMod(dice, mod('cha'));
+      const beams = eldritchBeams(sheet.level);
+      if (beams > 1) properties.push(`${beams} rayons (un jet d'attaque chacun)`);
+    }
     attacks.push({
       kind: 'SPELL',
       index: s.index,
@@ -482,7 +562,7 @@ export async function describeAttacks(
       damage: `${dice}${type ? ` ${type}` : ''}`,
       versatileDamage: null,
       range: s.rangeFt ? `${meters(s.rangeFt)} m` : null,
-      properties: [],
+      properties,
       equipped: false,
     });
   }

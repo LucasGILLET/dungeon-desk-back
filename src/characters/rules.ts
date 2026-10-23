@@ -69,6 +69,10 @@ export interface RulesContext {
   spells: Map<string, { id: number; level: number }>;
   equipment: Map<string, number>;
   magicItems: Map<string, number>;
+  // Pour poser un objet magique sur un objet de base : nature de l'objet du
+  // catalogue (WEAPON, ARMOR…) et catégorie de l'objet magique (weapon, armor…)
+  equipmentKinds: Map<string, string>;
+  magicItemCategories: Map<string, string>;
   languages: Map<string, number>;
   conditions: Map<string, number>;
   traits: Map<string, number>;
@@ -150,6 +154,9 @@ const MAX_ATTUNED = 3;
 
 export const modifier = (score: number) => Math.floor((score - 10) / 2);
 export const proficiencyBonus = (level: number) => 2 + Math.floor((Math.max(level, 1) - 1) / 4);
+
+// Catégorie d'objet magique → nature des objets de base possibles
+const BASE_KINDS: Record<string, string[]> = { weapon: ['WEAPON'], armor: ['ARMOR'], ammunition: ['AMMUNITION'], staff: ['WEAPON'] };
 
 export function analyse(input: CharacterInput, ctx: RulesContext): Analysis {
   const errors: Issue[] = [];
@@ -441,7 +448,14 @@ export function analyse(input: CharacterInput, ctx: RulesContext): Analysis {
     const equipmentId = item.equipment ? lookup(ctx.equipment, item.equipment, `items[${i}].equipment`, 'equipment') ?? null : null;
     const magicItemId = item.magicItem ? lookup(ctx.magicItems, item.magicItem, `items[${i}].magicItem`, 'magic item') ?? null : null;
     if (!item.equipment && !item.magicItem && !item.name) fail(`items[${i}]`, 'An item needs an equipment index, a magic item index or a name');
-    if (item.equipment && item.magicItem) fail(`items[${i}]`, 'An item is either equipment or a magic item');
+    // Arme, armure, munitions ou bâton magique : posé sur un objet de base de la même nature
+    if (item.equipment && item.magicItem) {
+      const category = ctx.magicItemCategories.get(item.magicItem);
+      const kind = ctx.equipmentKinds.get(item.equipment);
+      const expected = category ? BASE_KINDS[category] : undefined;
+      if (!expected) fail(`items[${i}]`, `Magic item "${item.magicItem}" does not go on a base item`);
+      else if (kind && !expected.includes(kind)) fail(`items[${i}].equipment`, `"${item.equipment}" is not a valid base for "${item.magicItem}"`);
+    }
     items.push({ equipmentId, magicItemId, name: item.name ?? null, description: item.description ?? null, quantity: item.quantity, equipped: item.equipped, attuned: item.attuned, position: i });
   }
   if (items.filter((i) => i.attuned).length > MAX_ATTUNED) fail('items', `At most ${MAX_ATTUNED} attuned items`);

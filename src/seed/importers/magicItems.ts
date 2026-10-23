@@ -15,6 +15,17 @@ export function parseRarity(name: string): MagicItemRarity {
   return rarity;
 }
 
+// Bonus d'une arme ou armure magique, lu dans sa description anglaise :
+// « +1 bonus to attack and damage rolls », « +2 bonus to AC ». Sauf les bonus
+// conditionnels : « +2 bonus to AC against ranged attacks » (bouclier
+// antiprojectiles), Gardienne (bonus à répartir entre l'arme et la CA).
+const CONDITIONAL_ARMOR_BONUS = new Set(['defender']);
+export function parseMagicBonuses(index: string, description: string): { weaponBonus: number | null; armorBonus: number | null } {
+  const weapon = /\+(\d) bonus to attack and damage rolls/.exec(description);
+  const armor = CONDITIONAL_ARMOR_BONUS.has(index) ? null : /\+(\d) bonus to AC(?! against)/.exec(description);
+  return { weaponBonus: weapon ? Number(weapon[1]) : null, armorBonus: armor ? Number(armor[1]) : null };
+}
+
 export async function importMagicItems(prisma: PrismaClient, refs: Refs, edition: string): Promise<void> {
   const { editionId } = refs;
   const items = loadSrd(edition, 'Magic-Items');
@@ -24,6 +35,7 @@ export async function importMagicItems(prisma: PrismaClient, refs: Refs, edition
       equipmentCategoryId: await refs.id('equipmentCategory', en.equipment_category.index),
       rarity: parseRarity(en.rarity.name),
       requiresAttunement: /requires attunement/i.test(en.desc[0]),
+      ...parseMagicBonuses(en.index, en.desc.join(' ')),
       imageUrl: en.image ? `${IMAGE_HOST}${en.image}` : null,
     };
     await prisma.$transaction(async (tx) => {

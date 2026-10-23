@@ -27,6 +27,10 @@ model MagicItem {
   equipmentCategory   EquipmentCategory @relation(fields: [equipmentCategoryId], references: [id])
   rarity              MagicItemRarity
   requiresAttunement  Boolean           @default(false)
+  // Bonus des armes et armures magiques (« Arme, +1 », « Armure, +2 ») :
+  // ajouté au jet d'attaque et aux dégâts, ou à la CA, de l'objet de base
+  weaponBonus         Int?
+  armorBonus          Int?
   // Variante d'un objet générique ("Arme +1" → "Arme, +1, +2 ou +3")
   parentId            Int?
   parent              MagicItem?        @relation("MagicItemVariants", fields: [parentId], references: [id], onDelete: SetNull)

@@ -64,7 +64,9 @@ const ctx: RulesContext = {
   feats: new Map([['grappler', { id: 60, prerequisites: [{ abilityScoreId: abilityId('str'), minimumScore: 13, alternativeGroup: 1 }] }]]),
   spells: new Map([['fire-bolt', { id: 100, level: 0 }], ['magic-missile', { id: 101, level: 1 }], ['cure-wounds', { id: 102, level: 1 }], ['fireball', { id: 103, level: 3 }]]),
   equipment: new Map([['dagger', 200]]),
-  magicItems: new Map([['cloak-of-elvenkind', 300]]),
+  magicItems: new Map([['cloak-of-elvenkind', 300], ['weapon-1', 301]]),
+  equipmentKinds: new Map([['dagger', 'WEAPON']]),
+  magicItemCategories: new Map([['cloak-of-elvenkind', 'wondrous-items'], ['weapon-1', 'weapon']]),
   languages: new Map([['giant', 300]]),
   conditions: new Map(),
   traits: new Map(),
@@ -226,6 +228,12 @@ describe('Character rules', () => {
     bad.items.push({ magicItem: 'deck-of-many-things', quantity: 1 } as never, { equipment: 'dagger', magicItem: 'cloak-of-elvenkind', quantity: 1 } as never);
     const errors = messages(bad);
     expect(errors.some((e) => e.includes('deck-of-many-things'))).toBe(true);
-    expect(errors).toContain('An item is either equipment or a magic item');
+    expect(errors).toContain('Magic item "cloak-of-elvenkind" does not go on a base item');
+
+    // Une arme magique sur une arme de base : accepté
+    const magicDagger = base();
+    magicDagger.items.push({ equipment: 'dagger', magicItem: 'weapon-1', quantity: 1 } as never);
+    expect(run(magicDagger).errors).toEqual([]);
+    expect(run(magicDagger).plan?.items[1]).toMatchObject({ equipmentId: 200, magicItemId: 301 });
   });
 });
