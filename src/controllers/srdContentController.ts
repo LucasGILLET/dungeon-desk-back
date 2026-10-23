@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../prismaClient';
 import { allLangs, LangContext, pick, resolveLang } from '../srd/lang';
 import { logger } from '../utils/logger';
+import { setCache } from '../srd/cache';
 
 // Lecture publique des races, historiques et sorts, traduits et aplatis comme
 // les classes (voir srdController et docs/modelisation/conventions.md §5).
@@ -12,10 +13,6 @@ type Named = { index: string; translations: { localeCode: string; name: string }
 
 const refOf = (ctx: LangContext) => (x: Named | null) => (x ? { index: x.index, name: pick(x.translations, ctx).name } : null);
 const editionWhere = (req: Request) => ({ edition: { code: req.params.edition } });
-
-function setCache(res: Response) {
-  res.set('Cache-Control', 'public, max-age=3600');
-}
 
 function fail(res: Response, what: string, error: unknown) {
   logger.error(`Error fetching SRD ${what}: ${error instanceof Error ? error.message : error}`);

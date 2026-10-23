@@ -2,13 +2,10 @@ import { Request, Response } from 'express';
 import prisma from '../prismaClient';
 import { allLangs, pick, resolveLang } from '../srd/lang';
 import { logger } from '../utils/logger';
+import { setCache } from '../srd/cache';
 
 // Lecture des données de jeu (SRD). Les traductions sont aplaties dans l'objet :
 // langue demandée, sinon langue par défaut (voir docs/modelisation/conventions.md).
-
-function setCache(res: Response) {
-  res.set('Cache-Control', 'public, max-age=3600');
-}
 
 export const getClasses = async (req: Request, res: Response) => {
   try {

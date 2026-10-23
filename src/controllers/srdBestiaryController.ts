@@ -3,6 +3,7 @@ import prisma from '../prismaClient';
 import { detailInclude, monsterDetail, monsterSummary, summaryInclude } from '../monsters/serialize';
 import { allLangs, LangContext, pick, resolveLang } from '../srd/lang';
 import { logger } from '../utils/logger';
+import { setCache } from '../srd/cache';
 
 // Bestiaire et objets magiques : liste légère pour la recherche et le filtrage,
 // fiche détaillée par index (bloc de statistiques complet, description).
@@ -13,10 +14,6 @@ type Named = { index: string; translations: { localeCode: string; name: string }
 
 const refOf = (ctx: LangContext) => (x: Named | null) => (x ? { index: x.index, name: pick(x.translations, ctx).name } : null);
 const editionWhere = (req: Request) => ({ edition: { code: req.params.edition } });
-
-function setCache(res: Response) {
-  res.set('Cache-Control', 'public, max-age=3600');
-}
 
 function fail(res: Response, what: string, error: unknown) {
   logger.error(`Error fetching SRD ${what}: ${error instanceof Error ? error.message : error}`);

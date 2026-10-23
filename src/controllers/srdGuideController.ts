@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../prismaClient';
 import { allLangs, LangContext, pick, resolveLang } from '../srd/lang';
 import { logger } from '../utils/logger';
+import { setCache } from '../srd/cache';
 
 // Règles du SRD (sommaire, puis une section à la fois) et guides de
 // l'application (pages publiées, avec leurs sections et cartes).
@@ -15,10 +16,6 @@ const editionWhere = (req: Request) => ({ edition: { code: req.params.edition } 
 
 // Règles du SRD : une heure ; guides : une minute, pour qu'un rédacteur voie vite
 // ses modifications faites dans Directus
-function setCache(res: Response, maxAge = 3600) {
-  res.set('Cache-Control', `public, max-age=${maxAge}`);
-}
-
 function fail(res: Response, what: string, error: unknown) {
   logger.error(`Error fetching SRD ${what}: ${error instanceof Error ? error.message : error}`);
   res.status(500).json({ message: 'Server error' });

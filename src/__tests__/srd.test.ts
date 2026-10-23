@@ -114,7 +114,8 @@ describe('SRD Controller', () => {
       const res = await request(app).get('/api/srd/2014/classes?lang=fr');
 
       expect(res.status).toBe(200);
-      expect(res.headers['cache-control']).toBe('public, max-age=3600');
+      expect(res.headers['cache-control']).toBe('public, max-age=3600, stale-while-revalidate=86400');
+      expect(res.headers.etag).toBeDefined(); // revalidation : 304 si rien n'a changé
       expect(res.body).toEqual([
         { index: 'barbarian', name: 'Barbare', lang: 'fr', hitDie: 12, subclassLevel: 3, difficulty: 'MEDIUM', casterType: null, recommendedAbilities: [] },
         { index: 'wizard', name: 'Magicien', lang: 'fr', hitDie: 6, subclassLevel: 2, difficulty: 'MEDIUM', casterType: null, recommendedAbilities: [] },
