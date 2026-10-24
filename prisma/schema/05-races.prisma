@@ -207,6 +207,9 @@ model Trait {
   // Personnages qui l'utilisent
   characterUsage CharacterFeatureUsage[]
 
+  // Ce que coûte son utilisation pendant le tour (Souffle : action), lu par le seed
+  activation ActivationType?
+
   @@unique([editionId, index])
 }
 

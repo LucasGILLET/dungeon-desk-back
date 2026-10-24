@@ -373,6 +373,13 @@ model SubclassSpell {
 // Capacités de classe
 // ----------------------------------------------------------------------------
 
+// Utilisation d'une capacité ou d'un trait pendant le tour
+enum ActivationType {
+  ACTION
+  BONUS_ACTION
+  REACTION
+}
+
 // Sorts accordés par une capacité (manifestation « Armure des ombres » : armure
 // de mage à volonté ; pacte de la chaîne : appel de familier). Le SRD ne les
 // structure pas : le seed les écrit à la main.
@@ -390,20 +397,22 @@ model ClassFeatureSpell {
 }
 
 model ClassFeature {
-  id         Int            @id @default(autoincrement())
+  id         Int             @id @default(autoincrement())
   editionId  Int
-  edition    Edition        @relation(fields: [editionId], references: [id])
+  edition    Edition         @relation(fields: [editionId], references: [id])
   index      String // "arcane-recovery"
   level      Int // niveau de classe d'obtention
   classId    Int
-  class      Class          @relation(fields: [classId], references: [id], onDelete: Cascade)
+  class      Class           @relation(fields: [classId], references: [id], onDelete: Cascade)
   subclassId Int? // null = capacité commune à la classe
-  subclass   Subclass?      @relation(fields: [subclassId], references: [id], onDelete: Cascade)
+  subclass   Subclass?       @relation(fields: [subclassId], references: [id], onDelete: Cascade)
   // Sous-capacité : "Cercle de la Terre : Arctique" → "Cercle de la Terre",
   // chaque Manifestation occulte → "Manifestations occultes"
   parentId   Int?
-  parent     ClassFeature?  @relation("ClassFeatureTree", fields: [parentId], references: [id], onDelete: Cascade)
-  children   ClassFeature[] @relation("ClassFeatureTree")
+  parent     ClassFeature?   @relation("ClassFeatureTree", fields: [parentId], references: [id], onDelete: Cascade)
+  // Ce que coûte son utilisation pendant le tour (Rage : action bonus), lu par le seed
+  activation ActivationType?
+  children   ClassFeature[]  @relation("ClassFeatureTree")
 
   source    ContentSource @default(SRD)
   ownerId   Int?

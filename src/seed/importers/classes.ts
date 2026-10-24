@@ -3,6 +3,7 @@
 import { CasterType, ChoiceKind, ClassColumnValueType, ClassFeaturePrerequisiteType, PrismaClient } from '@prisma/client';
 import { Json, LOCALES, LocaleCode, loadMerged, loadSrd, log, MergedFile, readJson, Refs, replaceTranslations, SrdFile, text, translationsFor, TX_OPTIONS, Tx } from '../context';
 import { ChoiceImporter, ChoiceSpec } from './choices';
+import { parseActivation } from '../activation';
 
 const CASTER_TYPES: Record<string, CasterType> = {
   bard: 'FULL', cleric: 'FULL', druid: 'FULL', sorcerer: 'FULL', wizard: 'FULL',
@@ -269,6 +270,7 @@ export class ClassImporter {
     for (const f of ownFeatures) {
       const fdata = {
         level: f.level, classId, subclassId: f.subclass ? subclassIds.get(f.subclass.index)! : null,
+        activation: parseActivation(f.index, text(f.desc) ?? ''),
         source: features.isHomebrew(f.index) ? ('HOMEBREW' as const) : ('SRD' as const),
       };
       const row = await tx.classFeature.upsert({

@@ -151,6 +151,18 @@ export const characterSheetSchema = {
         },
       },
     },
+    turnOptions: {
+      type: 'array',
+      description: 'Capacités, traits et sorts utilisables pendant le tour (en plus des actions de base)',
+      items: {
+        type: 'object',
+        required: ['activation', 'source', 'index', 'name', 'spellLevel'],
+        properties: {
+          activation: { type: 'string', enum: ['ACTION', 'BONUS_ACTION', 'REACTION'] }, source: { type: 'string', enum: ['FEATURE', 'TRAIT', 'SPELL'] },
+          index: { type: 'string' }, name: { type: 'string' }, spellLevel: { type: 'integer', nullable: true },
+        },
+      },
+    },
     damageResistances: {
       type: 'array',
       items: { type: 'object', required: ['damageType', 'name', 'source'], properties: { damageType: { type: 'string' }, name: { type: 'string' }, source: { type: 'string' } } },

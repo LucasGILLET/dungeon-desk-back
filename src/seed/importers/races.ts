@@ -5,6 +5,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { SizesSchema, SpeedsSchema, TraitActionSchema } from '../../srd/jsonb';
 import { Json, loadMerged, loadSrd, log, MergedFile, Refs, replaceTranslations, SrdFile, text, translationsFor, TX_OPTIONS, Tx } from '../context';
 import { ChoiceImporter, ChoiceSpec } from './choices';
+import { parseActivation } from '../activation';
 
 const localized = (file: SrdFile, index: string, pick: (row: Json) => Json) => {
   const fr = file.get('fr', index);
@@ -56,6 +57,7 @@ export async function importRaces(prisma: PrismaClient, refs: Refs, edition: str
     const data = {
       damageTypeId: specific.damage_type ? await refs.id('damageType', specific.damage_type.index) : null,
       spellAbilityId: TRAIT_SPELLS[en.index] ? await refs.id('abilityScore', TRAIT_SPELLS[en.index]!.ability) : null,
+      activation: parseActivation(en.index, text(en.desc) ?? ''),
       action: traitAction(specific),
       source: traits.isHomebrew(en.index) ? ('HOMEBREW' as const) : ('SRD' as const),
     };

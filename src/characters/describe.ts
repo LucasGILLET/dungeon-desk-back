@@ -795,3 +795,76 @@ export async function describeResistances(db: Db, ctx: RulesContext, sheet: { gr
   });
   return rows.map((r) => ({ damageType: r.damageType.index, name: pick(r.damageType.translations, lang).name, source: pick(r.trait.translations, lang).name }));
 }
+
+// --- Pendant le tour : actions, actions bonus, réactions -----------------------------------
+
+export interface TurnOption {
+  activation: 'ACTION' | 'BONUS_ACTION' | 'REACTION';
+  source: 'FEATURE' | 'TRAIT' | 'SPELL';
+  index: string;
+  name: string;
+  spellLevel: number | null;
+}
+
+// Une capacité qui s'améliore avec le niveau a une entrée par palier (Inspiration
+// bardique (d6), (d8)…) : seule la plus haute atteinte compte
+const baseName = (name: string) => name.replace(/\s*\([^)]*\)\s*$/, '');
+
+// Ce que le personnage peut faire pendant son tour en plus des actions de base :
+// capacités de classe, traits raciaux et sorts lançables en une action, une
+// action bonus ou une réaction. Sorts : préparés (ou connus), et sorts accordés.
+export async function describeTurn(
+  db: Db, ctx: RulesContext, input: CharacterInput, sheet: { grantedTraits: string[]; grantedFeatures: string[] },
+  granted: GrantedSpell[], lang: LangContext,
+): Promise<TurnOption[]> {
+  const owned = input.classes.flatMap((c) => {
+    const rule = ctx.classes.get(c.class);
+    if (!rule) return [];
+    const subclassId = c.subclass ? rule.subclasses.get(c.subclass) ?? -1 : -1;
+    return [{ classId: rule.id, level: { lte: c.levels.length }, OR: [{ subclassId: null }, { subclassId }] }];
+  });
+  // Sorts de classe castables : sorts mineurs, sorts préparés, ou tous ceux d'un lanceur à sorts connus
+  const knownCaster = (classIndex: string) => {
+    const c = input.classes.find((x) => x.class === classIndex);
+    return ctx.classes.get(classIndex)?.levels.get(c?.levels.length ?? 0)?.spellsKnown != null;
+  };
+  const castable = input.spells.filter((s) => ctx.spells.get(s.spell)?.level === 0 || s.prepared || knownCaster(s.class));
+  const spellIndexes = [...new Set([...castable.map((s) => s.spell), ...granted.map((g) => g.index)])];
+  const traitIds = characterTraitIds(ctx, sheet);
+
+  const [features, traits, spells] = await Promise.all([
+    db.classFeature.findMany({
+      where: {
+        editionId: ctx.edition?.id, activation: { not: null },
+        OR: [
+          // Capacités de niveau, hors options d'un choix (manifestations, styles de combat)
+          ...owned.map((o) => ({ ...o, parentId: null, choiceItems: { none: {} } })),
+          { index: { in: sheet.grantedFeatures } },
+        ],
+      },
+      select: { index: true, level: true, activation: true, translations: t },
+      orderBy: { level: 'desc' },
+    }),
+    traitIds.length ? db.trait.findMany({ where: { id: { in: traitIds }, activation: { not: null } }, select: { index: true, activation: true, translations: t } }) : [],
+    spellIndexes.length
+      ? db.spell.findMany({
+        where: { editionId: ctx.edition?.id, index: { in: spellIndexes }, castingTimeUnit: { in: ['ACTION', 'BONUS_ACTION', 'REACTION'] } },
+        select: { index: true, level: true, castingTimeUnit: true, translations: t },
+      })
+      : [],
+  ]);
+
+  const result: TurnOption[] = [];
+  const seen = new Set<string>();
+  for (const f of features) {
+    const name = pick(f.translations, lang).name;
+    if (seen.has(baseName(name))) continue;
+    seen.add(baseName(name));
+    result.push({ activation: f.activation!, source: 'FEATURE', index: f.index, name: baseName(name), spellLevel: null });
+  }
+  for (const tr of traits) result.push({ activation: tr.activation!, source: 'TRAIT', index: tr.index, name: pick(tr.translations, lang).name, spellLevel: null });
+  for (const s of spells.sort((a, b) => a.level - b.level)) {
+    result.push({ activation: s.castingTimeUnit as TurnOption['activation'], source: 'SPELL', index: s.index, name: pick(s.translations, lang).name, spellLevel: s.level });
+  }
+  return result;
+}
