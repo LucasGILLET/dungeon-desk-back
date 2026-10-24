@@ -373,6 +373,22 @@ model SubclassSpell {
 // Capacités de classe
 // ----------------------------------------------------------------------------
 
+// Sorts accordés par une capacité (manifestation « Armure des ombres » : armure
+// de mage à volonté ; pacte de la chaîne : appel de familier). Le SRD ne les
+// structure pas : le seed les écrit à la main.
+model ClassFeatureSpell {
+  id              Int          @id @default(autoincrement())
+  classFeatureId  Int
+  spellId         Int
+  atWill          Boolean      @default(false) // sans emplacement de sort
+  oncePerLongRest Boolean      @default(false)
+  castAtLevel     Int?
+  classFeature    ClassFeature @relation(fields: [classFeatureId], references: [id], onDelete: Cascade)
+  spell           Spell        @relation(fields: [spellId], references: [id], onDelete: Cascade)
+
+  @@unique([classFeatureId, spellId])
+}
+
 model ClassFeature {
   id         Int            @id @default(autoincrement())
   editionId  Int
@@ -401,6 +417,7 @@ model ClassFeature {
   choices       Choice[] // expertise, style de combat, ennemi juré…
   choiceItems   ChoiceOptionItem[]         @relation("ChoiceItemClassFeature")
   grantsSpells  SubclassSpell[]            @relation("SubclassSpellFeature")
+  spells        ClassFeatureSpell[]
 
   // Personnages qui l'utilisent
   characterUsage CharacterFeatureUsage[]

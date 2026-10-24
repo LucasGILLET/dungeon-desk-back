@@ -19,8 +19,14 @@ const db = {
     findMany: async () => [
       { requiredClassLevel: 1, requiredFeature: null, spell: spell('bless', 1, 'Bénédiction'), subclass: { index: 'life', translations: tr('Domaine de la Vie'), class: { index: 'cleric' } } },
       { requiredClassLevel: 5, requiredFeature: null, spell: spell('revivify', 3, 'Retour à la vie'), subclass: { index: 'life', translations: tr('Domaine de la Vie'), class: { index: 'cleric' } } },
+      { requiredClassLevel: 1, requiredFeature: null, spell: spell('burning-hands', 1, 'Mains brûlantes'), subclass: { index: 'fiend', translations: tr('Le Fiélon'), class: { index: 'warlock' } } },
       { requiredClassLevel: 3, requiredFeature: { index: 'circle-of-the-land-forest' }, spell: spell('spider-climb', 2, 'Pattes d\'araignée'), subclass: { index: 'life', translations: tr('Domaine de la Vie'), class: { index: 'cleric' } } },
     ],
+  },
+  classFeatureSpell: {
+    findMany: async ({ where }: any) => where.classFeature.index.in.includes('eldritch-invocation-armor-of-shadows')
+      ? [{ atWill: true, oncePerLongRest: false, castAtLevel: null, spell: spell('mage-armor', 1, 'Armure de mage'), classFeature: { translations: tr('Armure des ombres'), class: { index: 'warlock' } } }]
+      : [],
   },
   traitDamageResistance: { findMany: async () => [{ damageType: { index: 'fire', translations: tr('Feu') }, trait: { translations: tr('Résistance infernale') } }] },
 } as any;
@@ -34,8 +40,8 @@ describe('describeGrantedSpells', () => {
     const spells = await describeGrantedSpells(db, ctx, input, sheet(3), [], fr);
 
     expect(spells).toEqual([
-      { index: 'thaumaturgy', name: 'Thaumaturgie', level: 0, source: 'Ascendance infernale', kind: 'TRAIT', ability: 'cha', saveDC: 13, attackBonus: 5, castAtLevel: null, oncePerLongRest: false },
-      { index: 'hellish-rebuke', name: 'Représailles infernales', level: 1, source: 'Ascendance infernale', kind: 'TRAIT', ability: 'cha', saveDC: 13, attackBonus: 5, castAtLevel: 2, oncePerLongRest: true },
+      { index: 'thaumaturgy', name: 'Thaumaturgie', level: 0, source: 'Ascendance infernale', kind: 'TRAIT', ability: 'cha', saveDC: 13, attackBonus: 5, castAtLevel: null, oncePerLongRest: false, atWill: false },
+      { index: 'hellish-rebuke', name: 'Représailles infernales', level: 1, source: 'Ascendance infernale', kind: 'TRAIT', ability: 'cha', saveDC: 13, attackBonus: 5, castAtLevel: 2, oncePerLongRest: true, atWill: false },
     ]);
     expect(await describeGrantedSpells(db, ctx, input, sheet(2), [], fr)).toHaveLength(1);
   });
@@ -46,6 +52,17 @@ describe('describeGrantedSpells', () => {
 
     // Retour à la vie : niveau 5 ; Pattes d'araignée : terrain non choisi
     expect(spells).toEqual([expect.objectContaining({ index: 'bless', source: 'Domaine de la Vie', kind: 'SUBCLASS', ability: 'wis', saveDC: 12 })]);
+  });
+});
+
+describe('describeGrantedSpells (occultiste)', () => {
+  it('adds the spells of a chosen invocation at will, but not the expanded list of the patron', async () => {
+    const input = { classes: [{ class: 'warlock', subclass: 'fiend', levels: [{}, {}] }], choices: [] } as any;
+    const warlock = [{ class: 'warlock', ability: 'cha', saveDC: 13, attackBonus: 5 }];
+    const spells = await describeGrantedSpells(db, { ...ctx, race: null }, input, { ...sheet(2), grantedFeatures: ['eldritch-invocation-armor-of-shadows'] }, warlock, fr);
+
+    // Mains brûlantes : liste étendue du Fiélon, à apprendre comme les autres sorts
+    expect(spells).toEqual([expect.objectContaining({ index: 'mage-armor', source: 'Armure des ombres', kind: 'FEATURE', atWill: true, saveDC: 13 })]);
   });
 });
 

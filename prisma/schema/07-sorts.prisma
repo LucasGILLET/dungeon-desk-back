@@ -105,6 +105,7 @@ model Spell {
   classes                   ClassSpell[]
   subclasses                SubclassSpell[]
   traits                    TraitSpell[]
+  classFeatures             ClassFeatureSpell[]
   classFeaturePrerequisites ClassFeaturePrerequisite[]
   choiceOptionItems         ChoiceOptionItem[]
 

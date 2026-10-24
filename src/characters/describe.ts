@@ -690,22 +690,28 @@ export interface GrantedSpell {
   name: string;
   level: number;
   source: string; // « Héritage infernal », « Domaine de la Vie »
-  // Trait racial, sous-classe (toujours préparé, sans compter dans la limite) ou choix
-  kind: 'TRAIT' | 'SUBCLASS' | 'CHOICE';
+  // Trait racial, sous-classe (toujours préparé, sans compter dans la limite),
+  // capacité de classe (manifestation occulte) ou choix
+  kind: 'TRAIT' | 'SUBCLASS' | 'FEATURE' | 'CHOICE';
   // Valeurs d'incantation : celles du trait, ou de la classe pour une sous-classe
   ability: string | null;
   saveDC: number | null;
   attackBonus: number | null;
   castAtLevel: number | null; // lancé comme un sort de ce niveau
-  oncePerLongRest: boolean; // sans emplacement, une fois par repos long
+  oncePerLongRest: boolean; // une fois par repos long
+  atWill: boolean; // à volonté, sans emplacement de sort
 }
+
+// Occultiste : les sorts du patron étendent seulement la liste de sorts
+const EXPANDED_LIST_CLASSES = new Set(['warlock']);
 
 const spellSelect = { select: { index: true, level: true, translations: t } } as const;
 const sourceSelect = { select: { index: true, translations: t, spellAbility: { select: { index: true } } } } as const;
 
 // Sorts que le personnage a sans les choisir dans sa liste de classe : traits
 // raciaux (héritage infernal), sorts de sous-classe toujours préparés (domaine,
-// serment, cercle) et sorts pris dans un choix (sort mineur du haut-elfe).
+// serment, cercle), capacités choisies (manifestations occultes, pacte de la
+// chaîne) et sorts pris dans un choix (sort mineur du haut-elfe).
 export async function describeGrantedSpells(
   db: Db, ctx: RulesContext, input: CharacterInput,
   sheet: { level: number; proficiencyBonus: number; abilityScores: Record<string, { modifier: number }>; grantedTraits: string[]; grantedFeatures: string[] },
@@ -724,7 +730,7 @@ export async function describeGrantedSpells(
   const optionIds = input.choices.flatMap((c) => (c.optionId != null ? [c.optionId] : []));
   const subclasses = input.classes.filter((c) => c.subclass);
 
-  const [traitSpells, chosen, subclassSpells] = await Promise.all([
+  const [traitSpells, chosen, subclassSpells, featureSpells] = await Promise.all([
     traitIds.length
       ? db.traitSpell.findMany({ where: { traitId: { in: traitIds }, requiredCharacterLevel: { lte: sheet.level } }, include: { spell: spellSelect, trait: sourceSelect }, orderBy: { requiredCharacterLevel: 'asc' } })
       : [],
@@ -740,12 +746,19 @@ export async function describeGrantedSpells(
         include: { spell: spellSelect, subclass: { select: { index: true, translations: t, class: { select: { index: true } } } }, requiredFeature: { select: { index: true } } },
       })
       : [],
+    // Capacités accordées par une option (les manifestations se choisissent)
+    sheet.grantedFeatures.length
+      ? db.classFeatureSpell.findMany({
+        where: { classFeature: { editionId: ctx.edition?.id, index: { in: sheet.grantedFeatures } } },
+        include: { spell: spellSelect, classFeature: { select: { translations: t, class: { select: { index: true } } } } },
+      })
+      : [],
   ]);
   const name = (x: { translations: { localeCode: string; name: string }[] }) => pick(x.translations, lang).name;
   const result: GrantedSpell[] = [];
-  const add = (spell: { index: string; level: number; translations: { localeCode: string; name: string }[] }, kind: GrantedSpell['kind'], source: string, values: ReturnType<typeof casting>, extra: { castAtLevel?: number | null; oncePerLongRest?: boolean } = {}) => {
+  const add = (spell: { index: string; level: number; translations: { localeCode: string; name: string }[] }, kind: GrantedSpell['kind'], source: string, values: ReturnType<typeof casting>, extra: { castAtLevel?: number | null; oncePerLongRest?: boolean; atWill?: boolean } = {}) => {
     if (result.some((r) => r.index === spell.index && r.source === source)) return;
-    result.push({ index: spell.index, name: name(spell), level: spell.level, source, kind, ...values, castAtLevel: extra.castAtLevel ?? null, oncePerLongRest: extra.oncePerLongRest ?? false });
+    result.push({ index: spell.index, name: name(spell), level: spell.level, source, kind, ...values, castAtLevel: extra.castAtLevel ?? null, oncePerLongRest: extra.oncePerLongRest ?? false, atWill: extra.atWill ?? false });
   };
 
   for (const s of traitSpells) add(s.spell, 'TRAIT', name(s.trait), casting(s.trait.spellAbility?.index ?? null), s);
@@ -757,11 +770,12 @@ export async function describeGrantedSpells(
   }
   for (const s of subclassSpells) {
     const owner = subclasses.find((c) => c.subclass === s.subclass.index && c.class === s.subclass.class.index);
-    if (!owner || s.requiredClassLevel > owner.levels.length) continue;
+    if (!owner || EXPANDED_LIST_CLASSES.has(owner.class) || s.requiredClassLevel > owner.levels.length) continue;
     // Cercle de la Terre : seulement les sorts du terrain choisi
     if (s.requiredFeature && !sheet.grantedFeatures.includes(s.requiredFeature.index)) continue;
     add(s.spell, 'SUBCLASS', name(s.subclass), ofClass(owner.class));
   }
+  for (const s of featureSpells) add(s.spell, 'FEATURE', name(s.classFeature), ofClass(s.classFeature.class.index), s);
   return result.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
 }
 

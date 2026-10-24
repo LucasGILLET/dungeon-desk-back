@@ -143,11 +143,11 @@ export const characterSheetSchema = {
       description: 'Sorts accordés sans être choisis dans la liste de classe : traits raciaux, sous-classe (toujours préparés), choix',
       items: {
         type: 'object',
-        required: ['index', 'name', 'level', 'source', 'kind', 'ability', 'saveDC', 'attackBonus', 'castAtLevel', 'oncePerLongRest'],
+        required: ['index', 'name', 'level', 'source', 'kind', 'ability', 'saveDC', 'attackBonus', 'castAtLevel', 'oncePerLongRest', 'atWill'],
         properties: {
-          index: { type: 'string' }, name: { type: 'string' }, level: { type: 'integer' }, source: { type: 'string' }, kind: { type: 'string', enum: ['TRAIT', 'SUBCLASS', 'CHOICE'] },
+          index: { type: 'string' }, name: { type: 'string' }, level: { type: 'integer' }, source: { type: 'string' }, kind: { type: 'string', enum: ['TRAIT', 'SUBCLASS', 'FEATURE', 'CHOICE'] },
           ability: { type: 'string', nullable: true }, saveDC: { type: 'integer', nullable: true }, attackBonus: { type: 'integer', nullable: true },
-          castAtLevel: { type: 'integer', nullable: true }, oncePerLongRest: { type: 'boolean' },
+          castAtLevel: { type: 'integer', nullable: true }, oncePerLongRest: { type: 'boolean' }, atWill: { type: 'boolean' },
         },
       },
     },

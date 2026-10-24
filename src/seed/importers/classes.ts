@@ -10,6 +10,35 @@ const CASTER_TYPES: Record<string, CasterType> = {
   warlock: 'PACT',
 };
 
+// Sorts accordés par les capacités : le SRD ne les donne qu'en texte
+type FeatureSpellSpec = { spell: string; atWill?: boolean; longRest?: boolean; castAt?: number };
+const atWill = (spell: string, castAt?: number): FeatureSpellSpec[] => [{ spell, atWill: true, castAt }];
+const oncePerLongRest = (spell: string): FeatureSpellSpec[] => [{ spell, longRest: true }];
+export const FEATURE_SPELLS: Record<string, FeatureSpellSpec[]> = {
+  'eldritch-invocation-armor-of-shadows': atWill('mage-armor'),
+  'eldritch-invocation-beast-speech': atWill('speak-with-animals'),
+  'eldritch-invocation-eldritch-sight': atWill('detect-magic'),
+  'eldritch-invocation-fiendish-vigor': atWill('false-life', 1),
+  'eldritch-invocation-mask-of-many-faces': atWill('disguise-self'),
+  'eldritch-invocation-misty-visions': atWill('silent-image'),
+  'eldritch-invocation-ascendant-step': atWill('levitate'),
+  'eldritch-invocation-otherworldly-leap': atWill('jump'),
+  'eldritch-invocation-whispers-of-the-grave': atWill('speak-with-dead'),
+  'eldritch-invocation-chains-of-carceri': atWill('hold-monster'),
+  'eldritch-invocation-master-of-myriad-forms': atWill('alter-self'),
+  'eldritch-invocation-visions-of-distant-realms': atWill('arcane-eye'),
+  // Avec un emplacement de sort d'occultiste, une fois par repos long
+  'eldritch-invocation-thief-of-five-fates': oncePerLongRest('bane'),
+  'eldritch-invocation-mire-the-mind': oncePerLongRest('slow'),
+  'eldritch-invocation-sign-of-ill-omen': oncePerLongRest('bestow-curse'),
+  'eldritch-invocation-bewitching-whispers': oncePerLongRest('compulsion'),
+  'eldritch-invocation-dreadful-word': oncePerLongRest('confusion'),
+  'eldritch-invocation-sculptor-of-flesh': oncePerLongRest('polymorph'),
+  'eldritch-invocation-minions-of-chaos': oncePerLongRest('conjure-elemental'),
+  // Connu en plus des sorts de l'occultiste, lancé comme rituel
+  'pact-of-the-chain': [{ spell: 'find-familiar' }],
+};
+
 interface Sources {
   classes: SrdFile;
   levels: SrdFile;
@@ -286,6 +315,18 @@ export class ClassImporter {
             requiredFeatureId: feature ? featureIds.get(feature.index)! : null,
           };
         })),
+      });
+    }
+
+    // Sorts accordés par les capacités (manifestations, pacte de la chaîne)
+    for (const [index, spells] of Object.entries(FEATURE_SPELLS)) {
+      const classFeatureId = featureIds.get(index);
+      if (!classFeatureId) continue;
+      await tx.classFeatureSpell.deleteMany({ where: { classFeatureId } });
+      await tx.classFeatureSpell.createMany({
+        data: await Promise.all(spells.map(async (sp) => ({
+          classFeatureId, spellId: await this.refs.id('spell', sp.spell), atWill: !!sp.atWill, oncePerLongRest: !!sp.longRest, castAtLevel: sp.castAt ?? null,
+        }))),
       });
     }
 
