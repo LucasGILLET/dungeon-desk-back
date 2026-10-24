@@ -295,7 +295,7 @@ export const FIELDS: Record<string, string> = {
   'Class.multiclassProficiencies': 'Maîtrises obtenues en multiclassage',
   'ClassTranslation.subclassLabel': 'Nom générique des sous-classes',
   'ClassLevel.abilityScoreImprovements': 'Augmentations de caractéristique (cumul)',
-  'ClassLevel.cantripsKnown': 'Tours de magie connus',
+  'ClassLevel.cantripsKnown': 'Sorts mineurs connus',
   'ClassLevel.spellsKnown': 'Sorts connus',
   'ClassLevel.spellSlots': 'Emplacements de sorts',
   'ClassLevelSpellSlot.spellLevel': 'Niveau de sort',

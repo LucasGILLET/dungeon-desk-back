@@ -453,7 +453,7 @@ export async function describeAttacks(
   // Une attaque par objet de l'inventaire (une épée longue +1 et une épée longue ordinaire en font deux)
   const weaponItems = input.items.filter((i) => i.equipment);
   const cantrips = input.spells.filter((s) => ctx.spells.get(s.spell)?.level === 0);
-  // Tours de magie accordés (trait racial, choix), avec leurs propres valeurs d'incantation
+  // Sorts mineurs accordés (trait racial, choix), avec leurs propres valeurs d'incantation
   const grantedCantrips = granted.filter((g) => g.level === 0 && g.saveDC != null && !cantrips.some((c) => c.spell === g.index));
   const cantripIndexes = [...cantrips.map((s) => s.spell), ...grantedCantrips.map((g) => g.index)];
   const magicIndexes = [...new Set(weaponItems.flatMap((i) => (i.magicItem ? [i.magicItem] : [])))];
@@ -705,7 +705,7 @@ const sourceSelect = { select: { index: true, translations: t, spellAbility: { s
 
 // Sorts que le personnage a sans les choisir dans sa liste de classe : traits
 // raciaux (héritage infernal), sorts de sous-classe toujours préparés (domaine,
-// serment, cercle) et sorts pris dans un choix (tour de magie du haut-elfe).
+// serment, cercle) et sorts pris dans un choix (sort mineur du haut-elfe).
 export async function describeGrantedSpells(
   db: Db, ctx: RulesContext, input: CharacterInput,
   sheet: { level: number; proficiencyBonus: number; abilityScores: Record<string, { modifier: number }>; grantedTraits: string[]; grantedFeatures: string[] },

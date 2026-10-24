@@ -30,7 +30,7 @@ export const TRAIT_SPELLS: Record<string, { ability: string; spells: TraitSpellS
   'infernal-legacy': { ability: 'cha', spells: [{ spell: 'thaumaturgy' }, { spell: 'hellish-rebuke', level: 3, castAt: 2, longRest: true }, { spell: 'darkness', level: 5, longRest: true }] },
   'drow-magic': { ability: 'cha', spells: [{ spell: 'dancing-lights' }, { spell: 'faerie-fire', level: 3, longRest: true }, { spell: 'darkness', level: 5, longRest: true }] },
   'natural-illusionist': { ability: 'int', spells: [{ spell: 'minor-illusion' }] },
-  // Tour de magie au choix (choix SPELL du trait) : seulement la caractéristique
+  // Sort mineur au choix (choix SPELL du trait) : seulement la caractéristique
   'high-elf-cantrip': { ability: 'int', spells: [] },
 };
 
