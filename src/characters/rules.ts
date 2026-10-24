@@ -191,6 +191,8 @@ export function analyse(input: CharacterInput, ctx: RulesContext): Analysis {
   if (input.abilityMethod === 'STANDARD_ARRAY' && [...bases].sort((a, b) => b - a).join() !== sortedArray.join()) {
     fail('abilityScores', `Standard array must be ${sortedArray.join(', ')}`);
   }
+  // 3d6 ou 4d6 en gardant les trois meilleurs : de 3 à 18 avant les bonus
+  if (input.abilityMethod === 'ROLLED' && bases.some((s) => s < 3 || s > 18)) fail('abilityScores', 'Rolled scores must be between 3 and 18');
   if (input.abilityMethod === 'POINT_BUY') {
     const values = Object.keys(pointBuyCosts).map(Number);
     if (bases.some((s) => pointBuyCosts[String(s)] === undefined)) fail('abilityScores', `Point buy scores must be between ${Math.min(...values)} and ${Math.max(...values)}`);

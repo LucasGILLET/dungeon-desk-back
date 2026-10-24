@@ -147,6 +147,13 @@ describe('Character rules', () => {
     expect(messages(raw)).toContain('Ability scores do not meet the multiclass requirements of fighter');
   });
 
+  it('should accept free scores, and rolled scores between 3 and 18', () => {
+    const scores = { str: 18, dex: 3, con: 17, int: 20, wis: 4, cha: 9 };
+    expect(messages({ ...base(), abilityMethod: 'MANUAL', abilityScores: scores })).not.toContain('Rolled scores must be between 3 and 18');
+    expect(messages({ ...base(), abilityMethod: 'ROLLED', abilityScores: scores })).toContain('Rolled scores must be between 3 and 18');
+    expect(messages({ ...base(), abilityMethod: 'ROLLED', abilityScores: { ...scores, int: 16 } })).not.toContain('Rolled scores must be between 3 and 18');
+  });
+
   it('should refuse inconsistent levels', () => {
     const gap = base();
     gap.classes[0].levels = [lv(1, 1), lv(3, 2)];
