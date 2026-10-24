@@ -124,6 +124,8 @@ export async function loadRulesContext(db: Db, input: CharacterInput): Promise<R
     .filter((v): v is number => v != null);
   if (grantedTraits.length) {
     for (const c of await db.choice.findMany({ where: { traitId: { in: grantedTraits } }, select: CHOICE_SELECT })) choices.set(c.id, toChoiceRule(c));
+    // Index des traits accordés (sheet.grantedTraits), en plus de ceux des compteurs d'usage
+    traits.push(...await db.trait.findMany({ where: { id: { in: grantedTraits.filter((id) => !traits.some((t) => t.id === id)) } }, select: { id: true, index: true } }));
   }
 
   const poolCategories = [...new Set([...choices.values()].map((c) => c.poolCategoryId).filter((v): v is number => v != null))];

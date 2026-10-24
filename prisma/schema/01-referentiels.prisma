@@ -25,6 +25,7 @@ model AbilityScore {
   spells                Spell[]
   choiceOptionItems     ChoiceOptionItem[]
   raceAbilityBonuses    RaceAbilityBonus[]
+  traitSpellAbilities   Trait[]                   @relation("TraitSpellAbility")
   subraceAbilityBonuses SubraceAbilityBonus[]
   featPrerequisites     FeatPrerequisite[]
   recommendedFor        ClassRecommendedAbility[] @relation("ClassRecommendedAbilities")
@@ -126,6 +127,7 @@ model DamageType {
   weaponStats            WeaponStats[]
   spellDamageTypes       SpellDamageType[]
   traits                 Trait[]
+  traitResistances       TraitDamageResistance[]
   monsterDamageModifiers MonsterDamageModifier[]
   monsterActionDamages   MonsterActionDamage[]
 }

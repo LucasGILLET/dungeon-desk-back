@@ -442,6 +442,7 @@ export async function describeAttacks(
   db: Db, ctx: RulesContext, input: CharacterInput,
   sheet: { level: number; proficiencyBonus: number; abilityScores: Record<string, { modifier: number }>; grantedFeatures: string[] },
   known: { proficiencies: { index: string }[] }, spellcasting: Resources['spellcasting'], lang: LangContext,
+  granted: GrantedSpell[] = [],
 ): Promise<Attack[]> {
   const mod = (a: string) => sheet.abilityScores[a]?.modifier ?? 0;
   const has = (list: string[]) => list.some((f) => sheet.grantedFeatures.includes(f));
@@ -452,6 +453,9 @@ export async function describeAttacks(
   // Une attaque par objet de l'inventaire (une épée longue +1 et une épée longue ordinaire en font deux)
   const weaponItems = input.items.filter((i) => i.equipment);
   const cantrips = input.spells.filter((s) => ctx.spells.get(s.spell)?.level === 0);
+  // Tours de magie accordés (trait racial, choix), avec leurs propres valeurs d'incantation
+  const grantedCantrips = granted.filter((g) => g.level === 0 && g.saveDC != null && !cantrips.some((c) => c.spell === g.index));
+  const cantripIndexes = [...cantrips.map((s) => s.spell), ...grantedCantrips.map((g) => g.index)];
   const magicIndexes = [...new Set(weaponItems.flatMap((i) => (i.magicItem ? [i.magicItem] : [])))];
   const [weapons, magicItems, proficiencies, spells] = await Promise.all([
     weaponItems.length
@@ -468,9 +472,9 @@ export async function describeAttacks(
       where: { editionId: ctx.edition?.id, type: 'WEAPON', index: { in: known.proficiencies.map((p) => p.index) } },
       select: { equipmentId: true, equipmentCategoryId: true },
     }),
-    cantrips.length
+    cantripIndexes.length
       ? db.spell.findMany({
-        where: { editionId: ctx.edition?.id, index: { in: cantrips.map((s) => s.spell) }, damageScaling: { not: Prisma.DbNull } },
+        where: { editionId: ctx.edition?.id, index: { in: cantripIndexes }, damageScaling: { not: Prisma.DbNull } },
         select: { index: true, attackType: true, rangeFt: true, damageScaling: true, translations: t, damageTypes: { select: { damageType: named } }, saveAbility: { select: { index: true } } },
       })
       : [],
@@ -543,7 +547,10 @@ export async function describeAttacks(
     const reached = Object.keys(scaling.values).map(Number).filter((l) => l <= sheet.level).sort((a, b) => b - a)[0];
     let dice = reached != null ? scaling.values[String(reached)] : undefined;
     if (!dice) continue;
-    const caster = spellcasting.find((c) => c.class === cantrips.find((x) => x.spell === s.index)?.class) ?? spellcasting[0];
+    const own = grantedCantrips.find((g) => g.index === s.index);
+    const caster = own
+      ? { saveDC: own.saveDC!, attackBonus: own.attackBonus! }
+      : spellcasting.find((c) => c.class === cantrips.find((x) => x.spell === s.index)?.class) ?? spellcasting[0];
     if (!caster) continue;
     const type = s.damageTypes.map((d) => name(d.damageType).toLowerCase()).join(' ou ');
     const properties: string[] = [];
@@ -668,4 +675,109 @@ export async function describeGrantedTraits(db: Db, ctx: RulesContext, sheet: { 
     const tt = pick(trait.translations, lang);
     return { index: trait.index, name: tt.name, description: tt.description };
   });
+}
+
+// --- Sorts accordés et résistances ----------------------------------------------------------
+
+// Traits du personnage : race, sous-race, et ceux accordés par un choix
+const characterTraitIds = (ctx: RulesContext, sheet: { grantedTraits: string[] }) => [
+  ...(ctx.race?.traitIds ?? []), ...(ctx.subrace?.traitIds ?? []),
+  ...sheet.grantedTraits.flatMap((index) => { const id = ctx.traits.get(index); return id ? [id] : []; }),
+];
+
+export interface GrantedSpell {
+  index: string;
+  name: string;
+  level: number;
+  source: string; // « Héritage infernal », « Domaine de la Vie »
+  // Trait racial, sous-classe (toujours préparé, sans compter dans la limite) ou choix
+  kind: 'TRAIT' | 'SUBCLASS' | 'CHOICE';
+  // Valeurs d'incantation : celles du trait, ou de la classe pour une sous-classe
+  ability: string | null;
+  saveDC: number | null;
+  attackBonus: number | null;
+  castAtLevel: number | null; // lancé comme un sort de ce niveau
+  oncePerLongRest: boolean; // sans emplacement, une fois par repos long
+}
+
+const spellSelect = { select: { index: true, level: true, translations: t } } as const;
+const sourceSelect = { select: { index: true, translations: t, spellAbility: { select: { index: true } } } } as const;
+
+// Sorts que le personnage a sans les choisir dans sa liste de classe : traits
+// raciaux (héritage infernal), sorts de sous-classe toujours préparés (domaine,
+// serment, cercle) et sorts pris dans un choix (tour de magie du haut-elfe).
+export async function describeGrantedSpells(
+  db: Db, ctx: RulesContext, input: CharacterInput,
+  sheet: { level: number; proficiencyBonus: number; abilityScores: Record<string, { modifier: number }>; grantedTraits: string[]; grantedFeatures: string[] },
+  spellcasting: Resources['spellcasting'], lang: LangContext,
+): Promise<GrantedSpell[]> {
+  const casting = (ability: string | null) => {
+    if (!ability) return { ability: null, saveDC: null, attackBonus: null };
+    const mod = sheet.abilityScores[ability]?.modifier ?? 0;
+    return { ability, saveDC: 8 + sheet.proficiencyBonus + mod, attackBonus: sheet.proficiencyBonus + mod };
+  };
+  const ofClass = (classIndex: string | undefined) => {
+    const c = spellcasting.find((s) => s.class === classIndex);
+    return c ? { ability: c.ability, saveDC: c.saveDC, attackBonus: c.attackBonus } : casting(null);
+  };
+  const traitIds = characterTraitIds(ctx, sheet);
+  const optionIds = input.choices.flatMap((c) => (c.optionId != null ? [c.optionId] : []));
+  const subclasses = input.classes.filter((c) => c.subclass);
+
+  const [traitSpells, chosen, subclassSpells] = await Promise.all([
+    traitIds.length
+      ? db.traitSpell.findMany({ where: { traitId: { in: traitIds }, requiredCharacterLevel: { lte: sheet.level } }, include: { spell: spellSelect, trait: sourceSelect }, orderBy: { requiredCharacterLevel: 'asc' } })
+      : [],
+    optionIds.length
+      ? db.choiceOptionItem.findMany({
+        where: { optionId: { in: optionIds }, spellId: { not: null } },
+        select: { spell: spellSelect, option: { select: { choice: { select: { trait: sourceSelect, class: { select: { index: true } }, subclass: { select: { class: { select: { index: true } } } } } } } } },
+      })
+      : [],
+    subclasses.length
+      ? db.subclassSpell.findMany({
+        where: { subclass: { editionId: ctx.edition?.id, index: { in: subclasses.map((c) => c.subclass!) } } },
+        include: { spell: spellSelect, subclass: { select: { index: true, translations: t, class: { select: { index: true } } } }, requiredFeature: { select: { index: true } } },
+      })
+      : [],
+  ]);
+  const name = (x: { translations: { localeCode: string; name: string }[] }) => pick(x.translations, lang).name;
+  const result: GrantedSpell[] = [];
+  const add = (spell: { index: string; level: number; translations: { localeCode: string; name: string }[] }, kind: GrantedSpell['kind'], source: string, values: ReturnType<typeof casting>, extra: { castAtLevel?: number | null; oncePerLongRest?: boolean } = {}) => {
+    if (result.some((r) => r.index === spell.index && r.source === source)) return;
+    result.push({ index: spell.index, name: name(spell), level: spell.level, source, kind, ...values, castAtLevel: extra.castAtLevel ?? null, oncePerLongRest: extra.oncePerLongRest ?? false });
+  };
+
+  for (const s of traitSpells) add(s.spell, 'TRAIT', name(s.trait), casting(s.trait.spellAbility?.index ?? null), s);
+  for (const item of chosen) {
+    const choice = item.option.choice;
+    if (!item.spell) continue;
+    if (choice.trait) add(item.spell, 'CHOICE', name(choice.trait), casting(choice.trait.spellAbility?.index ?? null));
+    else add(item.spell, 'CHOICE', 'Choix', ofClass(choice.class?.index ?? choice.subclass?.class.index));
+  }
+  for (const s of subclassSpells) {
+    const owner = subclasses.find((c) => c.subclass === s.subclass.index && c.class === s.subclass.class.index);
+    if (!owner || s.requiredClassLevel > owner.levels.length) continue;
+    // Cercle de la Terre : seulement les sorts du terrain choisi
+    if (s.requiredFeature && !sheet.grantedFeatures.includes(s.requiredFeature.index)) continue;
+    add(s.spell, 'SUBCLASS', name(s.subclass), ofClass(owner.class));
+  }
+  return result.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
+}
+
+export interface DamageResistance {
+  damageType: string;
+  name: string; // « Feu »
+  source: string; // « Résistance infernale »
+}
+
+// Résistances aux dégâts des traits (résistance infernale, ascendance draconique…)
+export async function describeResistances(db: Db, ctx: RulesContext, sheet: { grantedTraits: string[] }, lang: LangContext): Promise<DamageResistance[]> {
+  const traitIds = characterTraitIds(ctx, sheet);
+  if (!traitIds.length) return [];
+  const rows = await db.traitDamageResistance.findMany({
+    where: { traitId: { in: traitIds } },
+    select: { damageType: named, trait: { select: { translations: t } } },
+  });
+  return rows.map((r) => ({ damageType: r.damageType.index, name: pick(r.damageType.translations, lang).name, source: pick(r.trait.translations, lang).name }));
 }

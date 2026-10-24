@@ -138,6 +138,23 @@ export const characterSheetSchema = {
     grantedFeatures: { type: 'array', description: 'Capacités accordées par une option choisie (index), ex. colossus-slayer', items: { type: 'string' } },
     grantedTraits: { type: 'array', description: 'Traits raciaux accordés par une option choisie (index)', items: { type: 'string' } },
     grantedTraitDetails: { type: 'array', items: { type: 'object', properties: { index: { type: 'string' }, name: { type: 'string' }, description: { type: 'string' } } } },
+    grantedSpells: {
+      type: 'array',
+      description: 'Sorts accordés sans être choisis dans la liste de classe : traits raciaux, sous-classe (toujours préparés), choix',
+      items: {
+        type: 'object',
+        required: ['index', 'name', 'level', 'source', 'kind', 'ability', 'saveDC', 'attackBonus', 'castAtLevel', 'oncePerLongRest'],
+        properties: {
+          index: { type: 'string' }, name: { type: 'string' }, level: { type: 'integer' }, source: { type: 'string' }, kind: { type: 'string', enum: ['TRAIT', 'SUBCLASS', 'CHOICE'] },
+          ability: { type: 'string', nullable: true }, saveDC: { type: 'integer', nullable: true }, attackBonus: { type: 'integer', nullable: true },
+          castAtLevel: { type: 'integer', nullable: true }, oncePerLongRest: { type: 'boolean' },
+        },
+      },
+    },
+    damageResistances: {
+      type: 'array',
+      items: { type: 'object', required: ['damageType', 'name', 'source'], properties: { damageType: { type: 'string' }, name: { type: 'string' }, source: { type: 'string' } } },
+    },
     proficiencies: { type: 'array', items: { type: 'object', required: ['index', 'name', 'type'], properties: { index: { type: 'string' }, name: { type: 'string' }, type: { type: 'string', example: 'SKILL' } } } },
     expertise: { type: 'array', items: refName },
     languages: { type: 'array', items: refName },

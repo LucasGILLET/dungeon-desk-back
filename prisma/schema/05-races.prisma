@@ -180,11 +180,14 @@ model Trait {
   children  Trait[] @relation("TraitTree")
 
   // Type de dégâts associé (ascendance draconique)
-  damageTypeId Int?
-  damageType   DamageType? @relation(fields: [damageTypeId], references: [id])
+  damageTypeId   Int?
+  damageType     DamageType?   @relation(fields: [damageTypeId], references: [id])
   // JSONB TraitAction, pour un trait utilisable comme une action (souffle du
   // drakéide) : { area, save, damageAtCharacterLevel, usage }
-  action       Json?
+  action         Json?
+  // Caractéristique d'incantation des sorts accordés (héritage infernal : CHA)
+  spellAbilityId Int?
+  spellAbility   AbilityScore? @relation("TraitSpellAbility", fields: [spellAbilityId], references: [id])
 
   source    ContentSource @default(SRD)
   ownerId   Int?
@@ -196,8 +199,10 @@ model Trait {
   races         RaceTrait[]
   subraces      SubraceTrait[]
   proficiencies TraitProficiency[]
+  spells        TraitSpell[]
+  resistances   TraitDamageResistance[]
   choices       Choice[] // maîtrise au choix, langue, tour de magie, sous-trait
-  choiceItems   ChoiceOptionItem[] @relation("ChoiceItemTrait")
+  choiceItems   ChoiceOptionItem[]      @relation("ChoiceItemTrait")
 
   // Personnages qui l'utilisent
   characterUsage CharacterFeatureUsage[]
@@ -215,6 +220,33 @@ model TraitTranslation {
   locale      Locale @relation(fields: [localeCode], references: [code])
 
   @@unique([traitId, localeCode])
+}
+
+// Sorts accordés par un trait (héritage infernal : thaumaturgie, puis
+// représailles infernales au niveau 3…). Le SRD ne les structure pas : le seed
+// les écrit à la main.
+model TraitSpell {
+  id                     Int     @id @default(autoincrement())
+  traitId                Int
+  spellId                Int
+  requiredCharacterLevel Int     @default(1)
+  castAtLevel            Int? // lancé comme un sort de ce niveau
+  oncePerLongRest        Boolean @default(false) // sans emplacement, une fois par repos long
+  trait                  Trait   @relation(fields: [traitId], references: [id], onDelete: Cascade)
+  spell                  Spell   @relation(fields: [spellId], references: [id], onDelete: Cascade)
+
+  @@unique([traitId, spellId])
+}
+
+// Résistances aux dégâts accordées par un trait (résistance infernale : feu)
+model TraitDamageResistance {
+  id           Int        @id @default(autoincrement())
+  traitId      Int
+  damageTypeId Int
+  trait        Trait      @relation(fields: [traitId], references: [id], onDelete: Cascade)
+  damageType   DamageType @relation(fields: [damageTypeId], references: [id])
+
+  @@unique([traitId, damageTypeId])
 }
 
 model TraitProficiency {

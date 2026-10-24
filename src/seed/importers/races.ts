@@ -24,6 +24,24 @@ function traitAction(specific: Json): Prisma.InputJsonValue | typeof Prisma.DbNu
   });
 }
 
+// Sorts accordés par les traits : le SRD ne les donne qu'en texte
+type TraitSpellSpec = { spell: string; level?: number; castAt?: number; longRest?: boolean };
+export const TRAIT_SPELLS: Record<string, { ability: string; spells: TraitSpellSpec[] }> = {
+  'infernal-legacy': { ability: 'cha', spells: [{ spell: 'thaumaturgy' }, { spell: 'hellish-rebuke', level: 3, castAt: 2, longRest: true }, { spell: 'darkness', level: 5, longRest: true }] },
+  'drow-magic': { ability: 'cha', spells: [{ spell: 'dancing-lights' }, { spell: 'faerie-fire', level: 3, longRest: true }, { spell: 'darkness', level: 5, longRest: true }] },
+  'natural-illusionist': { ability: 'int', spells: [{ spell: 'minor-illusion' }] },
+  // Tour de magie au choix (choix SPELL du trait) : seulement la caractéristique
+  'high-elf-cantrip': { ability: 'int', spells: [] },
+};
+
+// « You have resistance to fire damage », « resistance against poison damage » ;
+// l'ascendance draconique donne la résistance au type de dégâts du dragon
+export function parseResistances(en: Json): string[] {
+  const found = [...text(en.desc ?? [])?.matchAll(/resistance (?:to|against) (?!the )(\w+) damage/g) ?? []].map((m) => m[1]!.toLowerCase());
+  if (en.parent?.index === 'draconic-ancestry' && en.trait_specific?.damage_type) found.push(en.trait_specific.damage_type.index);
+  return [...new Set(found)];
+}
+
 export async function importRaces(prisma: PrismaClient, refs: Refs, edition: string): Promise<{ untranslatedChoices: number }> {
   const { editionId } = refs;
   const key = (index: string) => ({ editionId_index: { editionId, index } });
@@ -37,6 +55,7 @@ export async function importRaces(prisma: PrismaClient, refs: Refs, edition: str
     const specific = en.trait_specific ?? {};
     const data = {
       damageTypeId: specific.damage_type ? await refs.id('damageType', specific.damage_type.index) : null,
+      spellAbilityId: TRAIT_SPELLS[en.index] ? await refs.id('abilityScore', TRAIT_SPELLS[en.index]!.ability) : null,
       action: traitAction(specific),
       source: traits.isHomebrew(en.index) ? ('HOMEBREW' as const) : ('SRD' as const),
     };
@@ -54,6 +73,16 @@ export async function importRaces(prisma: PrismaClient, refs: Refs, edition: str
     const traitId = traitIds.get(en.index)!;
     await prisma.$transaction(async (tx) => {
       await tx.trait.update({ where: { id: traitId }, data: { parentId: en.parent ? traitIds.get(en.parent.index) ?? null : null } });
+      await tx.traitSpell.deleteMany({ where: { traitId } });
+      await tx.traitSpell.createMany({
+        data: await Promise.all((TRAIT_SPELLS[en.index]?.spells ?? []).map(async (sp) => ({
+          traitId, spellId: await refs.id('spell', sp.spell), requiredCharacterLevel: sp.level ?? 1, castAtLevel: sp.castAt ?? null, oncePerLongRest: !!sp.longRest,
+        }))),
+      });
+      await tx.traitDamageResistance.deleteMany({ where: { traitId } });
+      await tx.traitDamageResistance.createMany({
+        data: await Promise.all(parseResistances(en).map(async (d) => ({ traitId, damageTypeId: await refs.id('damageType', d) }))),
+      });
       await tx.traitProficiency.deleteMany({ where: { traitId } });
       await tx.traitProficiency.createMany({
         data: await Promise.all((en.proficiencies ?? []).map(async (p: Json) => ({ traitId, proficiencyId: await refs.id('proficiency', p.index) }))),

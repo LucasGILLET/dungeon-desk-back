@@ -71,6 +71,13 @@ describe('describeAttacks', () => {
     ]);
   });
 
+  it('adds a granted attack cantrip (high elf) with the values of its trait', async () => {
+    const granted = [{ index: 'fire-bolt', name: 'Trait de feu', level: 0, source: 'Tour de magie du haut-elfe', kind: 'CHOICE' as const, ability: 'int', saveDC: 12, attackBonus: 4, castAtLevel: null, oncePerLongRest: false }];
+    const attacks = await describeAttacks(db, ctx, character([]), sheet(), { proficiencies: [] }, [], fr, granted);
+
+    expect(attacks).toEqual([expect.objectContaining({ kind: 'SPELL', index: 'fire-bolt', attackBonus: 4, damage: '2d10 feu' })]);
+  });
+
   it('adds the bonus of a magic weapon to the attack and damage, next to the ordinary one', async () => {
     const items = [{ equipment: 'longsword', magicItem: 'weapon-1', equipped: true }, { equipment: 'longsword' }] as any;
     const attacks = await describeAttacks(db, ctx, character(items), sheet(), { proficiencies: [] }, [], fr);

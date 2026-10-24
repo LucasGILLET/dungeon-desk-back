@@ -4,6 +4,7 @@ import {
   parseSenses, parseSpeeds, parseType, parseUsage, translateLanguages,
 } from '../seed/importers/monsters';
 import { parseRarity } from '../seed/importers/magicItems';
+import { parseResistances } from '../seed/importers/races';
 
 // Analyse des chaînes du bloc de statistiques du SRD (seed des monstres)
 
@@ -94,5 +95,13 @@ describe('monster import', () => {
   it('maps magic item rarities', () => {
     expect(parseRarity('Very Rare')).toBe('VERY_RARE');
     expect(() => parseRarity('Mythic')).toThrow();
+  });
+
+  it('reads the damage resistances of racial traits', () => {
+    expect(parseResistances({ index: 'hellish-resistance', desc: ['You have resistance to fire damage.'] })).toEqual(['fire']);
+    expect(parseResistances({ index: 'dwarven-resilience', desc: ['You have advantage on saving throws against poison, and you have resistance against poison damage.'] })).toEqual(['poison']);
+    // Dépend de l'ascendance : portée par le trait enfant
+    expect(parseResistances({ index: 'damage-resistance', desc: ['You have resistance to the damage type associated with your draconic ancestry.'] })).toEqual([]);
+    expect(parseResistances({ index: 'draconic-ancestry-red', parent: { index: 'draconic-ancestry' }, trait_specific: { damage_type: { index: 'fire' } }, desc: ['…'] })).toEqual(['fire']);
   });
 });

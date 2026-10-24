@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { ZodError } from 'zod';
 import prisma from '../prismaClient';
 import { loadRulesContext } from '../characters/context';
-import { describeArmorClass, describeAttacks, describeChoices, describeFeatureResources, describeGrantedTraits, describeProficiencies, describeResources } from '../characters/describe';
+import { describeArmorClass, describeAttacks, describeChoices, describeFeatureResources, describeGrantedSpells, describeGrantedTraits, describeProficiencies, describeResistances, describeResources } from '../characters/describe';
 import { CharacterInput, CharacterInputSchema } from '../characters/input';
 import { analyse, CharacterSheet, Issue, RulesContext } from '../characters/rules';
 import { CHARACTER_INCLUDE, createCharacter as insertCharacter, displayNames, findCharacter, replaceCharacter, StoredCharacter, toInput } from '../characters/store';
@@ -37,12 +37,15 @@ async function validate(req: Request, res: Response) {
 async function describeSheet(ctx: RulesContext, input: CharacterInput, sheet: CharacterSheet, lang: LangContext) {
     const known = await describeProficiencies(prisma, ctx, input, lang);
     const resources = await describeResources(prisma, ctx, input, sheet);
+    const grantedSpells = await describeGrantedSpells(prisma, ctx, input, sheet, resources.spellcasting, lang);
     return {
         ...sheet,
         ...known,
         ...resources,
         armorClass: await describeArmorClass(prisma, ctx, input, sheet, lang),
-        attacks: await describeAttacks(prisma, ctx, input, sheet, known, resources.spellcasting, lang),
+        attacks: await describeAttacks(prisma, ctx, input, sheet, known, resources.spellcasting, lang, grantedSpells),
+        grantedSpells,
+        damageResistances: await describeResistances(prisma, ctx, sheet, lang),
         featureResources: await describeFeatureResources(prisma, ctx, input, sheet, lang),
         grantedTraitDetails: await describeGrantedTraits(prisma, ctx, sheet, lang),
     };
