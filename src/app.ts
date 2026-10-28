@@ -15,6 +15,7 @@ import campaignRoutes from './routes/campaignRoutes';
 import monsterRoutes from './routes/monsterRoutes';
 import combatViewRoutes from './routes/combatViewRoutes';
 import srdRoutes from './routes/srdRoutes';
+import profileRoutes from './routes/profileRoutes';
 import prisma from './prismaClient';
 import { logger } from './utils/logger';
 import { httpRequestDurationSeconds, register } from './utils/monitoring';
@@ -99,6 +100,7 @@ app.use('/api/campaigns', campaignRoutes);
 app.use('/api/monsters', monsterRoutes);
 app.use('/api/combat-view', combatViewRoutes);
 app.use('/api/srd', srdRoutes);
+app.use('/api/me', profileRoutes);
 
 
 // Basic health check route
