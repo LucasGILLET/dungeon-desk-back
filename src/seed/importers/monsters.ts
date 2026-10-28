@@ -7,9 +7,6 @@ import { ArmorClassSource, DamageModifierKind, MonsterActionKind, MonsterAttackT
 import { DiceSchema, MonsterSpeedsSchema, MonsterUsage, MonsterUsageSchema, SensesSchema, SpellSlotsSchema } from '../../srd/jsonb';
 import { Json, loadSrd, LocaleCode, log, parseUrl, readJson, Refs, replaceTranslations, SrdFile, text, translationsFor, TX_OPTIONS, Tx } from '../context';
 
-// Les images du SRD sont servies par l'API publique dont proviennent les fichiers
-export const IMAGE_HOST = 'https://www.dnd5eapi.co';
-
 const DAMAGE_TYPES = new Set(['acid', 'bludgeoning', 'cold', 'fire', 'force', 'lightning', 'necrotic', 'piercing', 'poison', 'psychic', 'radiant', 'slashing', 'thunder']);
 const ALIGNMENTS = ['lawful-good', 'neutral-good', 'chaotic-good', 'lawful-neutral', 'neutral', 'chaotic-neutral', 'lawful-evil', 'neutral-evil', 'chaotic-evil'];
 
@@ -281,7 +278,8 @@ async function monsterData(en: Json, refs: Refs, languageIndexes: Map<string, st
       xp: en.xp,
       // Toutes les créatures légendaires du SRD 5.1 ont 3 actions légendaires par round
       legendaryActionsPerRound: en.legendary_actions?.length ? 3 : null,
-      imageUrl: en.image ? `${IMAGE_HOST}${en.image}` : null,
+      // Images de dnd5eapi.co générées par IA (Stable Diffusion) : non reprises
+      imageUrl: null,
     },
   };
 }

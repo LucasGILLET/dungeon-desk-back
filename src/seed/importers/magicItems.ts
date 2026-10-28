@@ -3,7 +3,6 @@
 // les variantes ("Armor, +1") sont rattachées à leur objet générique.
 import { MagicItemRarity, PrismaClient } from '@prisma/client';
 import { Json, loadSrd, log, Refs, replaceTranslations, text, translationsFor, TX_OPTIONS } from '../context';
-import { IMAGE_HOST } from './monsters';
 
 const RARITIES: Record<string, MagicItemRarity> = {
   Common: 'COMMON', Uncommon: 'UNCOMMON', Rare: 'RARE', 'Very Rare': 'VERY_RARE', Legendary: 'LEGENDARY', Artifact: 'ARTIFACT', Varies: 'VARIES',
@@ -36,7 +35,8 @@ export async function importMagicItems(prisma: PrismaClient, refs: Refs, edition
       rarity: parseRarity(en.rarity.name),
       requiresAttunement: /requires attunement/i.test(en.desc[0]),
       ...parseMagicBonuses(en.index, en.desc.join(' ')),
-      imageUrl: en.image ? `${IMAGE_HOST}${en.image}` : null,
+      // Images de dnd5eapi.co très probablement générées par IA : non reprises
+      imageUrl: null,
     };
     await prisma.$transaction(async (tx) => {
       const row = await tx.magicItem.upsert({
