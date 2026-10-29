@@ -362,7 +362,7 @@ export const getCreationRules = async (req: Request, res: Response) => {
   }
 };
 
-// Tables du générateur, par type : { FIRST_NAME: [{ race: 'elf', text: 'Aelar', weight: 1 }], … }
+// Tables du générateur, par type : { PROFESSION: [{ race: null, text: 'Forgeron', weight: 1 }], … }
 export const getNpcTables = async (req: Request, res: Response) => {
   try {
     const ctx = await resolveLang(req);
@@ -373,8 +373,8 @@ export const getNpcTables = async (req: Request, res: Response) => {
     });
     const tables: Record<string, { race: string | null; text: string; weight: number }[]> = {};
     for (const e of rows) {
-      const text = e.value ?? (e.translations.length ? pick(e.translations, ctx).text : null);
-      if (!text) continue;
+      if (!e.translations.length) continue;
+      const { text } = pick(e.translations, ctx);
       (tables[e.kind] ??= []).push({ race: e.race?.index ?? null, text, weight: e.weight });
     }
     setCache(res);

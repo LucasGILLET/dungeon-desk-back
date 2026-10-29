@@ -1,13 +1,11 @@
 // Tables du générateur de PNJ (custom/npc-generator.json) : profils physiques
-// des races, prénoms et noms par race, textes tirés au sort (professions,
-// manies…). Remplacées en bloc : aucun PNJ ne les référence (il garde le texte).
+// des races, textes tirés au sort (professions, manies…). Les noms sont générés
+// par le front. Remplacées en bloc : aucun PNJ ne les référence (il garde le texte).
 import { NpcTableKind, PrismaClient } from '@prisma/client';
 import { log, readJson, Refs, TX_OPTIONS } from '../context';
 
 interface GeneratorFile {
   raceProfiles: Record<string, { npcFrequency: number; baseHeightCm: number; heightVarianceCm: number; baseWeightKg: number; weightVarianceKg: number }>;
-  names: Record<string, { first: string[]; last: string[] }>;
-  common: Partial<Record<NpcTableKind, string[]>>;
   texts: Partial<Record<NpcTableKind, Record<string, string>[]>>;
 }
 
@@ -25,19 +23,6 @@ export async function importNpcGenerator(prisma: PrismaClient, refs: Refs, editi
 
     // Entrées propres aux races de cette édition, et entrées communes
     await tx.npcTableEntry.deleteMany({ where: { OR: [{ raceId: { in: [...races.values()] } }, { raceId: null }] } });
-    const values: { kind: NpcTableKind; raceId: number | null; value: string }[] = [];
-    for (const [index, names] of Object.entries(file.names)) {
-      const raceId = races.get(index);
-      if (!raceId) continue;
-      for (const value of names.first) values.push({ kind: 'FIRST_NAME', raceId, value });
-      for (const value of names.last) values.push({ kind: 'LAST_NAME', raceId, value });
-    }
-    for (const [kind, list] of Object.entries(file.common)) {
-      for (const value of list ?? []) values.push({ kind: kind as NpcTableKind, raceId: null, value });
-    }
-    await tx.npcTableEntry.createMany({ data: values });
-    entries += values.length;
-
     for (const [kind, list] of Object.entries(file.texts)) {
       for (const text of list ?? []) {
         const entry = await tx.npcTableEntry.create({ data: { kind: kind as NpcTableKind } });

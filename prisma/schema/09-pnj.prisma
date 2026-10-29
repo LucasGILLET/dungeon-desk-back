@@ -6,9 +6,9 @@
 // histoire…) sont du texte libre : tirés par le générateur, puis modifiables
 // par le MJ.
 //
-// Le générateur tire ses valeurs dans NpcTableEntry : prénoms et noms par race,
-// professions, manies… éditables dans le back-office. Les noms propres sont
-// neutres en langue (value) ; les autres entrées sont traduites.
+// Le générateur tire ses valeurs dans NpcTableEntry : professions, manies…
+// traduites et éditables dans le back-office. Les noms sont générés par le
+// front à partir des sonorités de chaque race (pas de liste).
 // ============================================================================
 
 enum NpcGender {
@@ -75,10 +75,6 @@ model NpcAbilityScore {
 // --- Tables du générateur ------------------------------------------------------
 
 enum NpcTableKind {
-  FIRST_NAME // par race
-  LAST_NAME // par race, ou commun (raceId null)
-  NAME_PREFIX // syllabes de repli : préfixe + suffixe
-  NAME_SUFFIX
   BODY_TYPE
   SOCIAL_STATUS
   PROFESSION
@@ -90,14 +86,12 @@ enum NpcTableKind {
   HISTORY_EVENT // « … et cherche son frère disparu »
 }
 
-// Une valeur tirable. Noms propres : value (neutre en langue) ; texte :
-// traductions. Exactement l'un des deux (vérifié par le seed).
+// Un texte tirable, traduit
 model NpcTableEntry {
   id     Int          @id @default(autoincrement())
   kind   NpcTableKind
-  raceId Int? // entrée propre à une race (prénoms, noms de famille)
+  raceId Int? // entrée propre à une race ; null = commune
   race   Race?        @relation(fields: [raceId], references: [id], onDelete: Cascade)
-  value  String?
   weight Int          @default(1) // probabilité relative du tirage
 
   translations NpcTableEntryTranslation[]

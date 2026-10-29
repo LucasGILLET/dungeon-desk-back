@@ -201,10 +201,6 @@ Enum NpcGender {
 }
 
 Enum NpcTableKind {
-  FIRST_NAME
-  LAST_NAME
-  NAME_PREFIX
-  NAME_SUFFIX
   BODY_TYPE
   SOCIAL_STATUS
   PROFESSION
@@ -1475,8 +1471,7 @@ Table NpcAbilityScore {
 Table NpcTableEntry {
   id int [pk, increment]
   kind NpcTableKind [not null]
-  raceId int [note: 'entrée propre à une race (prénoms, noms de famille)']
-  value varchar
+  raceId int [note: 'entrée propre à une race ; null = commune']
   weight int [not null, default: 1, note: 'probabilité relative du tirage']
 }
 
