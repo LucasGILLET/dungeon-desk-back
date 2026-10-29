@@ -5,6 +5,7 @@ import {
 } from '../controllers/srdContentController';
 import { getGuide, getGuides, getRuleChapters, getRuleSection } from '../controllers/srdGuideController';
 import { getMagicItemByIndex, getMagicItems, getMonsterByIndex, getMonsters } from '../controllers/srdBestiaryController';
+import { getSearch } from '../controllers/srdSearchController';
 
 const router = Router();
 
@@ -382,5 +383,22 @@ router.get('/:edition/guides', getGuides);
  *       404: { description: Not found }
  */
 router.get('/:edition/guides/:index', getGuide);
+
+/**
+ * @swagger
+ * /srd/{edition}/search:
+ *   get:
+ *     summary: Search all game data (spells, monsters, items, classes, rules…), ignoring accents and typos
+ *     description: Names match in every language (an English name finds the French entry). At most 8 results per kind, best first.
+ *     operationId: searchSrd
+ *     tags: [SRD]
+ *     parameters:
+ *       - { in: path, name: edition, required: true, schema: { type: string, example: '2014' } }
+ *       - { in: query, name: q, required: true, schema: { type: string, example: boul de fe } }
+ *       - { in: query, name: lang, schema: { type: string, example: fr } }
+ *     responses:
+ *       200: { description: "Results with kind, index, name, matched (other-language name found), detail and text (for entries without a page)" }
+ */
+router.get('/:edition/search', getSearch);
 
 export default router;

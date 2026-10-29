@@ -1,0 +1,19 @@
+import { Request, Response } from 'express';
+import { resolveLang } from '../srd/lang';
+import { search } from '../srd/search';
+import { setCache } from '../srd/cache';
+import { logger } from '../utils/logger';
+
+// Recherche globale : sorts, monstres, objets, règles… en une seule requête
+export const getSearch = async (req: Request, res: Response) => {
+  try {
+    const q = typeof req.query.q === 'string' ? req.query.q : '';
+    const ctx = await resolveLang(req);
+    const results = await search(req.params.edition, q, ctx);
+    setCache(res, 600);
+    res.json(results);
+  } catch (error) {
+    logger.error(`Error searching SRD: ${error instanceof Error ? error.message : error}`);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
