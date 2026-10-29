@@ -1954,6 +1954,26 @@ Table CampaignNpc {
   }
 }
 
+Table CampaignSessionNpc [note: 'PNJ de la campagne rencontré pendant une séance'] {
+  id int [pk, increment]
+  sessionId int [not null]
+  campaignNpcId int [not null]
+  indexes {
+    (sessionId, campaignNpcId) [unique]
+    campaignNpcId
+  }
+}
+
+Table QuestNpc [note: 'PNJ de la campagne mêlé à une quête'] {
+  id int [pk, increment]
+  questId int [not null]
+  campaignNpcId int [not null]
+  indexes {
+    (questId, campaignNpcId) [unique]
+    campaignNpcId
+  }
+}
+
 Table Encounter {
   id int [pk, increment]
   campaignId int [not null]
@@ -2207,6 +2227,10 @@ Ref: Quest.campaignId > Campaign.id
 Ref: Quest.giverNpcId > Npc.id
 Ref: CampaignNpc.campaignId > Campaign.id
 Ref: CampaignNpc.npcId > Npc.id
+Ref: CampaignSessionNpc.sessionId > CampaignSession.id
+Ref: CampaignSessionNpc.campaignNpcId > CampaignNpc.id
+Ref: QuestNpc.questId > Quest.id
+Ref: QuestNpc.campaignNpcId > CampaignNpc.id
 Ref: Encounter.campaignId > Campaign.id
 Ref: Encounter.sessionId > CampaignSession.id
 Ref: EncounterMonster.encounterId > Encounter.id
@@ -2398,6 +2422,8 @@ TableGroup "Campagnes" [color: #24BAB1] {
   CampaignSession
   Quest
   CampaignNpc
+  CampaignSessionNpc
+  QuestNpc
   Encounter
   EncounterMonster
 }
