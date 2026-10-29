@@ -12,8 +12,8 @@ vi.mock('../middleware/authMiddleware', () => ({
   },
 }));
 
-vi.mock('../prismaClient', () => ({
-  default: {
+vi.mock('../prismaClient', () => {
+  const db: any = {
     locale: { findMany: vi.fn().mockResolvedValue([{ code: 'en', isDefault: true }, { code: 'fr', isDefault: false }]) },
     campaign: { findUnique: vi.fn(), findUniqueOrThrow: vi.fn(), findMany: vi.fn(), update: vi.fn(), create: vi.fn() },
     campaignMember: { upsert: vi.fn(), deleteMany: vi.fn() },
@@ -21,8 +21,14 @@ vi.mock('../prismaClient', () => ({
     character: { findFirst: vi.fn() },
     quest: { findFirst: vi.fn() },
     npc: { findFirst: vi.fn() },
-  },
-}));
+    campaignSession: { findFirst: vi.fn(), aggregate: vi.fn(), create: vi.fn(), update: vi.fn() },
+    campaignNpc: { count: vi.fn() },
+    campaignSessionNpc: { deleteMany: vi.fn(), createMany: vi.fn() },
+    // Écritures : la transaction reçoit le même client
+    $transaction: vi.fn((write: (tx: any) => unknown) => write(db)),
+  };
+  return { default: db };
+});
 
 const user = (id: number, username: string) => ({ id, username });
 // Campagne telle que la renvoie findUniqueOrThrow (include)
@@ -36,7 +42,7 @@ const stored = (questsForRole: object[]) => ({
       classes: [{ class: { index: 'monk', translations: [{ localeCode: 'fr', name: 'Moine' }] }, _count: { levels: 3 } }] },
   }],
   gmCharacters: [] as object[],
-  sessions: [{ id: 1, number: 1, playedOn: new Date('2026-10-10T00:00:00Z'), title: 'Départ', summary: 'Résumé', gmNotes: 'Secret du MJ' }],
+  sessions: [{ id: 1, number: 1, playedOn: new Date('2026-10-10T00:00:00Z'), title: 'Départ', summary: 'Résumé', gmNotes: 'Secret du MJ', npcs: [{ campaignNpcId: 4 }] }],
   quests: questsForRole,
   npcs: [],
   encounters: [],
@@ -73,7 +79,8 @@ describe('Campaign access', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({ role: 'PLAYER', inviteCode: null, npcs: [], encounters: [], partyLevels: [3] });
-    expect(res.body.sessions[0]).toMatchObject({ summary: 'Résumé', gmNotes: null, playedOn: '2026-10-10' });
+    // Ni les notes du MJ ni les PNJ présents
+    expect(res.body.sessions[0]).toMatchObject({ summary: 'Résumé', gmNotes: null, playedOn: '2026-10-10', campaignNpcIds: [] });
     expect(res.body.members[0]).toMatchObject({ isMe: true, character: { name: 'Test moine', level: 3, race: 'Humain' } });
     // Seules les quêtes révélées sont demandées pour un joueur
     expect((prisma.campaign.findUniqueOrThrow as any).mock.calls[0][0].include.quests.where).toEqual({ revealed: true });
@@ -152,5 +159,40 @@ describe('Game master characters', () => {
     expect((await request(app).delete('/api/campaigns/5/gm-characters/12')).status).toBe(200);
     expect((await request(app).delete('/api/campaigns/5/gm-characters/12')).status).toBe(404);
     expect((prisma.campaignGmCharacter.deleteMany as any).mock.calls[0][0].where).toEqual({ campaignId: 5, characterId: 12 });
+  });
+});
+
+describe('NPCs of sessions and quests', () => {
+  beforeEach(() => {
+    (prisma.campaign.findUnique as any).mockResolvedValue({ userId: 1, editionId: 1, members: [] });
+    (prisma.campaignSession.aggregate as any).mockResolvedValue({ _max: { number: 2 } });
+    (prisma.campaignSession.create as any).mockResolvedValue({ id: 8 });
+  });
+
+  it('shows the game master which NPCs were met during a session', async () => {
+    (prisma.campaign.findUniqueOrThrow as any).mockResolvedValue(stored([]));
+    const res = await request(app).get('/api/campaigns/5?lang=fr');
+    expect(res.body.sessions[0].campaignNpcIds).toEqual([4]);
+  });
+
+  it('links NPCs of the campaign to a new session', async () => {
+    (prisma.campaignNpc.count as any).mockResolvedValue(2);
+
+    const res = await request(app).post('/api/campaigns/5/sessions').send({ title: 'Retour', campaignNpcIds: [4, 6, 4] });
+
+    expect(res.status).toBe(201);
+    // Cherchés parmi les PNJ de cette campagne, sans doublon
+    expect((prisma.campaignNpc.count as any).mock.calls[0][0].where).toEqual({ campaignId: 5, id: { in: [4, 6] } });
+    expect((prisma.campaignSessionNpc.createMany as any).mock.calls[0][0].data).toEqual([{ sessionId: 8, campaignNpcId: 4 }, { sessionId: 8, campaignNpcId: 6 }]);
+  });
+
+  it("refuses an NPC of another campaign, and keeps the links when the list is not sent", async () => {
+    (prisma.campaignNpc.count as any).mockResolvedValue(0);
+    const refused = await request(app).post('/api/campaigns/5/sessions').send({ campaignNpcIds: [99] });
+    expect(refused.status).toBe(400);
+    expect(prisma.campaignSession.create).not.toHaveBeenCalled();
+
+    expect((await request(app).post('/api/campaigns/5/sessions').send({ title: 'Sans PNJ' })).status).toBe(201);
+    expect(prisma.campaignSessionNpc.deleteMany).not.toHaveBeenCalled();
   });
 });

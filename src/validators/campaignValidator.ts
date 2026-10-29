@@ -6,6 +6,8 @@ const title = z.string().trim().min(1).max(200);
 const short = z.string().trim().max(500).nullish();
 const long = z.string().max(50000).nullish();
 const id = z.number().int().positive();
+// PNJ de la campagne (id de CampaignNpc) liés à une séance ou une quête ; absent : inchangés
+const campaignNpcIds = z.array(id).max(100).optional();
 
 export const campaignInputSchema = z.object({
   edition: z.string().trim().min(1).max(100).default('2014'),
@@ -22,6 +24,7 @@ export const sessionInputSchema = z.object({
   title: short,
   summary: long,
   gmNotes: long,
+  campaignNpcIds,
 });
 
 export const questInputSchema = z.object({
@@ -33,6 +36,7 @@ export const questInputSchema = z.object({
   giverNpcId: id.nullish(),
   revealed: z.boolean().default(false),
   position: z.number().int().min(0).optional(),
+  campaignNpcIds,
 });
 
 export const campaignNpcInputSchema = z.object({

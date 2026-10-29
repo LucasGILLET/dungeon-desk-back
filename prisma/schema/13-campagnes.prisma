@@ -6,8 +6,8 @@
 // MJ peut alors consulter leur fiche, sans la modifier.
 //
 // Visibilité côté joueurs : la campagne, ses membres, le résumé des séances
-// et les quêtes révélées. Les notes du MJ, les PNJ et les rencontres restent
-// réservés au MJ.
+// et les quêtes révélées. Les notes du MJ, les PNJ (et leurs liens aux séances
+// et aux quêtes) et les rencontres restent réservés au MJ.
 // ============================================================================
 
 enum CampaignStatus {
@@ -86,6 +86,7 @@ model CampaignSession {
   updatedAt  DateTime  @updatedAt
 
   encounters Encounter[]
+  npcs       CampaignSessionNpc[]
 
   @@unique([campaignId, number])
 }
@@ -122,6 +123,9 @@ model Quest {
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 
+  // PNJ de la campagne mêlés à la quête
+  npcs QuestNpc[]
+
   @@index([campaignId, position])
 }
 
@@ -136,7 +140,34 @@ model CampaignNpc {
   location   String? // "Phandaline"
   notes      String?  @db.Text
 
+  sessions CampaignSessionNpc[]
+  quests   QuestNpc[]
+
   @@unique([campaignId, npcId])
+}
+
+// PNJ de la campagne rencontré pendant une séance
+model CampaignSessionNpc {
+  id            Int             @id @default(autoincrement())
+  sessionId     Int
+  session       CampaignSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  campaignNpcId Int
+  campaignNpc   CampaignNpc     @relation(fields: [campaignNpcId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, campaignNpcId])
+  @@index([campaignNpcId])
+}
+
+// PNJ de la campagne mêlé à une quête
+model QuestNpc {
+  id            Int         @id @default(autoincrement())
+  questId       Int
+  quest         Quest       @relation(fields: [questId], references: [id], onDelete: Cascade)
+  campaignNpcId Int
+  campaignNpc   CampaignNpc @relation(fields: [campaignNpcId], references: [id], onDelete: Cascade)
+
+  @@unique([questId, campaignNpcId])
+  @@index([campaignNpcId])
 }
 
 enum EncounterStatus {

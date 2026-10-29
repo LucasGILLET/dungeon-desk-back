@@ -132,8 +132,12 @@ export const getCampaign = async (req: Request, res: Response) => {
         user: { select: { id: true, username: true } },
         members: { orderBy: { joinedAt: 'asc' }, include: { user: { select: { id: true, username: true } }, character: characterSummary } },
         gmCharacters: { orderBy: { addedAt: 'asc' }, include: { character: characterSummary } },
-        sessions: { orderBy: { number: 'asc' } },
-        quests: { where: gm ? {} : { revealed: true }, orderBy: [{ position: 'asc' }, { id: 'asc' }], include: { giverNpc: { select: { id: true, name: true } } } },
+        sessions: { orderBy: { number: 'asc' }, include: { npcs: { select: { campaignNpcId: true }, orderBy: { campaignNpcId: 'asc' } } } },
+        quests: {
+          where: gm ? {} : { revealed: true },
+          orderBy: [{ position: 'asc' }, { id: 'asc' }],
+          include: { giverNpc: { select: { id: true, name: true } }, npcs: { select: { campaignNpcId: true }, orderBy: { campaignNpcId: 'asc' } } },
+        },
         // PNJ et rencontres : lus pour le MJ seulement (aucune ligne pour un joueur)
         npcs: { where: gm ? {} : { id: -1 }, orderBy: { id: 'asc' }, include: { npc: { select: { id: true, name: true, profession: true, race: named, class: named } } } },
         encounters: {
@@ -180,10 +184,13 @@ export const getCampaign = async (req: Request, res: Response) => {
       sessions: c.sessions.map((s) => ({
         id: s.id, number: s.number, playedOn: s.playedOn?.toISOString().slice(0, 10) ?? null, title: s.title, summary: s.summary,
         gmNotes: gm ? s.gmNotes : null,
+        // PNJ de la campagne présents (réservés au MJ, comme les PNJ)
+        campaignNpcIds: gm ? s.npcs.map((n) => n.campaignNpcId) : [],
       })),
       quests: c.quests.map((q) => ({
         id: q.id, position: q.position, title: q.title, description: q.description, status: q.status, difficulty: q.difficulty, reward: q.reward,
         revealed: q.revealed, giver: q.giverNpc ? { id: q.giverNpc.id, name: q.giverNpc.name } : null,
+        campaignNpcIds: gm ? q.npcs.map((n) => n.campaignNpcId) : [],
       })),
       npcs: gm
         ? c.npcs.map((n) => ({
@@ -455,6 +462,23 @@ async function gmNpc(campaignId: number, npcId: number): Promise<boolean> {
   return !!(await prisma.npc.findFirst({ where: { id: npcId, userId: campaign.userId }, select: { id: true } }));
 }
 
+// PNJ liés à une séance ou une quête : seulement des PNJ de cette campagne
+async function checkCampaignNpcs(campaignId: number, ids: number[] | undefined): Promise<Issue[]> {
+  if (!ids?.length) return [];
+  const found = await prisma.campaignNpc.count({ where: { campaignId, id: { in: [...new Set(ids)] } } });
+  return found === new Set(ids).size ? [] : [{ path: 'campaignNpcIds', message: 'NPC not found in this campaign' }];
+}
+
+// Remplace les PNJ liés (liste fournie) ; absente : inchangés
+async function linkCampaignNpcs(
+  tx: Prisma.TransactionClient, model: 'campaignSessionNpc' | 'questNpc', key: 'sessionId' | 'questId', id: number, ids: number[] | undefined,
+): Promise<void> {
+  if (!ids) return;
+  const delegate = (tx as any)[model];
+  await delegate.deleteMany({ where: { [key]: id } });
+  await delegate.createMany({ data: [...new Set(ids)].map((campaignNpcId) => ({ [key]: id, campaignNpcId })) });
+}
+
 async function nextPosition(model: 'quest' | 'encounter', campaignId: number): Promise<number> {
   const last = await (prisma as any)[model].aggregate({ where: { campaignId }, _max: { position: true } });
   return (last._max.position ?? -1) + 1;
@@ -465,6 +489,8 @@ export const sessions = child({
   what: 'Session',
   schema: sessionInputSchema,
   data: async (input, campaign, existingId) => {
+    const errors = await checkCampaignNpcs(campaign.id, input.campaignNpcIds);
+    if (errors.length) return errors;
     const number = input.number
       ?? (existingId ? undefined : ((await prisma.campaignSession.aggregate({ where: { campaignId: campaign.id }, _max: { number: true } }))._max.number ?? 0) + 1);
     return {
@@ -475,6 +501,7 @@ export const sessions = child({
       gmNotes: input.gmNotes ?? null,
     };
   },
+  after: (tx, id, input) => linkCampaignNpcs(tx, 'campaignSessionNpc', 'sessionId', id, input.campaignNpcIds),
 });
 
 export const quests = child({
@@ -483,13 +510,16 @@ export const quests = child({
   schema: questInputSchema,
   data: async (input, campaign, existingId) => {
     if (input.giverNpcId && !(await gmNpc(campaign.id, input.giverNpcId))) return [{ path: 'giverNpcId', message: 'NPC not found' }];
-    const { position, ...fields } = input;
+    const errors = await checkCampaignNpcs(campaign.id, input.campaignNpcIds);
+    if (errors.length) return errors;
+    const { position, campaignNpcIds: _npcs, ...fields } = input;
     return {
       ...fields,
       giverNpcId: input.giverNpcId ?? null,
       ...(position !== undefined ? { position } : existingId ? {} : { position: await nextPosition('quest', campaign.id) }),
     };
   },
+  after: (tx, id, input) => linkCampaignNpcs(tx, 'questNpc', 'questId', id, input.campaignNpcIds),
 });
 
 export const campaignNpcs = child({
