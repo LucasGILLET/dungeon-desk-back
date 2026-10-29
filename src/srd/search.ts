@@ -19,6 +19,8 @@ export interface SearchResult {
   // Texte affiché dans la recherche pour ce qui n'a pas de page à soi
   text: string | null;
   score: number;
+  // Contenu maison de l'utilisateur connecté
+  mine: boolean;
 }
 
 interface Source {
@@ -30,7 +32,7 @@ interface Source {
   description?: string;
   text?: string;
   detail?: string;
-  // Contenu maison : jamais dans la recherche publique
+  // Contenu maison : seulement celui de l'utilisateur connecté ($5)
   homebrew?: boolean;
   where?: string;
 }
@@ -55,12 +57,15 @@ const SOURCES: Source[] = [
   { kind: 'guide', table: 'GuidePage', fk: 'guidePageId', name: 'title', description: 'intro', where: 'p."published"' },
 ];
 
+// Sans accents ni majuscules, apostrophes typographiques comprises (« d’or » = « d'or »)
+const norm = (expr: string) => `lower(unaccent(replace(${expr}, '’', '''')))`;
+
 // Pertinence d'une traduction : nom exact, début du nom, nom qui contient la
 // recherche, nom proche (fautes de frappe), enfin la description
 function score(s: Source): string {
-  const n = `lower(unaccent(t."${s.name ?? 'name'}"))`;
+  const n = norm(`t."${s.name ?? 'name'}"`);
   const description = s.description
-    ? `WHEN length(q.q) >= 4 AND t."localeCode" = $3 AND lower(unaccent(coalesce(t."${s.description}", ''))) LIKE '%' || q.q || '%' THEN 0.3`
+    ? `WHEN length(q.q) >= 4 AND t."localeCode" = $3 AND ${norm(`coalesce(t."${s.description}", '')`)} LIKE '%' || q.q || '%' THEN 0.3`
     : '';
   return `CASE
     WHEN ${n} = q.q THEN 1
@@ -73,12 +78,13 @@ function score(s: Source): string {
 
 function select(s: Source): string {
   const name = s.name ?? 'name';
-  const where = [s.homebrew ? 'p."ownerId" IS NULL' : '', s.where ?? ''].filter(Boolean).map((w) => ` AND ${w}`).join('');
+  const where = [s.homebrew ? '(p."ownerId" IS NULL OR p."ownerId" = $5)' : '', s.where ?? ''].filter(Boolean).map((w) => ` AND ${w}`).join('');
   return `SELECT '${s.kind}' AS kind, p."index", max(m.score) AS score,
     (array_agg(t."${name}" ORDER BY m.score DESC, (t."localeCode" = $3) DESC))[1] AS matched,
     ${translated(s.table, s.fk, 'p.id', name)} AS name,
     ${s.detail ?? 'NULL'} AS detail,
-    ${s.text ? translated(s.table, s.fk, 'p.id', s.text) : 'NULL'} AS text
+    ${s.text ? translated(s.table, s.fk, 'p.id', s.text) : 'NULL'} AS text,
+    ${s.homebrew ? 'p."ownerId" IS NOT NULL' : 'false'} AS mine
   FROM "${s.table}" p
   JOIN "Edition" e ON e.id = p."editionId"
   JOIN "${s.table}Translation" t ON t."${s.fk}" = p.id
@@ -88,9 +94,9 @@ function select(s: Source): string {
   GROUP BY p.id, p."index"`;
 }
 
-const SQL = `WITH q AS (SELECT lower(unaccent($1::text)) AS q)
+const SQL = `WITH q AS (SELECT ${norm('$1::text')} AS q)
 ${SOURCES.map(select).join('\nUNION ALL\n')}
-ORDER BY score DESC, name
+ORDER BY score DESC, mine DESC, name
 LIMIT 200`;
 
 export const PER_KIND = 8;
@@ -98,10 +104,10 @@ export const PER_KIND = 8;
 // Les caractères spéciaux de LIKE ne servent à rien dans une recherche
 export const normalizeQuery = (q: string) => q.replace(/[\\%_]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
 
-export async function search(edition: string, query: string, ctx: LangContext): Promise<SearchResult[]> {
+export async function search(edition: string, query: string, ctx: LangContext, userId: number | null = null): Promise<SearchResult[]> {
   const q = normalizeQuery(query);
   if (q.length < 2) return [];
-  const rows = await prisma.$queryRawUnsafe<(Omit<SearchResult, 'score'> & { score: unknown })[]>(SQL, q, edition, ctx.lang, ctx.fallback);
+  const rows = await prisma.$queryRawUnsafe<(Omit<SearchResult, 'score'> & { score: unknown })[]>(SQL, q, edition, ctx.lang, ctx.fallback, userId);
   const perKind = new Map<SearchKind, number>();
   return rows.flatMap((r) => {
     const count = perKind.get(r.kind) ?? 0;

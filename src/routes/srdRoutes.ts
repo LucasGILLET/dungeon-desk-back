@@ -6,6 +6,7 @@ import {
 import { getGuide, getGuides, getRuleChapters, getRuleSection } from '../controllers/srdGuideController';
 import { getMagicItemByIndex, getMagicItems, getMonsterByIndex, getMonsters } from '../controllers/srdBestiaryController';
 import { getSearch } from '../controllers/srdSearchController';
+import { optionalUser } from '../middleware/optionalUser';
 
 const router = Router();
 
@@ -389,7 +390,7 @@ router.get('/:edition/guides/:index', getGuide);
  * /srd/{edition}/search:
  *   get:
  *     summary: Search all game data (spells, monsters, items, classes, rules…), ignoring accents and typos
- *     description: Names match in every language (an English name finds the French entry). At most 8 results per kind, best first.
+ *     description: Names match in every language (an English name finds the French entry). At most 8 results per kind, best first. With a bearer token, the user's own homebrew content is included (mine true).
  *     operationId: searchSrd
  *     tags: [SRD]
  *     parameters:
@@ -399,6 +400,6 @@ router.get('/:edition/guides/:index', getGuide);
  *     responses:
  *       200: { description: "Results with kind, index, name, matched (other-language name found), detail and text (for entries without a page)" }
  */
-router.get('/:edition/search', getSearch);
+router.get('/:edition/search', optionalUser, getSearch);
 
 export default router;

@@ -3,12 +3,20 @@ import request from 'supertest';
 import { app } from '../app';
 import prisma from '../prismaClient';
 
+// Jeton présent : utilisateur 4 connecté
+vi.mock('../middleware/optionalUser', () => ({
+  optionalUser: (req: any, _res: any, next: any) => {
+    if (req.headers.authorization) req.user = { id: 4 };
+    next();
+  },
+}));
+
 vi.mock('../prismaClient', () => ({
   default: { locale: { findMany: vi.fn() }, $queryRawUnsafe: vi.fn() },
 }));
 
 const row = (kind: string, index: string, name: string, score: number, matched = name) =>
-  ({ kind, index, name, matched, detail: null, text: null, score });
+  ({ kind, index, name, matched, detail: null, text: null, score, mine: false });
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -26,8 +34,21 @@ describe('Global search', () => {
     const res = await request(app).get('/api/srd/2014/search?q=fireball&lang=fr');
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual([{ kind: 'spell', index: 'fireball', name: 'Boule de feu', matched: 'Fireball', detail: null, text: null, score: 1 }]);
-    expect((prisma.$queryRawUnsafe as any).mock.calls[0].slice(1)).toEqual(['fireball', '2014', 'fr', 'en']);
+    expect(res.body).toEqual([{ kind: 'spell', index: 'fireball', name: 'Boule de feu', matched: 'Fireball', detail: null, text: null, score: 1, mine: false }]);
+    // Anonyme : aucun contenu maison, réponse en cache public
+    expect((prisma.$queryRawUnsafe as any).mock.calls[0].slice(1)).toEqual(['fireball', '2014', 'fr', 'en', null]);
+    expect(res.headers['cache-control']).toContain('public');
+  });
+
+  it("includes the signed-in user's own homebrew content, never cached for others", async () => {
+    (prisma.$queryRawUnsafe as any).mockResolvedValue([{ ...row('monster', 'orza-6ed062', 'Orza', 0.9), mine: true }]);
+
+    const res = await request(app).get('/api/srd/2014/search?q=orza').set('Authorization', 'Bearer token');
+
+    expect(res.body[0].mine).toBe(true);
+    expect((prisma.$queryRawUnsafe as any).mock.calls[0][5]).toBe(4);
+    expect(res.headers['cache-control']).toBe('private, no-store');
+    expect(res.headers.vary).toContain('Authorization');
   });
 
   it('keeps the best 8 results of each kind', async () => {
